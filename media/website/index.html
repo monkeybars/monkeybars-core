@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<title>Monkeybars</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" href="css/1.css" type="text/css" media="screen,projection" />
+
+</head>
+ 
+<body>
+
+<div id="wrapper">
+
+		<div id="header">
+						
+				<p>
+					<img src="images/monkeybars_logo.png" alt="Monkeybars logo" />
+					<h3>Tools enabled Swing development for Ruby</h3>
+				</p>
+				
+				<ul id="nav">
+				
+						<li><a href="index.html" class="active">Main</a></li>
+
+						<li><a href="http://rubyforge.org/projects/monkeybars/">Rubyforge Project</a></li>
+						
+						<li><a href="docs.html">Documentation</a></li>
+						
+						<li><a href="examples.html">Examples</a></li>
+						
+						<li><a href="faq.html">FAQ</a></li>
+						
+				</ul>
+		
+		</div>
+		
+		<div id="sidebar">
+		
+				<h2>Latest News</h2>
+				
+				<p class="news">
+					Monkeybars 0.5 is out.  Currently this is still a source distribution but I am looking to get both a gem and a jar build out shortly.
+				</p>
+				
+				<p class="news">
+					Monkeybars 0.4 is released! This is our first real public release, head over to the <a href="http://rubyforge.org/projects/monkeybars/">Rubyforge Page</a> to get it
+				</p>
+		
+		</div>
+		
+		<div id="content">
+		
+				<h2>About</h2>
+				
+				<p>
+				
+						Thanks for checking out Monkeybars.  This is a library that enables you to make use of Swing from <a href="http://jruby.codehaus.org/">JRuby</a>.  Monkeybars aims to allow you to continue using the GUI editing tools you are used to but makes it easy to write all your application logic in pure Ruby.  In fact, with most editors you'll never even have to look at the Java.	
+				
+				</p>
+				
+				<h2>Philosophy</h2>
+				<h3>Origins</h3>
+				<p>
+						
+						Monkeybars was created from a pretty specific need.  My company, <a href="http://www.risingtidesoftware.com">Rising Tide Software</a> was working on a large Swing application and we wanted to be able to easily write all the logic in Ruby via JRuby.  Our initial attempts laid the groundwork for what was to become Monkeybars.  Because of our needs, Monkeybars has an emphasis on using normal Swing development tools (we were using <a href="http://www.netbeans.org/">Netbeans 6</a>) and especially the ability to sit down with a client and use a visual designer to create the Swing layouts.  To this end, Monkeybars is designed to reach in and integrate itself with a Java class without any special consideration on the Java side.  This means Monkeybars should work with Java code emitted from any Swing form designer, we don't parse the code directly so there is no issue with code formatting or code conventions used inside the class.
+							
+				</p>
+				
+				<p>
+						So, what do we mean by "easily"?  Well, I've got a pretty low tolerance for pain in my code so ideally everything gets reduced down to a one liner.  Want to set up mouse event listeners on all elements in your form?
+				</p>
+				
+				<blockquote>
+						<p>add_listener :type => :mouse</p>
+						
+				</blockquote>
+				
+				<p>
+						Or how about declaring that only the components okButton and cancelButton should get mouse events?
+				</p>
+							
+				<blockquote>
+						<p>add_listener :type => :mouse, :components => ["okButton", "cancelButton"]</p>
+				</blockquote>
+				
+				<p>
+						How about setting the form to invoke a certain method when the user clicks the close button in the upper corner?
+				</p>
+				
+				<blockquote>
+						<p>close_action :method => :my_close_method
+				</blockquote>
+
+				<p>
+ 						Still not convinced?  Go so more code samples on the <a href="examples.html">examples</a> page.
+				</p>
+
+				<h3>Testing</h3>				
+				<p>
+						A second important consideration for us was testability.  Our early attempts to create a Ruby interface to Swing left us with brittle, difficult to test code.  Therefore in Monkeybars we implemented a stark separation between controller and view.  All* communication between the two is accomplished via a model which is just a plain Ruby class.  This keeps your controllers much more testable.  The views also are typically smaller and much easier to test, only being concerned with their methods to convert data from and back into the model.<br/><br/>
+						* I say all but in reality there is direct communication between the controller and the view, it's just behind the scenes so you don't have to think of it in terms of direct communication.
+		
+				</p>
+						
+		
+		</div>
+		
+		<div id="footer">
+		
+								<!-- Please leave this line intact -->
+								<p>Template design by <a href="http://www.sixshootermedia.com">Six Shooter Media</a>.<br />
+								<!-- you can delete below here -->
+
+								© 2007 David Koontz, all rights reserved.</p>
+		
+		</div>
+
+</div>
+
+
+</body>
+</html>

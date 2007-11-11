@@ -1,0 +1,7 @@
+== 0.5.0 / 2007-11-03
+
+* New method on Swing components, disable_handler.
+  * Turns off the specified handlers for the duration of the attached block.
+  * Allows you to prevent infinite loops caused by handlers re-generating events.
+* Added new ignoring option to the map/to methods.
+  * Automatically wraps the default mapping performed during update_view_from_model in a disable_handler call.
