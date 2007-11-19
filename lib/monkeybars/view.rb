@@ -57,17 +57,17 @@ module Monkeybars
       TYPE_RAW = :raw
       TYPE_PROPERTIES = :both_properties
       TYPE_METHOD = :method
-      DIRECTION_IN = :in
-      DIRECTION_OUT = :out
+      DIRECTION_FROM_MODEL = :from_model
+      DIRECTION_TO_MODEL = :to_model
       DIRECTION_BOTH = :both
       
-      attr_accessor :view_property, :model_property, :in_method, :out_method, :type, :direction, :event_types_to_ignore
+      attr_accessor :view_property, :model_property, :from_model_method, :to_model_method, :type, :direction, :event_types_to_ignore
       
       def initialize(view_property = nil, model_property = nil)
 	@view_property = view_property
         @model_property = model_property
-        @in_method = nil
-        @out_method = nil
+        @from_model_method = nil
+        @to_model_method = nil
         @event_types_to_ignore = []
       end
       
@@ -76,9 +76,9 @@ module Monkeybars
         return self
       end
 
-      def using(in_method, out_method)
-        @in_method = in_method
-        @out_method = out_method
+      def using(from_model_method, to_model_method)
+        @from_model_method = from_model_method
+        @to_model_method = to_model_method
         return self
       end
       
@@ -103,15 +103,15 @@ module Monkeybars
       end
 
       def both_methods_present?
-	!@in_method.nil? and !@out_method.nil?
+	!@from_model_method.nil? and !@to_model_method.nil?
       end
 
-      def in_method_present?
-	!@in_method.nil?
+      def from_model_method_present?
+	!@from_model_method.nil?
       end
       
-      def out_method_present?
-	!@out_method.nil?
+      def to_model_method_present?
+	!@to_model_method.nil?
       end
       
       private
@@ -121,7 +121,7 @@ module Monkeybars
       end
       
       def at_least_one_method_present?
-	!@in_method.nil? or !@out_method.nil?
+	!@from_model_method.nil? or !@to_model_method.nil?
       end
     end
     
@@ -251,10 +251,10 @@ module Monkeybars
     end
     
     # See View.map
-    def self.raw_mapping(in_method, out_method)
+    def self.raw_mapping(from_model_method, to_model_method)
       mapping = ModelMapping.new
-      mapping.in_method = in_method
-      mapping.out_method = out_method
+      mapping.from_model_method = from_model_method
+      mapping.to_model_method = to_model_method
       view_mappings << mapping
       nil #prevent accidental raw_mapping().something calls
     end
@@ -317,11 +317,7 @@ module Monkeybars
       @main_view_component.visible = false
     end
 
-    def dispose
-      @main_view_component.dispose
-    end
-    
-    # For internal use.
+   # For internal use.
     # This is set via the controller, do not call directly unless you know what
     # you are doing.
     def add_handler(type, handler, components)
@@ -355,18 +351,18 @@ module Monkeybars
       return if model.nil?
       mapping_proc = Proc.new do |mapping|
         begin
-          if [View::ModelMapping::DIRECTION_IN, View::ModelMapping::DIRECTION_BOTH].member? mapping.direction
+          if [View::ModelMapping::DIRECTION_FROM_MODEL, View::ModelMapping::DIRECTION_BOTH].member? mapping.direction
             case mapping.type
             when View::ModelMapping::TYPE_PROPERTIES
               map_model_properties_to_view(mapping, model)
             when View::ModelMapping::TYPE_METHOD
-              if :default == mapping.in_method
+              if :default == mapping.from_model_method
                 map_model_properties_to_view(mapping, model)
               else
-                instance_eval("self.#{mapping.view_property.to_s} = method(mapping.in_method).call(model)")
+                instance_eval("self.#{mapping.view_property.to_s} = method(mapping.from_model_method).call(model)")
               end
             when View::ModelMapping::TYPE_RAW
-              method(mapping.in_method).call(model)
+              method(mapping.from_model_method).call(model)
             end
           end
         rescue NoMethodError => e
@@ -386,18 +382,18 @@ module Monkeybars
     # the controller needs the state of the view.
     def write_state_to_model(model)
       @__valid_mappings.each do |mapping|
-        if [View::ModelMapping::DIRECTION_OUT, View::ModelMapping::DIRECTION_BOTH].member? mapping.direction
+        if [View::ModelMapping::DIRECTION_TO_MODEL, View::ModelMapping::DIRECTION_BOTH].member? mapping.direction
           case mapping.type
           when View::ModelMapping::TYPE_PROPERTIES
             map_view_properties_to_model(mapping, model)
           when View::ModelMapping::TYPE_METHOD
-            if :default == mapping.in_method
+            if :default == mapping.to_model_method
               map_view_properties_to_model(mapping, model)
             else
-              instance_eval("model.#{mapping.model_property.to_s} = method(mapping.out_method).call(model)")
+              instance_eval("model.#{mapping.model_property.to_s} = method(mapping.to_model_method).call(model)")
             end
           when View::ModelMapping::TYPE_RAW
-            method(mapping.out_method).call(model)
+            method(mapping.to_model_method).call(model)
           end
         end
       end
@@ -480,24 +476,24 @@ module Monkeybars
           mapping.type = View::ModelMapping::TYPE_METHOD
           if mapping.both_methods_present?
             mapping.direction = View::ModelMapping::DIRECTION_BOTH
-            validate_method(:both, mapping)
+            validate_method(View::ModelMapping::DIRECTION_BOTH, mapping)
           else
-            if mapping.in_method_present?
-              mapping.direction = View::ModelMapping::DIRECTION_IN
-              validate_method(:in, mapping)
+            if mapping.from_model_method_present?
+              mapping.direction = View::ModelMapping::DIRECTION_FROM_MODEL
+              validate_method(View::ModelMapping::DIRECTION_FROM_MODEL, mapping)
             else
-              mapping.direction = View::ModelMapping::DIRECTION_OUT
-              validate_method(:out, mapping)
+              mapping.direction = View::ModelMapping::DIRECTION_TO_MODEL
+              validate_method(View::ModelMapping::DIRECTION_TO_MODEL, mapping)
             end
           end
         elsif mapping.methods_only?
           mapping.type = View::ModelMapping::TYPE_RAW
           if mapping.both_methods_present?
             mapping.direction = View::ModelMapping::DIRECTION_BOTH
-          elsif mapping.in_method_present?
-            mapping.direction = View::ModelMapping::DIRECTION_IN
+          elsif mapping.from_model_method_present?
+            mapping.direction = View::ModelMapping::DIRECTION_FROM_MODEL
           else
-            mapping.direction = View::ModelMapping::DIRECTION_OUT
+            mapping.direction = View::ModelMapping::DIRECTION_TO_MODEL
           end
         else
           raise InvalidMappingError, "Invalid mapping in #{self.class}, invalid map() or raw_mapping() arguments"
@@ -508,7 +504,7 @@ module Monkeybars
     
     def validate_method(direction, mapping)
       if :both == direction
-        directions = [:in, :out]
+        directions = [View::ModelMapping::DIRECTION_FROM_MODEL, View::ModelMapping::DIRECTION_TO_MODEL]
       else
         directions = [direction]
       end
@@ -552,6 +548,7 @@ class Component
   #   end
   #
   def disable_handlers(*types)
+    puts "Disabling handlers for: #{types}"
     types.map! { |t| t.camelize }
     listeners = {}
     types.each do |type|  

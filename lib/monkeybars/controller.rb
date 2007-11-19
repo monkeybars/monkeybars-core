@@ -329,6 +329,7 @@ module Monkeybars
     # gets called before mouse_released. A component's name field must be defined in order
     # for the name_event_type style handlers to work.
     def handle_event(event_name, event) #:nodoc:
+      return if event.nil?
       method = "#{event.source.name.underscore}_#{event_name}".to_sym
       
       model = create_new_model
