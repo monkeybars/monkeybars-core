@@ -3,8 +3,8 @@ Manifest.txt
 README.txt
 COPYING.txt
 Rakefile
-bin/monkeybars
 lib/monkeybars.rb
+lib/monkeybars/key.rb
 lib/monkeybars/controller.rb
 lib/monkeybars/inflector.rb
 lib/monkeybars/view.rb
