@@ -21,6 +21,8 @@ module Monkeybars
   #
   # Example, (assume a JFrame with a label, text area and button):
   #
+  #   require 'monkeybars'
+  #
   #   class MyView < Monkeybars::View
   #     set_java_class "com.project.MyCoolJFrame"
   #     map("titleLabel.text").to(:title_text)
@@ -548,7 +550,6 @@ class Component
   #   end
   #
   def disable_handlers(*types)
-    puts "Disabling handlers for: #{types}"
     types.map! { |t| t.camelize }
     listeners = {}
     types.each do |type|  

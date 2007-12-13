@@ -18,13 +18,15 @@ module Monkeybars
   #
   # The controller is where you define any events you are interested in handling
   # (see add_listener) as well as one special event, the pressing of the "close" button
-  # of the window (see close_action).
+  # of the window (see close_action).  Handlers can
   #
   # Example of a controller, this assumes the existance of a Ruby class named MyModel that
   # has an attribute named user_name that is mapped to a field on a subclass of 
   # Monkeybars::View named MyView that has a button named "okButton" and a text field called 
   # userNameTextField:
   #
+  #   require 'monkeybars'
+  #   
   #   class MyController < Monkeybars::Controller
   #     set_view :MyView
   #     set_model :MyModel
@@ -38,7 +40,8 @@ module Monkeybars
   #   end
   #
   # It is important that you do not implement your own initialize and update methods, this
-  # will interfere with the operation of the Controller class.
+  # will interfere with the operation of the Controller class (or if you do be sure to call
+  # super as the first line).
   #
   class Controller
     METHOD_NOT_FOUND = :method_not_found
