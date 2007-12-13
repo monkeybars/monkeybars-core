@@ -98,7 +98,7 @@ describe "validate_mappings method" do
       def method1; end
     end
     
-    TestView.new.send(:instance_variable_get, :@__valid_mappings)[0].direction.should == Monkeybars::View::ModelMapping::DIRECTION_IN
+    TestView.new.send(:instance_variable_get, :@__valid_mappings)[0].direction.should == Monkeybars::View::ModelMapping::DIRECTION_FROM_MODEL
   end
   
   it "sets direction to out when only 'out' methods are provided" do
@@ -107,7 +107,7 @@ describe "validate_mappings method" do
       def method1; end
     end
     
-    TestView.new.send(:instance_variable_get, :@__valid_mappings)[0].direction.should == Monkeybars::View::ModelMapping::DIRECTION_OUT
+    TestView.new.send(:instance_variable_get, :@__valid_mappings)[0].direction.should == Monkeybars::View::ModelMapping::DIRECTION_TO_MODEL
   end
   
   it "sets direction to both when both methods are provided" do
@@ -125,7 +125,7 @@ describe "validate_mappings method" do
       def method1; end
     end
     
-    TestView.new.send(:instance_variable_get, :@__valid_mappings)[0].direction.should == Monkeybars::View::ModelMapping::DIRECTION_IN
+    TestView.new.send(:instance_variable_get, :@__valid_mappings)[0].direction.should == Monkeybars::View::ModelMapping::DIRECTION_FROM_MODEL
   end
 
   it "sets direction to out when only 'out' raw method is provided" do
@@ -134,7 +134,7 @@ describe "validate_mappings method" do
       def method1; end
     end
     
-    TestView.new.send(:instance_variable_get, :@__valid_mappings)[0].direction.should == Monkeybars::View::ModelMapping::DIRECTION_OUT
+    TestView.new.send(:instance_variable_get, :@__valid_mappings)[0].direction.should == Monkeybars::View::ModelMapping::DIRECTION_TO_MODEL
   end
   
   it "sets direction to both when both raw methods are provided" do

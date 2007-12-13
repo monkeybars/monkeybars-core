@@ -167,9 +167,6 @@ module Monkeybars
     # If you wish to trigger subsequent updates of the view, you may call 
     # update_from_model manually from the controller.
     #
-    # PENDING: There will soon be an option to specify a mapping as recurring
-    # at a specified time interval (every 10 seconds, every 100 ms, etc.).
-    #
     # There are several ways to declare a mapping based on what level of control
     # you need over the process.  The simplest form is:
     #

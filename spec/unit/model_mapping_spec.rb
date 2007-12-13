@@ -36,34 +36,34 @@ describe "model mapping instance" do
   end
   
   it "detects when 'in' method is present" do
-    @mapping.in_method_present?.should == false
-    @mapping.in_method = true
-    @mapping.in_method_present?.should == true
+    @mapping.from_model_method_present?.should == false
+    @mapping.from_model_method = true
+    @mapping.from_model_method_present?.should == true
   end
   
   it "detects when 'out' method is present" do
-    @mapping.out_method_present?.should == false
-    @mapping.out_method = true
-    @mapping.out_method_present?.should == true
+    @mapping.to_model_method_present?.should == false
+    @mapping.to_model_method = true
+    @mapping.to_model_method_present?.should == true
   end
   
   it "detects when a method is present (in method)" do
     @mapping.send(:at_least_one_method_present?).should == false
-    @mapping.in_method = true
+    @mapping.from_model_method = true
     @mapping.send(:at_least_one_method_present?).should == true
   end
 
   it "detects when a method is present (out method)" do
     @mapping.send(:at_least_one_method_present?).should == false
-    @mapping.out_method = true
+    @mapping.to_model_method = true
     @mapping.send(:at_least_one_method_present?).should == true
   end
   
   it "detects when both methods are present" do
     @mapping.both_methods_present?.should == false
-    @mapping.in_method = true
+    @mapping.from_model_method = true
     @mapping.both_methods_present?.should == false
-    @mapping.out_method = true
+    @mapping.to_model_method = true
     @mapping.both_methods_present?.should == true
   end
   
@@ -71,13 +71,13 @@ describe "model mapping instance" do
     @mapping.properties_only?.should == false
     @mapping.view_property = true
     @mapping.properties_only?.should == true
-    @mapping.in_method = true
+    @mapping.from_model_method = true
     @mapping.properties_only?.should == false
   end
   
   it "detects when only methods are present" do
     @mapping.methods_only?.should == false
-    @mapping.in_method = true
+    @mapping.from_model_method = true
     @mapping.methods_only?.should == true
     @mapping.view_property = true
     @mapping.properties_only?.should == false
@@ -87,7 +87,7 @@ describe "model mapping instance" do
     @mapping.both_properties_and_methods?.should == false
     @mapping.view_property = true
     @mapping.both_properties_and_methods?.should == false
-    @mapping.in_method = true
+    @mapping.from_model_method = true
     @mapping.both_properties_and_methods?.should == false
     @mapping.model_property = true
     @mapping.both_properties_and_methods?.should == true
