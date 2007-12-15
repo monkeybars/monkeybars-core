@@ -2,6 +2,7 @@ include_class javax.swing.JComponent
 include_class javax.swing.KeyStroke
 
 require "monkeybars/inflector"
+require 'monkeybars/validated_hash'
 
 module Monkeybars
   # The view is the gatekeeper to the actual Java (or sometimes non-Java) view class.
@@ -65,12 +66,28 @@ module Monkeybars
       
       attr_accessor :view_property, :model_property, :from_model_method, :to_model_method, :type, :direction, :event_types_to_ignore
       
-      def initialize(view_property = nil, model_property = nil)
-	@view_property = view_property
-        @model_property = model_property
-        @from_model_method = nil
-        @to_model_method = nil
-        @event_types_to_ignore = []
+      def initialize(property_hash = {})
+	@view_property = property_hash[:view] || nil
+        @model_property = property_hash[:model] || nil
+        @from_model_method, @to_model_method = if property_hash[:using]
+          if property_hash[:using].kind_of? Array
+            [property_hash[:using][0], property_hash[:using][1]]
+          else
+            [property_hash[:using], nil]
+          end
+        else
+          [nil, nil]
+        end
+        
+        @event_types_to_ignore = if property_hash[:ignoring]
+          if property_hash[:ignoring].kind_of? Array
+            property_hash[:ignoring]
+          else
+            [property_hash[:ignoring]]
+          end
+        else
+          []
+        end
       end
       
       def to(model_property)
@@ -243,10 +260,10 @@ module Monkeybars
     # would simply invoke the associated method when update_from_model or 
     # write_state_to_model was called.  Thus any assignment to view properties
     # must be done within the method (hence the 'raw').
-    def self.map(view_property)
-      mapping = ModelMapping.new(view_property)
+    def self.map(properties)
+      properties.validate_only(:model, :view, :using, :ignoring)
+      mapping = ModelMapping.new(properties)
       view_mappings << mapping
-      return mapping
     end
     
     # See View.map
@@ -316,22 +333,47 @@ module Monkeybars
       @main_view_component.visible = false
     end
 
-   # For internal use.
     # This is set via the controller, do not call directly unless you know what
     # you are doing.
+    #
+    # Looks up the appropriate component and calls addXXXListener on the
+    # component.
+    #
+    # add_handler returns a hash of objects as keys and their normalized (underscored
+    # and . replaced with _) names as keys
     def add_handler(type, handler, components)
+      mappings = {}
       components = ["global"] if components.nil?
       components.each do |component|
+        component = component.to_s
         if "global" == component
           get_all_components.each do |component|
-            component.send("add#{type.camelize}Listener", handler)
+            listener = "add#{type.camelize}Listener"
+            if (component.respond_to?(listener) && component.name)
+              mappings[component] = component.name.underscore.gsub(".", "_")
+              component.send(listener, handler)
+            end
           end
         elsif "java_window" == component.to_s
+          mappings[@main_view_component] = "java_window"
           @main_view_component.send("add#{type.camelize}Listener", handler)
         else
-          get_field_value(component).send("add#{type.camelize}Listener", handler)
+          if component.index(".")
+            parts = component.split(".")
+            object = get_field_value(parts.shift)
+            parts.each do |method|
+              object = object.send(method)
+            end
+            mappings[object] = component.underscore.gsub(".", "_")
+            object.send("add#{type.camelize}Listener", handler)
+          else
+            object = get_field_value(component)
+            mappings[object] = component.underscore
+            object.send("add#{type.camelize}Listener", handler)
+          end
         end
       end
+      mappings
     end
     
     # Attempts to find a member variable in the underlying @main_view_component
@@ -445,6 +487,10 @@ module Monkeybars
         @__field_references[field_name] = field
       end
       field
+    end
+    
+    def dispose
+      @main_view_component.dispose
     end
     
     private

@@ -27,6 +27,7 @@ public class TestView extends javax.swing.JFrame {
 
         testLabel = new javax.swing.JLabel();
         testButton = new javax.swing.JButton();
+        testTextField = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(null);
@@ -39,12 +40,17 @@ public class TestView extends javax.swing.JFrame {
         getContentPane().add(testButton);
         testButton.setBounds(140, 250, 120, 29);
 
+        testTextField.setText("A text field");
+        getContentPane().add(testTextField);
+        testTextField.setBounds(300, 20, 84, 28);
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
         
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton testButton;
     private javax.swing.JLabel testLabel;
+    private javax.swing.JTextField testTextField;
     // End of variables declaration//GEN-END:variables
     
 }

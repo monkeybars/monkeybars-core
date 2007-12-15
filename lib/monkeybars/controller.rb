@@ -71,14 +71,14 @@ module Monkeybars
     # the MyView class.
     #
     def self.set_view(view)
-      require view.underscore
-      self.send(:class_variable_set, :@@view, view.constantize)
+      require view.underscore unless view.constantize
+      self.view_class = view.constantize
     end
 
     # See set_view.  The declared model class is also auto-required prior to the
     # class being instantiated.
     def self.set_model(model)
-      require model.underscore
+      require model.underscore unless model.constantize
       self.model_class = model.constantize
     end
 
@@ -147,7 +147,6 @@ module Monkeybars
     #   end
     def self.define_handler(action, &block)
       event_handler_procs[action] = block
-      #define_method action, block
     end
     
     # Valid close actions are
@@ -210,8 +209,9 @@ module Monkeybars
     end    
     
     def initialize
-      @__view = self.class.send(:class_variable_get, "@@view").new if self.class.class_variables.member?("@@view")
+      @__view = create_new_view unless self.class.view_class.nil?
       @__model = create_new_model unless self.class.model_class.nil?
+      @__event_callback_mappings = {}
       
       handlers = self.class.send(:class_variable_get, :@@handlers)
 
@@ -300,8 +300,8 @@ module Monkeybars
     # Hides the view and unloads its resources
     def close
       @closed = true          
-      unload
       @__view.unload
+      unload
       @__view.dispose if @__view.respond_to? :dispose
       @@instance_lock.synchronize do
         @@instance_list[self.class].delete self
@@ -333,13 +333,13 @@ module Monkeybars
     # for the name_event_type style handlers to work.
     def handle_event(event_name, event) #:nodoc:
       return if event.nil?
-      method = "#{event.source.name.underscore}_#{event_name}".to_sym
-      
-      model = create_new_model
+
+      component_name = @__event_callback_mappings[event.source]
+      method = "#{component_name}_#{event_name}".to_sym
+      model = create_new_model unless self.class.model_class.nil?
       @__view.write_state_to_model(model)
-      
+     
       proc = get_method(method)
-      
       unless METHOD_NOT_FOUND == proc
         proc.call(model, event)
       else
@@ -368,12 +368,25 @@ module Monkeybars
     end
     
     def create_new_model
-      #self.class.send(:class_variable_get, "@@model").new if self.class.class_variables.member?("@@model")
       self.class.model_class.new
     end
     
+    @@view_class_for_child_controller = {}
+    def self.view_class
+      @@view_class_for_child_controller[self]
+    end
+    
+    def self.view_class=(view)
+      @@view_class_for_child_controller[self] = view
+    end
+    
+    def create_new_view
+      self.class.view_class.new
+    end
+    
     def add_handler_for(handler_type, components)
-      @__view.add_handler(handler_type, self, components)
+      mappings = @__view.add_handler(handler_type, self, components)
+      @__event_callback_mappings.merge! mappings
     end
     
     def get_method(method)
