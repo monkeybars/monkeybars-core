@@ -33,6 +33,7 @@ public class TestView extends javax.swing.JFrame {
         getContentPane().setLayout(null);
 
         testLabel.setText("A Test Label");
+        testLabel.setName("testLabel"); // NOI18N
         getContentPane().add(testLabel);
         testLabel.setBounds(20, 20, 77, 16);
 

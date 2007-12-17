@@ -84,18 +84,8 @@ module Monkeybars
 
     # Declares which components you want events to be generated for.  add_listener
     # takes a hash of the form :type => type, :components => [components for events]
-    #
-    # Current valid types are:
-    # * action
-    # * internal_frame
-    # * item
-    # * key
-    # * menu
-    # * mouse
-    # * window
-    #
-    # New types can be added by implementing the appropriate class in the handlers
-    # subdirectory of monkeybars.  See mouse.rb for an example.
+    # All AWT and Swing listener types are supported.  See Monkeybars::Handlers for
+    # the full list.
     #
     # The array of components should be strings or symbols with the exact naming of the 
     # component in the Java class declared in the view.  As an example, if you have a JFrame 
@@ -109,18 +99,19 @@ module Monkeybars
     # info_text_field_key_released or info_text_field_key_typed.
     #
     # If you want to add a listener to all the components on the view you can leave
-    # off the :components => key.
+    # off the :components => key.  This is equivalent to :components => ["global"].
+    # NOTE: ANY COMPONENTS ADDED VIA THIS "GLOBAL" MECHANISM MUST HAVE THEIR NAME
+    # PROPERTY SET OR METHOD SPECIFIC method_name_action_name STYLE HANDLERS WILL 
+    # *NOT* WORK.
     # 
     # If you want to add a listener to the view itself (JFrame, JDialog, etc.)
     # then you can use :java_window as the component
     # 
     #   add_listener :type => :window, :components => [:java_window]
     #
-    # If it is not possible to declare a method, or it is desirable to do so dynamically,
-    # you can use the define_handler method.
+    # If it is not possible to declare a method, or it is desirable to do so dynamically
+    # (even from outside the class), you can use the define_handler method.
     def self.add_listener(details)
-      #klass = "Monkeybars::#{details[:type].camelize}Handler".constantize
-      #self.send(:include, klass) unless self.kind_of? klass
       self.send(:class_variable_get, :@@handlers).push(details)
       hide_protected_class_methods #workaround for JRuby bug #1283
     end

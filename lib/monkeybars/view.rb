@@ -90,20 +90,20 @@ module Monkeybars
         end
       end
       
-      def to(model_property)
-        @model_property = model_property
-        return self
-      end
-
-      def using(from_model_method, to_model_method)
-        @from_model_method = from_model_method
-        @to_model_method = to_model_method
-        return self
-      end
-      
-      def ignoring(*event_types)
-      	@event_types_to_ignore = event_types
-      end
+#      def to(model_property)
+#        @model_property = model_property
+#        return self
+#      end
+#
+#      def using(from_model_method, to_model_method)
+#        @from_model_method = from_model_method
+#        @to_model_method = to_model_method
+#        return self
+#      end
+#      
+#      def ignoring(*event_types)
+#      	@event_types_to_ignore = event_types
+#      end
       
       def properties_only?
         (at_least_one_property_present? and !at_least_one_method_present?) ? true : false
@@ -187,14 +187,14 @@ module Monkeybars
     # There are several ways to declare a mapping based on what level of control
     # you need over the process.  The simplest form is:
     #
-    #   map(:foo).to(:bar)
+    #   map :view => :foo, :model => :bar
     #
     # Which means, when update_from_model is called, self.foo = model.bar
     #
     # Strings may also be used interchangably with symbols.  If you have nested
     # properties you may specify them as a string:
     #
-    #   map("foo.sub_property").to("bar.other_sub_property")
+    #   map :view => "foo.sub_property", :model => "bar.other_sub_property"
     #
     # which means, self.foo.sub_property = model.bar.other_sub_property
     #
@@ -202,45 +202,46 @@ module Monkeybars
     # referenced for both update_from_model and write_state_to_model.  When used
     # for write_state_to_model the assignment direction is reversed, so a view with
     #
-    #   map(:foo).to(:bar)
+    #   map :view => :foo, :model => :bar
     #
     # would mean model.bar = self.foo
     # 
     # When a direct assignment is not sufficient you may provide a method to
     # filter or adapt the contents of the model's value before assignment to
-    # the view.  This is accomplished by adding a .using call after the .to call.
-    # The parameters are the methods to be used when converting from the model 
-    # to the view, and when converting from the view back to the model.  If you
-    # only want to use a custom method for either the conversion from a model to
-    # a view or vice versa, you can specify :default, for the other parameter 
+    # the view.  This is accomplished by adding a :using key to the hash.
+    # The key's value is an array of the method names to be used when converting from
+    # the model to the view, and when converting from the view back to the model.  
+    # If you only want to use a custom method for either the conversion from a model 
+    # to a view or vice versa, you can specify :default, for the other parameter 
     # and the normal mapping will take place.  If you want to disable the copying
     # of data in one direction you can pass nil as the method parameter.
     #
-    #   map(:foo).to(:bar).using(:from_model, :to_model)
+    #   map :view => :foo, :method => :bar, :using => [:from_model, :to_model]
     #
     # would mean self.foo = from_model() when called by update_from_model and
     # model.bar = to_model() when called by write_state_to_model.
     # 
-    #   map(:foo).to(:bar).using(:from_model, :default)
+    #   map :view => :foo, :model => :bar, :using => [:from_model, :default]
     #   
     # would mean self.foo = from_model() when called by update_from_model and
     # model.bar = self.foo when called by write_state_to_model.
     #
-    #   map(:foo).to(:bar).using(:from_model, nil)
+    #   map :view => :foo, :model => :bar, :using => [:from_model, nil]
     #   
     # would mean self.foo = from_model() when called by update_from_model and
     # would do nothing when called by write_state_to_model.
     #
     # If you want to invoke disable_handlers during the call to update_from_model
-    # you can add .ignore(type or array of types).
+    # you can add the :ignoring key.  The key's value is either a single type or
+    # an array of types to be ignored during the update process.
     # 
-    #   map(:foo).to(:bar).ignoring(:item)
+    #   map :view => :foo, :model => :bar, :ignoring => :item
     # 
     # This will wrap up the update in a call to disable_handlers on the view 
     # component, which is assumed to be the first part of the mapping UP TO THE 
     # FIRST PERIOD.  This means that
     # 
-    #   map("foo.bar").to(:model_property).ignoring(:item)
+    #   map :view => "foo.bar", :model => :model_property, :ignoring => :item
     # 
     # would translate to
     # 
@@ -255,7 +256,7 @@ module Monkeybars
     # a method provided via the using method you may provide a method for conversion
     # into the view, out of the view or both.
     #
-    #   raw_mapping(:from_model, :to_model)
+    #   raw_mapping :from_model, :to_model
     #
     # would simply invoke the associated method when update_from_model or 
     # write_state_to_model was called.  Thus any assignment to view properties
@@ -268,11 +269,7 @@ module Monkeybars
     
     # See View.map
     def self.raw_mapping(from_model_method, to_model_method)
-      mapping = ModelMapping.new
-      mapping.from_model_method = from_model_method
-      mapping.to_model_method = to_model_method
-      view_mappings << mapping
-      nil #prevent accidental raw_mapping().something calls
+      view_mappings << ModelMapping.new(:using => [from_model_method, to_model_method])
     end
     
     def initialize
@@ -280,11 +277,11 @@ module Monkeybars
       @@is_a_java_class = !self.class.instance_java_class.nil? && self.class.instance_java_class.ancestors.member?(java.lang.Object)
       if @@is_a_java_class
         @main_view_component = self.class.instance_java_class.new
-        fields = self.class.instance_java_class.java_class.declared_fields
-        fields.each do |declared_field|
-          field = get_field_value(declared_field.name)
-          field.name = declared_field.name if field.kind_of?(java.awt.Component)
-        end
+#        fields = self.class.instance_java_class.java_class.declared_fields
+#        fields.each do |declared_field|
+#          field = get_field_value(declared_field.name)
+#          field.name = declared_field.name if field.kind_of?(java.awt.Component)
+#        end
       end
       
       validate_mappings
@@ -349,8 +346,8 @@ module Monkeybars
         if "global" == component
           get_all_components.each do |component|
             listener = "add#{type.camelize}Listener"
-            if (component.respond_to?(listener) && component.name)
-              mappings[component] = component.name.underscore.gsub(".", "_")
+            if (component.respond_to?(listener))
+              mappings[component] = component.name.underscore.gsub(".", "_") if component.name
               component.send(listener, handler)
             end
           end
