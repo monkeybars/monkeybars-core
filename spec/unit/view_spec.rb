@@ -49,13 +49,9 @@ end
 
 describe "view's add_handler method" do
   it "can resolve nested components" do
-    class TestController < Monkeybars::Controller
-      include Monkeybars::DocumentHandler
-    end
-    
     view = TestingView.new
-    lambda {view.add_handler(:document, TestController.instance, "testTextField.some_made_up_name")}.should raise_error(NoMethodError)
-    lambda {view.add_handler(:document, TestController.instance, "testTextField.document")}.should_not raise_error(NoMethodError)
+    lambda {view.add_handler(:document, Monkeybars::DocumentHandler.new(self), "testTextField.some_made_up_name")}.should raise_error(NoMethodError)
+    lambda {view.add_handler(:document, Monkeybars::DocumentHandler.new(self), "testTextField.document")}.should_not raise_error(NoMethodError)
     
     view.instance_variable_get("@main_view_component").dispose
   end

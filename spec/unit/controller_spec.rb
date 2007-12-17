@@ -82,6 +82,25 @@ describe "handle_event method" do
     event = MouseEvent.new(target_component, MouseEvent::MOUSE_PRESSED, 0, 0, 0, 0, 1, false)
     t.handle_event("mouse_clicked", event)
     $mouse_clicked.should == true
+    t.close
   end
   
+end
+
+describe "Controller's add_handler_for method" do
+  it "does not overwrite the controller's method_missing method" do
+    class TestController < Monkeybars::Controller
+      set_view "TestView"
+      
+      add_listener :type => :action, :components => ["testButton"]
+      
+      def method_missing(method, *args, &block)
+	return "original method missing"
+      end
+    end
+    
+    t = TestController.instance
+    t.foobar.should == "original method missing"
+    t.close
+  end
 end

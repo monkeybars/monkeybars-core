@@ -119,8 +119,8 @@ module Monkeybars
     # If it is not possible to declare a method, or it is desirable to do so dynamically,
     # you can use the define_handler method.
     def self.add_listener(details)
-      klass = "Monkeybars::#{details[:type].camelize}Handler".constantize
-      self.send(:include, klass) unless self.kind_of? klass
+      #klass = "Monkeybars::#{details[:type].camelize}Handler".constantize
+      #self.send(:include, klass) unless self.kind_of? klass
       self.send(:class_variable_get, :@@handlers).push(details)
       hide_protected_class_methods #workaround for JRuby bug #1283
     end
@@ -385,7 +385,8 @@ module Monkeybars
     end
     
     def add_handler_for(handler_type, components)
-      mappings = @__view.add_handler(handler_type, self, components)
+      handler = "Monkeybars::#{handler_type.camelize}Handler".constantize.new(self)
+      mappings = @__view.add_handler(handler_type, handler, components)
       @__event_callback_mappings.merge! mappings
     end
     
@@ -424,7 +425,7 @@ module Monkeybars
     def initialize(methods)
       super()
       raise ArgumentError if methods.empty?
-      methods.each { |method, proc| raise ArgumentError unless (/^(window|internalFrame)/ =~ method.to_s) and (proc.respond_to? :to_proc) }
+      methods.each { |method, proc| raise ArgumentError.new("Only window and internalFrame events can be used to create a MonkeybarsWindowAdapter") unless (/^(window|internalFrame)/ =~ method.to_s) and (proc.respond_to? :to_proc) }
       @methods = methods
     end
 
@@ -437,15 +438,16 @@ module Monkeybars
     end
   end  
   
-  module BaseHandler #:nodoc:
+  
+  # This module is used internally by the various XYZHandler classes as the
+  # recipent of events. It dispatches the event handling to the controller's
+  # handle_event method.
+  module BaseHandler
     def method_missing(method, *args, &block)
-      handle_event(method.underscore, args[0])
+      @controller.handle_event(method.underscore, args[0])
     end
   end
 
-end
-
-module Monkeybars
   module Handlers
     AWT_TYPES = ["Action","Adjustment","AWTEvent","Component","Container","Focus",
              "HierarchyBounds","Hierarchy","InputMethod","Item","Key","Mouse",
@@ -457,25 +459,20 @@ module Monkeybars
                    "TreeSelection", "TreeWillExpand", "UndoableEdit"]
   end
 end
-            
-Monkeybars::Handlers::AWT_TYPES.each do |type|
-  eval <<-ENDL
-    module Monkeybars
-      module #{type}Handler
-        include Monkeybars::BaseHandler
-        include java.awt.event.#{type}Listener
-      end
-    end
-  ENDL
-end
 
-Monkeybars::Handlers::SWING_TYPES.each do |type|
-  eval <<-ENDL
-    module Monkeybars
-      module #{type}Handler
-        include Monkeybars::BaseHandler
-        include javax.swing.event.#{type}Listener
+{"java.awt.event" => Monkeybars::Handlers::AWT_TYPES, "javax.swing.event" => Monkeybars::Handlers::SWING_TYPES}.each do |java_package, types|
+  types.each do |type|
+    eval <<-ENDL
+      module Monkeybars
+        class #{type}Handler
+          def initialize(controller)
+            @controller = controller
+          end
+
+          include Monkeybars::BaseHandler
+          include #{java_package}.#{type}Listener
+        end
       end
-    end
-  ENDL
+    ENDL
+  end
 end
