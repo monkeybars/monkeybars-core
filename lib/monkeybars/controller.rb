@@ -268,16 +268,6 @@ module Monkeybars
       @__view.update_from_model(model)
     end
     
-    # Returns the contents of the view as defined by the view's mappings.  For use
-    # in event handlers.  In an event handler this method is thread safe as Swing
-    # is single threaded and blocks any modification to the GUI while the handler
-    # is being proccessed.
-    def view_state
-      model = create_new_model unless self.class.model_class.nil?
-      @__view.write_state_to_model(model)
-      model
-    end
-    
     # Returns true if the view is visible, false otherwise
     def visible?
       @__view.visible?
@@ -377,6 +367,16 @@ module Monkeybars
     
     def self.view_class=(view)
       @@view_class_for_child_controller[self] = view
+    end
+    
+    # Returns the contents of the view as defined by the view's mappings.  For use
+    # in event handlers.  In an event handler this method is thread safe as Swing
+    # is single threaded and blocks any modification to the GUI while the handler
+    # is being proccessed.
+    def view_state
+      model = create_new_model unless self.class.model_class.nil?
+      @__view.write_state_to_model(model)
+      model
     end
     
     def create_new_view
