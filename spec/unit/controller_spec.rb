@@ -140,3 +140,32 @@ describe "Controller's view_state method" do
     t.close
   end
 end
+
+describe "Controller's update_model method" do
+  before(:each) do
+    Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
+    Object.send(:remove_const, :TestView) if Object.const_defined? :TestView
+    Object.send(:remove_const, :TestModel) if Object.const_defined? :TestModel
+  end
+  
+  it "updates the declared properties of the model from the view_state" do
+    class TestModel; attr_accessor :text, :text2, :text3; end
+    class TestController < Monkeybars::Controller; set_model "TestModel"; end
+    
+    t = TestController.instance
+    m = TestModel.new
+    m.text = "some test data"
+    m.text2 = "some test data"
+    m.text3 = "some test data"
+    
+    t.send(:model).text = ""
+    t.send(:model).text2 = ""
+    t.send(:model).text2 = ""
+    t.send(:update_model, m, :text, :text3)
+    t.send(:model).text.should == "some test data"
+    t.send(:model).text2.should == ""
+    t.send(:model).text3.should == "some test data"
+    t.close
+  end
+  
+end

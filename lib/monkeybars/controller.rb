@@ -291,7 +291,7 @@ module Monkeybars
     # Hides the view and unloads its resources
     def close
       @closed = true          
-      @__view.unload
+      @__view.unload unless @__view.nil?
       unload
       @__view.dispose if @__view.respond_to? :dispose
       @@instance_lock.synchronize do
@@ -354,6 +354,26 @@ module Monkeybars
     
     def model
       @__model
+    end
+    
+    # This method is almost always used from within an event handler to propogate
+    # the view_state to the model. Updates the model from the source provided 
+    # (typically from view_state). The list of properties defines what is modified 
+    # on the model.
+    # 
+    #   def ok_button_action_perfomed(event)
+    #     update_model(view_state, :user_name, :password)
+    #   end
+    # 
+    # This would have the same effect as:
+    # 
+    #   new_state = view_state
+    #   model.user_name = new_state.user_name
+    #   model.password = new_state.password
+    def update_model(source, *properties)
+      properties.each do |property|
+        @__model.send("#{property}=", source.send(property))
+      end
     end
     
     def create_new_model
