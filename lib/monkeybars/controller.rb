@@ -268,6 +268,16 @@ module Monkeybars
       @__view.update_from_model(model)
     end
     
+    # Returns the contents of the view as defined by the view's mappings.  For use
+    # in event handlers.  In an event handler this method is thread safe as Swing
+    # is single threaded and blocks any modification to the GUI while the handler
+    # is being proccessed.
+    def view_state
+      model = create_new_model unless self.class.model_class.nil?
+      @__view.write_state_to_model(model)
+      model
+    end
+    
     # Returns true if the view is visible, false otherwise
     def visible?
       @__view.visible?
@@ -311,6 +321,7 @@ module Monkeybars
       show
     end
 
+    
     # Stub to be overriden in sub-class.  This is where you put the code you would
     # normally put in initialize, it will be called the first time open is called
     # on the controller.
@@ -327,19 +338,16 @@ module Monkeybars
 
       component_name = @__event_callback_mappings[event.source]
       method = "#{component_name}_#{event_name}".to_sym
-      model = create_new_model unless self.class.model_class.nil?
-      @__view.write_state_to_model(model)
      
       proc = get_method(method)
       unless METHOD_NOT_FOUND == proc
-        proc.call(model, event)
+        proc.call(event)
       else
         method = event_name.to_sym
-        
         proc = get_method(method)
         
         unless METHOD_NOT_FOUND == proc
-          proc.call(model, event)
+          proc.call(event)
         end
       end
     end

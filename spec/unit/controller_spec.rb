@@ -53,11 +53,11 @@ describe "handle_event method" do
       add_listener :type => :document, :components => ["testTextField.document"]
       add_listener :type => :key
       
-      def test_button_action_performed(view_state, event)
+      def test_button_action_performed(event)
         $test_button_action_performed = true
       end
       
-      def mouse_clicked(view_state, event)
+      def mouse_clicked(event)
         $mouse_clicked = true
       end
       
@@ -88,6 +88,10 @@ describe "handle_event method" do
 end
 
 describe "Controller's add_handler_for method" do
+  before(:each) do
+    Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
+  end
+  
   it "does not overwrite the controller's method_missing method" do
     class TestController < Monkeybars::Controller
       set_view "TestView"
@@ -101,6 +105,38 @@ describe "Controller's add_handler_for method" do
     
     t = TestController.instance
     t.foobar.should == "original method missing"
+    t.close
+  end
+end
+
+describe "Controller's view_state method" do
+  before(:each) do
+    Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
+    Object.send(:remove_const, :TestView) if Object.const_defined? :TestView
+    Object.send(:remove_const, :TestModel) if Object.const_defined? :TestModel
+  end
+  
+  it "returns the view's state as a model" do  
+    class TestModel
+      attr_accessor :text
+      def initialize; @text= ""; end
+    end
+    
+    class TestView < Monkeybars::View
+      set_java_class "org.monkeybars.TestView"
+      map :view => "testTextField.text", :model => :text
+    end
+    
+    class TestController < Monkeybars::Controller
+      set_view "TestView"
+      set_model "TestModel"
+    end
+    
+    t = TestController.instance
+    
+    t.view_state.text.should == "A text field"
+    t.instance_variable_get("@__view").testTextField.text = "test data"
+    t.view_state.text.should == "test data"
     t.close
   end
 end

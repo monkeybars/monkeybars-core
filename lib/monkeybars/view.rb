@@ -416,8 +416,8 @@ module Monkeybars
       end
     end
     
-    # The inverse of update_from_model.  Called when an event is generated and
-    # the controller needs the state of the view.
+    # The inverse of update_from_model.  Called when view_state is called in
+    # the controller.
     def write_state_to_model(model)
       @__valid_mappings.each do |mapping|
         if [View::ModelMapping::DIRECTION_TO_MODEL, View::ModelMapping::DIRECTION_BOTH].member? mapping.direction
