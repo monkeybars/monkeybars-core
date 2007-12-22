@@ -394,9 +394,13 @@ module Monkeybars
     # is single threaded and blocks any modification to the GUI while the handler
     # is being proccessed.
     def view_state
-      model = create_new_model unless self.class.model_class.nil?
-      @__view.write_state_to_model(model)
-      model
+      unless self.class.model_class.nil?
+        model = create_new_model 
+        @__view.write_state_to_model(model)
+        model
+      else
+        nil
+      end
     end
     
     def create_new_view
