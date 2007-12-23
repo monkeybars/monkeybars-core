@@ -72,15 +72,23 @@ module Monkeybars
     # the MyView class.
     #
     def self.set_view(view)
-      require view.underscore unless view.constantize
-      self.view_class = view.constantize
+      begin
+        self.view_class = view.constantize
+      rescue NameError
+        require view.underscore
+        self.view_class = view.constantize
+      end
     end
 
     # See set_view.  The declared model class is also auto-required prior to the
     # class being instantiated.
     def self.set_model(model)
-      require model.underscore unless model.constantize
-      self.model_class = model.constantize
+      begin
+        self.model_class = model.constantize
+      rescue NameError
+        require model.underscore
+        self.model_class = model.constantize
+      end
     end
 
     # Declares which components you want events to be generated for.  add_listener
@@ -118,7 +126,7 @@ module Monkeybars
     end
   
     # Declares a method to be called whenever the controller's update method is called.
-    def self.update_method(method)
+    def self.set_update_method(method)
       raise "Argument must be a symbol" unless method.kind_of? Symbol
       raise "'Update' is a reserved method name" if :update == method
       self.send(:class_variable_set, :@@update_method_name, method)
@@ -160,7 +168,7 @@ module Monkeybars
     #   will release the resources for the window and its components, can be 
     #   brought back with a call to show
     # - action :hide - sets the visibility of the window to false
-    def self.close_action(action)
+    def self.set_close_action(action)
       self.send(:class_variable_set, :@@close_action, action)
     end
     

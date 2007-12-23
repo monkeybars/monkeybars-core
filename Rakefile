@@ -7,7 +7,7 @@ require 'spec/rake/spectask'
 
 OUTPUT_DIR = "pkg"
 BUILD_DIR = "#{OUTPUT_DIR}/bin"
-VERSION = "0.5.1"
+VERSION = "0.5.5"
 
 Hoe.new('monkeybars', VERSION) do |p|
   p.rubyforge_name = 'monkeybars'
