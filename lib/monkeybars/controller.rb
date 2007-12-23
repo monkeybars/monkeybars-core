@@ -2,6 +2,7 @@ require 'thread'
 
 require "monkeybars/inflector"
 require "monkeybars/view"
+require "monkeybars/event_handler"
 
 module Monkeybars
   # Controllers are the traffic cops of your application.  They decide how to react to
@@ -167,7 +168,10 @@ module Monkeybars
       subclass.send(:class_variable_set, :@@handlers, Array.new)
     end
     
-
+    def self.method_added(method_name)
+      
+    end
+    
     # Returns a frozen hash of ControllerName => [instances] pairs. This is
     # useful if you need to iterate over all active controllers to call update
     # or to check for a status.
@@ -176,7 +180,7 @@ module Monkeybars
     # list, even if open is subsequently called. If you need a window to remain
     # in the list but not be updated when not visible you can do:
     #
-    #   Monkeybars::Controller.active_controllers.values.flatten.select{|c| c.visible? }.each{|c| c.update }
+    #   Monkeybars::Controller.active_controllers.values.flatten.each{|c| c.update if c.visible? }
     def self.active_controllers
       @@instance_list.clone.freeze     
     end
@@ -209,6 +213,22 @@ module Monkeybars
       unless @__view.nil?
         handlers.each do |handler|            
           add_handler_for handler[:type], handler[:components]
+        end
+        
+        # Detect implicit handlers. This is very expensive the way it is coded n^y and
+        # we should look at it via profiling to see if it's impacting startup significantly
+        all_actions = Monkeybars::Handlers::EVENT_NAMES.keys
+        methods.each do |method|
+          all_actions.each do |action|
+            if index = method.index(action)
+              if 0 == index
+                add_handler_for(Monkeybars::Handlers::EVENT_NAMES[action], ["global"])
+              else
+                add_handler_for(Monkeybars::Handlers::EVENT_NAMES[action], method[0...index-1].camelize(false))
+              end
+              break
+            end
+          end
         end
       else
         unless handlers.empty?
@@ -429,73 +449,5 @@ module Monkeybars
     def built_in_close_method(event)
       close
     end
-  end
-  
-  # This class is primarily used internally for setting up a handler for window 
-  # close events although any of the WindowAdapter methods can be set.  To instantiate
-  # a new MonkeybarsWindowAdapter, pass in a hash of method name symbols and method 
-  # objects.  The method names must be the various methods from the 
-  # java.awt.event.WindowListener interface.
-  #
-  # For example:
-  #
-  #   def handle_window_closing(event)
-  #     puts "the window is closing"
-  #   end
-  #   
-  #   handler = MonkeybarsWindowAdapter.new(:windowClosing => method(handle_window_closing))
-  class MonkeybarsWindowAdapter #:nodoc:
-    def initialize(methods)
-      super()
-      raise ArgumentError if methods.empty?
-      methods.each { |method, proc| raise ArgumentError.new("Only window and internalFrame events can be used to create a MonkeybarsWindowAdapter") unless (/^(window|internalFrame)/ =~ method.to_s) and (proc.respond_to? :to_proc) }
-      @methods = methods
-    end
-
-    def method_missing(method, *args, &blk)
-      if /^(window|internalFrame)/ =~ method.to_s
-        @methods[method].call(*args) if @methods[method]
-      else
-        super
-      end
-    end
-  end  
-  
-  
-  # This module is used internally by the various XYZHandler classes as the
-  # recipent of events. It dispatches the event handling to the controller's
-  # handle_event method.
-  module BaseHandler
-    def method_missing(method, *args, &block)
-      @controller.handle_event(method.underscore, args[0])
-    end
-  end
-
-  module Handlers
-    AWT_TYPES = ["Action","Adjustment","AWTEvent","Component","Container","Focus",
-             "HierarchyBounds","Hierarchy","InputMethod","Item","Key","Mouse",
-             "MouseMotion","MouseWheel","Text", "WindowFocus","Window","WindowState"]       
-    SWING_TYPES = ["Ancestor", "Caret", "CellEditor", "Change", "Document", 
-                   "Hyperlink", "InternalFrame", "ListData", "ListSelection", 
-                   "MenuDragMouse", "MenuKey", "Menu", "MouseInput", "PopupMenu", 
-                   "TableColumnModel", "TableModel", "TreeExpansion", "TreeModel", 
-                   "TreeSelection", "TreeWillExpand", "UndoableEdit"]
-  end
-end
-
-{"java.awt.event" => Monkeybars::Handlers::AWT_TYPES, "javax.swing.event" => Monkeybars::Handlers::SWING_TYPES}.each do |java_package, types|
-  types.each do |type|
-    eval <<-ENDL
-      module Monkeybars
-        class #{type}Handler
-          def initialize(controller)
-            @controller = controller
-          end
-
-          include Monkeybars::BaseHandler
-          include #{java_package}.#{type}Listener
-        end
-      end
-    ENDL
   end
 end

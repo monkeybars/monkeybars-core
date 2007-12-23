@@ -167,5 +167,30 @@ describe "Controller's update_model method" do
     t.send(:model).text3.should == "some test data"
     t.close
   end
+end
+
+describe "implicit handler registration" do
+  before(:each) do
+    Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
+    Object.send(:remove_const, :TestView) if Object.const_defined? :TestView
+  end
+  
+  it "" do
+    class TestView < Monkeybars::View
+      set_java_class "org.monkeybars.TestView"
+    end
+    
+    class TestController < Monkeybars::Controller
+      set_view "TestView"
+      
+      def test_button_action_performed
+	
+      end
+    end
+    
+    t = TestController.instance
+    t.instance_variable_get("@__event_callback_mappings").values.member?("test_button").should be_true
+    t.close
+  end
   
 end
