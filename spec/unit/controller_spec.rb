@@ -12,6 +12,42 @@ class TestView < Monkeybars::View
   set_java_class 'org.monkeybars.TestView'
 end
 
+describe Monkeybars::Controller do
+  before(:each) do
+    Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
+  end
+  
+  it "allows the model and view to be set externally" do
+    class TestController < Monkeybars::Controller; end
+    class MyTestView; end
+    class MyTestModel; end
+    
+    TestController.set_view "MyTestView"
+    TestController.set_model "MyTestModel"
+    
+    TestController.send(:view_class).should == MyTestView
+    TestController.send(:model_class).should == MyTestModel
+  end
+  
+  it "allows the model and view to be overriden externally" do
+    class MyTestView; end
+    class MyTestModel; end
+    class MyTestView2; end
+    class MyTestModel2; end
+    
+    class TestController < Monkeybars::Controller
+      set_view "MyTestView"
+      set_model "MyTestModel"
+    end
+    
+    TestController.set_view "MyTestView2"
+    TestController.set_model "MyTestModel2"
+    
+    TestController.send(:view_class).should == MyTestView2
+    TestController.send(:model_class).should == MyTestModel2
+  end
+end
+
 describe "controller instantiation" do
   before(:each) do
     Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
@@ -175,7 +211,7 @@ describe "implicit handler registration" do
     Object.send(:remove_const, :TestView) if Object.const_defined? :TestView
   end
   
-  it "" do
+  it "detects event names in methods and adds an appropriate listener during instantiation" do
     class TestView < Monkeybars::View
       set_java_class "org.monkeybars.TestView"
     end
@@ -193,4 +229,5 @@ describe "implicit handler registration" do
     t.close
   end
   
+  it "detects when a new method is added and registers a new listener if appropriate"
 end

@@ -4,10 +4,10 @@ require 'rubygems'
 require 'fileutils'
 require 'hoe'
 require 'spec/rake/spectask'
+require 'lib/monkeybars_version'
 
 OUTPUT_DIR = "pkg"
 BUILD_DIR = "#{OUTPUT_DIR}/bin"
-VERSION = "0.5.5"
 
 Hoe.new('monkeybars', VERSION) do |p|
   p.rubyforge_name = 'monkeybars'

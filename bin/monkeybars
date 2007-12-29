@@ -1,0 +1,35 @@
+#! /usr/bin/env ruby
+
+require 'fileutils'
+require 'rubygems'
+require 'monkeybars_version'
+
+def help(message = nil)
+  puts message + "\n-----------------------------------\n" unless message.nil?
+  puts <<-ENDL
+  Usage:
+      monkeybars -h/--help
+      monkeybars -v/--version
+      
+      monkeybars project_name
+        Creates a new directory (project_name) containing a project skeleton with all files needed to run a monkeybars application.
+  ENDL
+end
+
+if ARGV.empty?
+  help
+else
+  case ARGV[0]
+  when "-h" || "--help" || nil
+    help
+  when "-v" || "--version"
+    puts "Monkeybars version #{Monkeybars::VERSION}"
+  else
+    # create new directory and copy app skeleton over
+    project_name = ARGV[0]
+    puts Dir::pwd
+    unless File.directory? project_name
+      FileUtils.mkdir_p(project_name)
+    end
+  end
+end

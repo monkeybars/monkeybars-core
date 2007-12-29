@@ -4,7 +4,7 @@
 <title>Monkeybars Documentation</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <link rel="stylesheet" href="css/1.css" type="text/css" media="screen,projection" />
-
+<script type="text/javascript" src="swfobject.js"></script>
 </head>
  
 <body>
@@ -22,6 +22,8 @@
 				
 						<li><a href="index.html">Main</a></li>
 
+						<li><a href="http://rm.happycamperstudios.com/projects/show/3">Issue Tracker</a></li>
+						
 						<li><a href="http://rubyforge.org/projects/monkeybars/">Rubyforge Project</a></li>
 						
 						<li><a href="docs.html" class="active">Documentation</a></li>
@@ -45,12 +47,72 @@
 				<p>
 						<ul>
 							<li><a href="api/index.html">RDoc</a></li>
+							<li>	
+								<table border=0 style="background-color: #fff; padding: 5px;" cellspacing=0>
+								  <tr><td>
+								  <img src="http://groups.google.com/groups/img/3nb/groups_bar.gif"
+								         height=26 width=132 alt="Google Groups">
+								  </td></tr>
+								  <tr><td style="padding-left: 5px">
+								  <b>Subscribe to Monkeybars</b>
+								  </td></tr>
+								  <form action="http://groups.google.com/group/monkeybars/boxsubscribe">
+								  <tr><td style="padding-left: 5px;">
+								  Email: <input type=text name=email>
+								  <input type=submit name="sub" value="Subscribe">
+								  </td></tr>
+								</form>
+								<tr><td align=right>
+								  <a href="http://groups.google.com/group/monkeybars">Visit this group</a>
+								</td></tr>
+								</table>
+							</li>
+							<li>Join us in the #monkeybars channel on the Freenode IRC Network</li>
 							<li><a href="architecture_overview.html">An overview of how Monkeybars works</a></li>
 						</ul>
-		
 				</p>
-						
-		
+				
+				<h2>Source</h2>
+				<p>
+					Monkeybars source code can be checked out from our <a href="http://www.selenic.com/mercurial/wiki/">Mercurial</a> repository by using the following command:
+					<p>
+						hg clone https://monkeybars.happycamperstudios.com monkeybars
+					</p>
+					
+					After the initial check-out, you can get new changes with the command "hg pull" from your local Monkeybars directory
+				</p>
+				
+				<h2>Screencasts</h2>
+
+				<p><a href="javascript:void(0)" onclick="document.getElementById('part1').style.display='block'">Part 1: High level overview</a></p>
+				<div id="part1" style="display: none;">
+					<a href="javascript:void(0)" onclick="document.getElementById('part1').style.display='none'">Hide video</a><br/>
+					If you have trouble playing this video or want a copy for offline viewing, you can download an AVI <a href="http://www.koontzfamily.org/david/videos/Monkeybars_Screencast_Part_1.avi">here</a> (15 MB)
+
+					<p id="player"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
+					<script type="text/javascript">
+						var so = new SWFObject('flvplayer.swf','player','800','600','7');
+						so.addParam("allowfullscreen","true");
+						so.addVariable("file","http://www.koontzfamily.org/david/videos/Monkeybars_Screencast_Part_1.flv");
+						so.addVariable("displayheight","600");
+						so.write('player');
+					</script>
+				</div>
+
+				<p><a href="javascript:void(0)" onclick="document.getElementById('part2').style.display='block'">Part 2: Building of a demo application</a></p>
+				<div id="part2" style="display: none;">
+					<a href="javascript:void(0)" onclick="document.getElementById('part2').style.display='none'">Hide video</a><br/>
+					If you have trouble playing this video or want a copy for offline viewing, you can download an AVI <a href="http://www.koontzfamily.org/david/videos/Monkeybars_Screencast_Part_2.avi">here</a> (120 MB)
+					
+					<p id="player2"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
+					<script type="text/javascript">
+						var so = new SWFObject('flvplayer.swf','player','800','600','7');
+						so.addParam("allowfullscreen","true");
+						so.addVariable("file","http://www.koontzfamily.org/david/videos/Monkeybars_Screencast_Part_2.flv");
+						so.addVariable("displayheight","600");
+						so.write('player2');
+					</script>
+				</div>
 		</div>
 		
 		<div id="footer">

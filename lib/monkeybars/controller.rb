@@ -120,6 +120,8 @@ module Monkeybars
     #
     # If it is not possible to declare a method, or it is desirable to do so dynamically
     # (even from outside the class), you can use the define_handler method.
+    #
+    # If you wish to override the default event handling behavior, override handle_event
     def self.add_listener(details)
       self.send(:class_variable_get, :@@handlers).push(details)
       hide_protected_class_methods #workaround for JRuby bug #1283
@@ -177,7 +179,8 @@ module Monkeybars
     end
     
     def self.method_added(method_name)
-      
+      #TODO: When a method is added, check its name to see if a new listener should
+      # be registered
     end
     
     # Returns a frozen hash of ControllerName => [instances] pairs. This is

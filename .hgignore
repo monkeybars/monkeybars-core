@@ -3,3 +3,4 @@ syntax: glob
 *.jar
 *.gem
 nbproject
+pkg
