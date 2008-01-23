@@ -3,6 +3,9 @@ require 'thread'
 require "monkeybars/inflector"
 require "monkeybars/view"
 require "monkeybars/event_handler"
+require 'foxtrot.jar'
+include_class "foxtrot.Worker"
+include_class "foxtrot.Job"
 
 module Monkeybars
   # Controllers are the traffic cops of your application.  They decide how to react to
@@ -18,24 +21,45 @@ module Monkeybars
   # to declare a view or model but a controller is of questionable usefulness without it.
   #
   # The controller is where you define any events you are interested in handling
-  # (see add_listener) as well as one special event, the pressing of the "close" button
-  # of the window (see close_action).  Handlers can
+  # (see add_listener) as well as two special events, the pressing of the "close" button
+  # of the window (see close_action), and the updating of the MVC tuple (see update_method).
+  # Handlers are methods named according to a certain convention that are the recipient of events.  
+  # Handlers are named either <component_event> or just <event> if you want a global handler.  
+  # No events are actually generated and sent to the controller unless a listener has been added 
+  # for that component, however, component-specific handlers will automatically add a listener 
+  # for that component when the class is instantiated.  Therefore a method named ok_button_action_performed
+  # would be the equivalent of 
+  # 
+  #   add_listener :type => :action, :components => ["ok_button"]
+  #   
+  # Global handlers cannot be declared in this fashion, you must use add_listener global action listener to the view.
+  # 
+  # Handler methods can optionally take one parameter which is the event generated
+  # by Swing.  This would look like
+  # 
+  #   def some_component_event_name(swing_event)
+  # 
+  # WARNING: Two Swing handler interfaces have conflicting method names, thus it was
+  # not possible to support all handler types in this fashion.  As a result, MouseInput, 
+  # HierarchyBounds, and TreeSelection listeners must be added using the add_listener
+  # method.
+  #
+  # ==========
   #
   # Example of a controller, this assumes the existance of a Ruby class named MyModel that
   # has an attribute named user_name that is mapped to a field on a subclass of 
-  # Monkeybars::View named MyView that has a button named "okButton" and a text field called 
-  # userNameTextField:
+  # Monkeybars::View named MyView that has a button named "ok_button" and a text field called 
+  # user_name
   #
   #   require 'monkeybars'
   #   
   #   class MyController < Monkeybars::Controller
   #     set_view :MyView
   #     set_model :MyModel
-  # 
-  #     add_listener :type => :mouse, :components => ["okButton"]
+  #
   #     close_action :exit
   # 
-  #     def ok_button_mouse_released(view_state, event)
+  #     def ok_button_mouse_released
   #       puts "The user's name is: #{view_state.user_name}"
   #     end
   #   end
@@ -52,12 +76,12 @@ module Monkeybars
     # Controllers cannot be instantiated via a call to new, instead use instance
     # to retrieve the instance of the view.  Currently only one instance of a
     # controller is created but in the near future a configurable limit will be
-    # available so that you can create n instance of a controller.
+    # available so that you can create n instances of a controller.
     def self.instance
       @@instance_lock.synchronize do
         controller = @@instance_list[self]
         unless controller.empty?
-          controller.size == 1 ? controller[0] : controller
+          controller.size == 1 ? controller.last : controller
         else
           __new__
         end
@@ -140,7 +164,7 @@ module Monkeybars
     #
     # So, if you have declared:
     #
-    #   add_listener :type => :mouse, :components => [:okButton]
+    #   add_listener :type => :mouse, :components => [:ok_button]
     #
     # you could implement the handler using:
     #
@@ -210,7 +234,7 @@ module Monkeybars
     
     def self.__new__
       object = new
-      @@instance_list[self] << object
+      @@instance_list[self.class] << object
       object
     end    
     
@@ -218,6 +242,7 @@ module Monkeybars
       @__view = create_new_view unless self.class.view_class.nil?
       @__model = create_new_model unless self.class.model_class.nil?
       @__event_callback_mappings = {}
+      @__transfer = {}
       
       handlers = self.class.send(:class_variable_get, :@@handlers)
 
@@ -232,9 +257,7 @@ module Monkeybars
         methods.each do |method|
           all_actions.each do |action|
             if index = method.index(action)
-              if 0 == index
-                add_handler_for(Monkeybars::Handlers::EVENT_NAMES[action], ["global"])
-              else
+              unless 0 == index
                 add_handler_for(Monkeybars::Handlers::EVENT_NAMES[action], method[0...index-1].camelize(false))
               end
               break
@@ -294,9 +317,17 @@ module Monkeybars
     end
 
     # Triggers updating of the view based on the mapping and the current contents
-    # of model
+    # of model and messages
     def update_view
-      @__view.update_from_model(model)
+      @__view.update(model, transfer)
+    end
+    
+    def update_view_model_only
+      raise "Not implemented!"
+    end
+    
+    def update_view_transfer_only
+      raise "Not implemented!"
     end
     
     # Returns true if the view is visible, false otherwise
@@ -333,6 +364,12 @@ module Monkeybars
     # Calls load if the controller has not been opened previously, then calls update_view
     # and shows the view.
     def open(*args)
+      @@instance_lock.synchronize do
+        unless @@instance_list[self.class].member? self
+          @@instance_list[self.class] << object
+        end
+      end
+      
       if closed?
         load(*args) 
         @closed = false
@@ -355,21 +392,20 @@ module Monkeybars
     # gets called before mouse_released. A component's name field must be defined in order
     # for the name_event_type style handlers to work.
     def handle_event(event_name, event) #:nodoc:
+
       return if event.nil?
 
       component_name = @__event_callback_mappings[event.source]
-      method = "#{component_name}_#{event_name}".to_sym
      
-      proc = get_method(method)
+      proc = get_method("#{component_name}_#{event_name}".to_sym)
+      if METHOD_NOT_FOUND == proc
+        proc = get_method(event_name.to_sym)
+      end
+      
       unless METHOD_NOT_FOUND == proc
-        proc.call(event)
-      else
-        method = event_name.to_sym
-        proc = get_method(method)
-        
-        unless METHOD_NOT_FOUND == proc
-          proc.call(event)
-        end
+        p = proc { 0 == proc.arity ? proc.call : proc.call(event) }
+        runner = Runner.new(&p)
+        Worker.post(runner)
       end
     end
     
@@ -385,6 +421,10 @@ module Monkeybars
     
     def model
       @__model
+    end
+    
+    def transfer
+      @__transfer      
     end
     
     # This method is almost always used from within an event handler to propogate
@@ -461,4 +501,17 @@ module Monkeybars
       close
     end
   end
+
+  class Runner < Job
+    attr_accessor :proc
+    def initialize(&proc)
+      @proc = proc
+    end
+    
+    def run
+      @proc.call
+    end
+  end
 end
+
+

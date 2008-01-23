@@ -3,10 +3,10 @@ $:.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
 require 'java'
 require 'monkeybars/view'
 
-describe "model mapping instance" do
+describe View::Mapping do
   
   before(:each) do
-    @mapping = Monkeybars::View::ModelMapping.new
+    @mapping = Monkeybars::View::Mapping.new
   end
   
   it "detects when no properties are present" do
@@ -36,15 +36,15 @@ describe "model mapping instance" do
   end
   
   it "detects when 'in' method is present" do
-    @mapping.from_model_method_present?.should == false
+    @mapping.to_view_method_present?.should == false
     @mapping.from_model_method = true
-    @mapping.from_model_method_present?.should == true
+    @mapping.to_view_method_present?.should == true
   end
   
   it "detects when 'out' method is present" do
-    @mapping.to_model_method_present?.should == false
+    @mapping.from_view_method_present?.should == false
     @mapping.to_model_method = true
-    @mapping.to_model_method_present?.should == true
+    @mapping.from_view_method_present?.should == true
   end
   
   it "detects when a method is present (in method)" do

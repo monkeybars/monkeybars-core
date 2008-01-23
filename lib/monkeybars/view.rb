@@ -3,6 +3,7 @@ include_class javax.swing.KeyStroke
 
 require "monkeybars/inflector"
 require 'monkeybars/validated_hash'
+require 'monkeybars/view_mapping'
 
 module Monkeybars
   # The view is the gatekeeper to the actual Java (or sometimes non-Java) view class.
@@ -40,7 +41,8 @@ module Monkeybars
   #   end
   #
   # It is important that you do not implement your own initialize method, doing so will
-  # interfere with the operation of the View class.
+  # interfere with the operation of the View class (or if you must, remember to
+  # call super on the first line of your initialize).
   #
   # It is possible to have a view that is not related to a Java class, in which
   # case no set_java_class delcaration is used.  If using a pure Ruby view (or
@@ -49,101 +51,7 @@ module Monkeybars
   # should respond to any methods that normally interact with the Java object such
   # as visisble?, hide, and dispose
   class View
-    # This is an internal class used only by View
-    #
-    # A ModelMapping records the relationship between the fields of a model and
-    # the fields of a view.  Mappings are created for each call to View.map and
-    # are cached until the view is instantiated.  The mappings are then inspected
-    # for validity and are assigned a type (one of the constants defined in
-    # ModelMapping) to speed up processing.  Invalid mappings raise an exception.
-    class ModelMapping #:nodoc:
-      TYPE_RAW = :raw
-      TYPE_PROPERTIES = :both_properties
-      TYPE_METHOD = :method
-      DIRECTION_FROM_MODEL = :from_model
-      DIRECTION_TO_MODEL = :to_model
-      DIRECTION_BOTH = :both
-      
-      attr_accessor :view_property, :model_property, :from_model_method, :to_model_method, :type, :direction, :event_types_to_ignore
-      
-      def initialize(property_hash = {})
-	@view_property = property_hash[:view] || nil
-        @model_property = property_hash[:model] || nil
-        @from_model_method, @to_model_method = if property_hash[:using]
-          if property_hash[:using].kind_of? Array
-            [property_hash[:using][0], property_hash[:using][1]]
-          else
-            [property_hash[:using], nil]
-          end
-        else
-          [nil, nil]
-        end
-        
-        @event_types_to_ignore = if property_hash[:ignoring]
-          if property_hash[:ignoring].kind_of? Array
-            property_hash[:ignoring]
-          else
-            [property_hash[:ignoring]]
-          end
-        else
-          []
-        end
-      end
-      
-#      def to(model_property)
-#        @model_property = model_property
-#        return self
-#      end
-#
-#      def using(from_model_method, to_model_method)
-#        @from_model_method = from_model_method
-#        @to_model_method = to_model_method
-#        return self
-#      end
-#      
-#      def ignoring(*event_types)
-#      	@event_types_to_ignore = event_types
-#      end
-      
-      def properties_only?
-        (at_least_one_property_present? and !at_least_one_method_present?) ? true : false
-      end
-      
-      def both_properties_and_methods?
-	(both_properties_present? and at_least_one_method_present?) ? true : false
-      end
-      
-      def methods_only?
-	(!at_least_one_property_present? and at_least_one_method_present?)  ? true : false
-      end
-      
-      def both_properties_present?
-	!@view_property.nil? and !@model_property.nil?
-      end
-
-      def both_methods_present?
-	!@from_model_method.nil? and !@to_model_method.nil?
-      end
-
-      def from_model_method_present?
-	!@from_model_method.nil?
-      end
-      
-      def to_model_method_present?
-	!@to_model_method.nil?
-      end
-      
-      private
-      
-      def at_least_one_property_present?
-	!@view_property.nil? or !@model_property.nil?
-      end
-      
-      def at_least_one_method_present?
-	!@from_model_method.nil? or !@to_model_method.nil?
-      end
-    end
-    
+ 
     module CloseActions #:nodoc:
       DO_NOTHING = javax::swing::WindowConstants::DO_NOTHING_ON_CLOSE
       DISPOSE = javax::swing::WindowConstants::DISPOSE_ON_CLOSE
@@ -263,17 +171,18 @@ module Monkeybars
     # must be done within the method (hence the 'raw').
     def self.map(properties)
       properties.validate_only(:model, :view, :using, :ignoring)
-      mapping = ModelMapping.new(properties)
+      mapping = Mapping.new(properties)
       view_mappings << mapping
     end
     
     # See View.map
     def self.raw_mapping(from_model_method, to_model_method)
-      view_mappings << ModelMapping.new(:using => [from_model_method, to_model_method])
+      view_mappings << Mapping.new(:using => [from_model_method, to_model_method])
     end
     
     def initialize
       @__field_references = {}
+      @__valid_mappings = {}
       @@is_a_java_class = !self.class.instance_java_class.nil? && self.class.instance_java_class.ancestors.member?(java.lang.Object)
       if @@is_a_java_class
         @main_view_component = self.class.instance_java_class.new
@@ -334,10 +243,12 @@ module Monkeybars
     # you are doing.
     #
     # Looks up the appropriate component and calls addXXXListener on the
-    # component.
+    # component.  Components can be nested, so textField.document would be a valid
+    # component and the listner would be added to the document object of the text
+    # field.
     #
     # add_handler returns a hash of objects as keys and their normalized (underscored
-    # and . replaced with _) names as keys
+    # and . replaced with _) names as values
     def add_handler(type, handler, components)
       mappings = {}
       components = ["global"] if components.nil?
@@ -383,55 +294,38 @@ module Monkeybars
       end
     end
     
+    
+    def update_model_only(model)
+      
+    end
+    
+    def update_transfer_only(transfer)
+      
+    end
+    
     # This method is called when the view is initialized.  It uses the mappings
-    # rules declared in the view to copy data from the supplied model into the view.
-    def update_from_model(model)
-      return if model.nil?
-      mapping_proc = Proc.new do |mapping|
-        begin
-          if [View::ModelMapping::DIRECTION_FROM_MODEL, View::ModelMapping::DIRECTION_BOTH].member? mapping.direction
-            case mapping.type
-            when View::ModelMapping::TYPE_PROPERTIES
-              map_model_properties_to_view(mapping, model)
-            when View::ModelMapping::TYPE_METHOD
-              if :default == mapping.from_model_method
-                map_model_properties_to_view(mapping, model)
-              else
-                instance_eval("self.#{mapping.view_property.to_s} = method(mapping.from_model_method).call(model)")
-              end
-            when View::ModelMapping::TYPE_RAW
-              method(mapping.from_model_method).call(model)
-            end
-          end
-        rescue NoMethodError => e
-          raise InvalidMappingError, "Invalid mapping #{mapping.inspect} in class #{self.class}, #{e.message}"
-        end
-      end
-      @__valid_mappings.each do |mapping|
-        if mapping.event_types_to_ignore.empty?
-          mapping_proc.call(mapping)
-        else
-          get_field_value(/^(\w+)\.?/.match(mapping.view_property)[1]).disable_handlers(mapping.event_types_to_ignore[0]) { mapping_proc.call(mapping) }
-        end
-      end
+    # rules declared in the view to copy data from the supplied model and transfer
+    # object into the view.
+    def update_both_model_and_transfer(model, transfer)
+      
     end
     
     # The inverse of update_from_model.  Called when view_state is called in
     # the controller.
     def write_state_to_model(model)
       @__valid_mappings.each do |mapping|
-        if [View::ModelMapping::DIRECTION_TO_MODEL, View::ModelMapping::DIRECTION_BOTH].member? mapping.direction
+        if [View::Mapping::DIRECTION_FROM_VIEW, View::Mapping::DIRECTION_BOTH].member? mapping.direction
           case mapping.type
-          when View::ModelMapping::TYPE_PROPERTIES
+          when View::Mapping::TYPE_PROPERTIES
             map_view_properties_to_model(mapping, model)
-          when View::ModelMapping::TYPE_METHOD
-            if :default == mapping.to_model_method
+          when View::Mapping::TYPE_METHOD
+            if :default == mapping.from_view_method
               map_view_properties_to_model(mapping, model)
             else
               instance_eval("model.#{mapping.model_property.to_s} = method(mapping.to_model_method).call(model)")
             end
-          when View::ModelMapping::TYPE_RAW
-            method(mapping.to_model_method).call(model)
+          when View::Mapping::TYPE_RAW
+            method(mapping.from_view_method).call(model)
           end
         end
       end
@@ -502,67 +396,52 @@ module Monkeybars
       list
     end
     
-    # Raises exceptions for any invalid mapping combinations (nil parameters, mistyped method
-    # names, etc.).  Also sets a direction and type for faster processing.
-    def validate_mappings
-      @__valid_mappings = self.class.view_mappings.map do |mapping|
-        mapping = mapping.dup
-        if mapping.properties_only?
-          if mapping.both_properties_present?
-            mapping.direction = View::ModelMapping::DIRECTION_BOTH
-            mapping.type = View::ModelMapping::TYPE_PROPERTIES
-          else
-            raise InvalidMappingError, "Only one property declared with map in #{self.class}"
-          end
-        elsif mapping.both_properties_and_methods?
-          mapping.type = View::ModelMapping::TYPE_METHOD
-          if mapping.both_methods_present?
-            mapping.direction = View::ModelMapping::DIRECTION_BOTH
-            validate_method(View::ModelMapping::DIRECTION_BOTH, mapping)
-          else
-            if mapping.from_model_method_present?
-              mapping.direction = View::ModelMapping::DIRECTION_FROM_MODEL
-              validate_method(View::ModelMapping::DIRECTION_FROM_MODEL, mapping)
-            else
-              mapping.direction = View::ModelMapping::DIRECTION_TO_MODEL
-              validate_method(View::ModelMapping::DIRECTION_TO_MODEL, mapping)
-            end
-          end
-        elsif mapping.methods_only?
-          mapping.type = View::ModelMapping::TYPE_RAW
-          if mapping.both_methods_present?
-            mapping.direction = View::ModelMapping::DIRECTION_BOTH
-          elsif mapping.from_model_method_present?
-            mapping.direction = View::ModelMapping::DIRECTION_FROM_MODEL
-          else
-            mapping.direction = View::ModelMapping::DIRECTION_TO_MODEL
-          end
-        else
-          raise InvalidMappingError, "Invalid mapping in #{self.class}, invalid map() or raw_mapping() arguments"
-        end
-        mapping
+
+    
+    def update(mappings, target)
+      return if target.nil?
+      
+      mappings.each do |mapping|
+
       end
     end
     
-    def validate_method(direction, mapping)
-      if :both == direction
-        directions = [View::ModelMapping::DIRECTION_FROM_MODEL, View::ModelMapping::DIRECTION_TO_MODEL]
-      else
-        directions = [direction]
-      end
-      directions.each do |direction|
-        next if :default == mapping.send("#{direction}_method")
-        raise InvalidMappingError, "Invalid '#{direction}' method: #{mapping.send("#{direction}_method")} declared in #{self.class}" unless self.respond_to?(mapping.send("#{direction}_method"))
+    def perform_mapping_update(mapping, model, transfer)
+      begin
+        if [View::Mapping::DIRECTION_TO_VIEW, View::Mapping::DIRECTION_BOTH].member? mapping.direction
+          case mapping.type
+          when View::Mapping::TYPE_PROPERTIES
+            if mapping.model_mapping?
+              map_model_properties_to_view(mapping, model)
+            else
+              map_transfer_properties_to_view(mapping, transfer)
+            end
+          when View::Mapping::TYPE_METHOD
+            if :default == mapping.to_view_method
+              map_model_properties_to_view(mapping, model)
+            else
+              instance_eval("self.#{mapping.view_property.to_s} = method(mapping.from_model_method).call(model)")
+            end
+          when View::Mapping::TYPE_RAW
+            method(mapping.to_view_method).call(model)
+          end
+        end
+      rescue NoMethodError => e
+        raise InvalidMappingError, "Invalid mapping #{mapping.inspect} in class #{self.class}, #{e.message}"
       end
     end
     
     def map_model_properties_to_view(mapping, model)
+      
+    end
+    
+    def map_transfer_properties_to_view(mapping, transfer)
       begin
-        instance_eval("self.#{mapping.view_property.to_s} = model.#{mapping.model_property.to_s}")
+        instance_eval("self.#{mapping.view_property.to_s} = #{transfer[mapping.transfer_property]}") if transfer.key?(mapping.transfer_property)
       rescue NoMethodError
-        raise InvalidMappingError, "Either model.#{mapping.model_property.to_s} or self.#{mapping.view_property.to_s} in #{self.class} is not valid."
+        raise InvalidMappingError, "model.#{mapping.model_property.to_s} is not valid"
       rescue TypeError => e
-        raise InvalidMappingError, "Invalid types when assigning from model.#{mapping.model_property.to_s} to self.#{mapping.view_property.to_s}, #{e.message} in #{self.class}"
+        raise InvalidMappingError, "Invalid types when assigning from transfer[#{mapping.transfer_property}] to self.#{mapping.view_property.to_s}, #{e.message} in #{self.class}"
       end
     end
     
@@ -575,7 +454,17 @@ module Monkeybars
         raise InvalidMappingError, "Invalid types when assigning from self.#{mapping.view_property.to_s}, #{e.message} in #{self.class} to model.#{mapping.model_property.to_s}"
       end
     end
+    
+    def map_view_properties_to_transfer(mapping, transfer)
+      # TODO: IMPLEMENT THIS!
+      
+      
+      
+      
+    end
+    
   end
+  
 end
 
 Component = java.awt.Component
@@ -609,4 +498,3 @@ class Component
 end
 
 class UndefinedControlError < Exception; end
-class InvalidMappingError < Exception; end

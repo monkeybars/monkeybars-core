@@ -1,4 +1,5 @@
 $:.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
+$CLASSPATH << File.expand_path(File.dirname(__FILE__) + "/../../lib/foxtrot.jar")
 
 require 'java'
 require 'monkeybars/view'
@@ -6,6 +7,8 @@ require 'monkeybars/controller'
 require 'spec/unit/test_files.jar'
 include_class 'java.awt.event.ActionEvent'
 include_class 'java.awt.event.MouseEvent'
+include_class "foxtrot.Worker"
+include_class "foxtrot.Job"
 
 
 class TestView < Monkeybars::View
@@ -75,11 +78,16 @@ describe "controller instantiation" do
     t.instance_variable_get("@__event_callback_mappings").values.should include("test_label") # from global key mapping
     t.close
   end
-  
-  it "should allow the creation of multiple instances when 'allow :multiple' is declared"
 end
 
 describe "handle_event method" do
+  #mock out the post call since we're not actually running in Swing's event dispatch thread
+  class Worker
+    def self.post(runner)
+      runner.run
+    end
+  end
+  
   before(:each) do
     Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
     
@@ -121,6 +129,7 @@ describe "handle_event method" do
     t.close
   end
   
+  it "spawns a Foxtrot worker so the GUI is not blocked"
 end
 
 describe "Controller's add_handler_for method" do

@@ -9,6 +9,7 @@ lib/monkeybars/key.rb
 lib/monkeybars/controller.rb
 lib/monkeybars/inflector.rb
 lib/monkeybars/view.rb
+lib/foxtrot.jar
 spec/unit/component_mixin_spec.rb
 spec/unit/controller_spec.rb
 spec/unit/model_mapping_spec.rb

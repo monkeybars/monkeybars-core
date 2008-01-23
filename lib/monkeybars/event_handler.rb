@@ -37,7 +37,9 @@ module Monkeybars
   # handle_event method.
   module BaseHandler
     def method_missing(method, *args, &block)
-      @controller.handle_event(method.underscore, args[0])
+      puts "method: #{method}, args: #{args}"
+      puts "method_missing - SwingUtilities.isEventDispatchThread: #{SwingUtilities.isEventDispatchThread}"
+      #@controller.handle_event(method.underscore, args[0])
     end
   end
 
@@ -72,7 +74,6 @@ end
     unless ["MouseInput", "HierarchyBounds", "TreeSelection"].member? type
       interface = eval "#{java_package}.#{type}Listener"
       interface.java_class.java_instance_methods.each do |method|
-        puts "duplicate method name: #{method.name.underscore} for type #{type}, has an existing type of #{Monkeybars::Handlers::EVENT_NAMES[method.name.underscore]}" if Monkeybars::Handlers::EVENT_NAMES[method.name.underscore]
         Monkeybars::Handlers::EVENT_NAMES[method.name.underscore] = type
       end
     end
