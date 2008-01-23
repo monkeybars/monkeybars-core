@@ -4,3 +4,4 @@ syntax: glob
 *.gem
 nbproject
 pkg
+.LCK*
