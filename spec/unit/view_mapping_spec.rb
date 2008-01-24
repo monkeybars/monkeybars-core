@@ -139,9 +139,84 @@ describe "Monkeybars::Mapping's transfer of data to the view" do
     Monkeybars::Mapping.new(:using => :raw_in).to_view view, :model, :transfer
   end
   
-  
-  
   it "triggers disabling of declared listeners"
+  it "maps :default methods as property mappings"
 end
 
+describe "Monkeybars::Mapping's transfer of data from the view" do
+  it "transfers mapped model properties from the related view properties" do
+    class MockData; attr_accessor :foo, :bar ;end
+    view = MockData.new
+    model = MockData.new
+    TEST_DATA = "bazz"    
+    view.foo = TEST_DATA
+    
+    mapping = Monkeybars::Mapping.new(:view => "foo", :model => "bar")
+    mapping.from_view(view, model, nil)
+    model.bar.should == TEST_DATA
+  end
+  
+  it "transfers mapped transfer hash properties from the related view properties" do
+    class MockData; attr_accessor :view_property ;end
+    TEST_DATA = "bazz"
+    view = MockData.new
+    view.view_property = TEST_DATA
+  
+    transfer = {}
+    mapping = Monkeybars::Mapping.new(:view => "view_property", :transfer => :bar)
+    mapping.from_view view, nil, transfer
+    transfer[:bar].should == TEST_DATA
+    
+    transfer = {}
+    mapping = Monkeybars::Mapping.new(:view => "view_property", :transfer => "foo")
+    mapping.from_view view, nil, transfer
+    transfer["foo"].should == TEST_DATA
+  end
+  
+  it "transfers mapped model properties from the related view properties via a declared method" do
+    class MockData
+      attr_accessor :bar
+      def out_method(model)
+	@bar + 1
+      end
+    end
+    model = Struct.new(:foo).new
+    view = MockData.new
+    view.bar = 5
+    
+    
+    Monkeybars::Mapping.new(:view => "bar", :model => "foo", :using => [nil, :out_method]).from_view(view, model, nil)
+    model.foo.should == 6
+  end
+  
+  it "transfers mapped transfer hash properties from the related view properties via a declared method" do
+    class MockData
+      attr_accessor :bar
+      def out_method(model)
+	@bar + 1
+      end
+    end
+    view = MockData.new
+    
+    transfer = {}
+    view.bar = 5
+    Monkeybars::Mapping.new(:view => "bar", :transfer => "foo", :using => [nil, :out_method]).from_view(view, nil, transfer)
+    transfer["foo"].should == 6
+    
+    transfer = {}
+    view.bar = 5
+    Monkeybars::Mapping.new(:view => "bar", :transfer => :foo, :using => [nil, :out_method]).from_view(view, nil, transfer)
+    transfer[:foo].should == 6
+  end
+  
+  it "invokes method declared by raw mapping" do
+    class MockData; end
+    view = MockData.new
+    view.should_receive(:raw_out)
 
+    Monkeybars::Mapping.new(:using => [nil, :raw_out]).from_view view, :model, :transfer
+  end
+  
+  it "triggers disabling of declared listeners"
+  it "maps :default methods as property mappings"
+end

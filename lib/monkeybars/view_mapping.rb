@@ -82,7 +82,7 @@ module Monkeybars
       disable_declared_handlers do
         if model_mapping?
           model_from_view(view, model)
-        else
+        elsif transfer_mapping?
           transfer_from_view(view, transfer)
         end
       end
@@ -138,6 +138,26 @@ module Monkeybars
       end
     end
     
+    def model_from_view(view, model)
+      begin
+        instance_eval("model.#{@model_property} = view.#{@view_property}")
+      rescue NoMethodError
+        raise InvalidMappingError, "Either model.#{@model_property} or self.#{@view_property} in #{view.class} is not valid."
+      rescue TypeError => e
+        raise InvalidMappingError, "Invalid types when assigning from model.#{@model_property} to self.#{@view_property}, #{e.message} in #{view.class}"
+      end
+    end
+    
+    def transfer_from_view(view, transfer)
+      begin
+        instance_eval("transfer[#{@transfer_property.inspect}] = view.#{@view_property}")
+      rescue NoMethodError
+        raise InvalidMappingError, "Either transfer[#{@transfer_property}] or self.#{@view_property} in #{view.class} is not valid."
+      rescue TypeError => e
+        raise InvalidMappingError, "Invalid types when assigning from transfer[#{@transfer_property}] to self.#{@view_property}, #{e.message} in #{view.class}"
+      end
+    end
+    
     private
     def self.new(*args)
       raise "#{self} is not a concrete class"
@@ -149,6 +169,10 @@ module Monkeybars
       disable_declared_handlers do
         view.method(@to_view_method).call(model, transfer)
       end
+    end
+    
+    def from_view(view, model, transfer)
+      view.method(@from_view_method).call(model, transfer)
     end
   end
   
@@ -172,6 +196,22 @@ module Monkeybars
         super
       else
         instance_eval("view.#{@view_property} = view.method(@to_view_method).call(transfer)")
+      end
+    end
+    
+    def model_from_view(view, model)
+      if :default == @from_view_method
+        super
+      else
+        instance_eval("model.#{@model_property} = view.method(@from_view_method).call(model)")
+      end
+    end
+    
+    def transfer_from_view(view, transfer)
+      if :default == @from_view_method
+        super
+      else
+        instance_eval("transfer[#{@transfer_property.inspect}] = view.method(@from_view_method).call(transfer)")
       end
     end
   end

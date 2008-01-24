@@ -170,19 +170,18 @@ module Monkeybars
     # write_state_to_model was called.  Thus any assignment to view properties
     # must be done within the method (hence the 'raw').
     def self.map(properties)
-      properties.validate_only(:model, :view, :using, :ignoring)
       mapping = Mapping.new(properties)
       view_mappings << mapping
     end
     
     # See View.map
-    def self.raw_mapping(from_model_method, to_model_method)
-      view_mappings << Mapping.new(:using => [from_model_method, to_model_method])
+    def self.raw_mapping(to_view_method, from_view_method, handlers_to_ignore = [])
+      view_mappings << Mapping.new(:using => [to_view_method, from_view_method], :ignoring => handlers_to_ignore)
     end
     
     def initialize
       @__field_references = {}
-      @__valid_mappings = {}
+
       @@is_a_java_class = !self.class.instance_java_class.nil? && self.class.instance_java_class.ancestors.member?(java.lang.Object)
       if @@is_a_java_class
         @main_view_component = self.class.instance_java_class.new
@@ -193,8 +192,6 @@ module Monkeybars
 #        end
       end
       
-      validate_mappings
-
       load
     end
 
@@ -294,41 +291,16 @@ module Monkeybars
       end
     end
     
-    
-    def update_model_only(model)
-      
-    end
-    
-    def update_transfer_only(transfer)
-      
-    end
-    
-    # This method is called when the view is initialized.  It uses the mappings
-    # rules declared in the view to copy data from the supplied model and transfer
-    # object into the view.
-    def update_both_model_and_transfer(model, transfer)
-      
+    def update(model, transfer)
+      view_mappings.each {|mapping| mapping.to_view(self, model, transfer)}
+      transfer.clear
     end
     
     # The inverse of update_from_model.  Called when view_state is called in
     # the controller.
-    def write_state_to_model(model)
-      @__valid_mappings.each do |mapping|
-        if [View::Mapping::DIRECTION_FROM_VIEW, View::Mapping::DIRECTION_BOTH].member? mapping.direction
-          case mapping.type
-          when View::Mapping::TYPE_PROPERTIES
-            map_view_properties_to_model(mapping, model)
-          when View::Mapping::TYPE_METHOD
-            if :default == mapping.from_view_method
-              map_view_properties_to_model(mapping, model)
-            else
-              instance_eval("model.#{mapping.model_property.to_s} = method(mapping.to_model_method).call(model)")
-            end
-          when View::Mapping::TYPE_RAW
-            method(mapping.from_view_method).call(model)
-          end
-        end
-      end
+    def write_state(model, transfer)
+      transfer.clear
+      view_mappings.each {|mapping| mapping.from_view(self, model, transfer)}
     end
     
     # Stub to be overriden in sub-class.  This is where you put the code you would
@@ -394,73 +366,6 @@ module Monkeybars
         get_all_components(list, component.components) if component.respond_to? :components
       end
       list
-    end
-    
-
-    
-    def update(mappings, target)
-      return if target.nil?
-      
-      mappings.each do |mapping|
-
-      end
-    end
-    
-    def perform_mapping_update(mapping, model, transfer)
-      begin
-        if [View::Mapping::DIRECTION_TO_VIEW, View::Mapping::DIRECTION_BOTH].member? mapping.direction
-          case mapping.type
-          when View::Mapping::TYPE_PROPERTIES
-            if mapping.model_mapping?
-              map_model_properties_to_view(mapping, model)
-            else
-              map_transfer_properties_to_view(mapping, transfer)
-            end
-          when View::Mapping::TYPE_METHOD
-            if :default == mapping.to_view_method
-              map_model_properties_to_view(mapping, model)
-            else
-              instance_eval("self.#{mapping.view_property.to_s} = method(mapping.from_model_method).call(model)")
-            end
-          when View::Mapping::TYPE_RAW
-            method(mapping.to_view_method).call(model)
-          end
-        end
-      rescue NoMethodError => e
-        raise InvalidMappingError, "Invalid mapping #{mapping.inspect} in class #{self.class}, #{e.message}"
-      end
-    end
-    
-    def map_model_properties_to_view(mapping, model)
-      
-    end
-    
-    def map_transfer_properties_to_view(mapping, transfer)
-      begin
-        instance_eval("self.#{mapping.view_property.to_s} = #{transfer[mapping.transfer_property]}") if transfer.key?(mapping.transfer_property)
-      rescue NoMethodError
-        raise InvalidMappingError, "model.#{mapping.model_property.to_s} is not valid"
-      rescue TypeError => e
-        raise InvalidMappingError, "Invalid types when assigning from transfer[#{mapping.transfer_property}] to self.#{mapping.view_property.to_s}, #{e.message} in #{self.class}"
-      end
-    end
-    
-    def map_view_properties_to_model(mapping, model)
-      begin
-        instance_eval("model.#{mapping.model_property.to_s} = self.#{mapping.view_property.to_s}")
-      rescue NoMethodError
-        raise InvalidMappingError, "Either model.#{mapping.model_property.to_s} or self.#{mapping.view_property.to_s} in #{self.class} is not valid."
-      rescue TypeError => e
-        raise InvalidMappingError, "Invalid types when assigning from self.#{mapping.view_property.to_s}, #{e.message} in #{self.class} to model.#{mapping.model_property.to_s}"
-      end
-    end
-    
-    def map_view_properties_to_transfer(mapping, transfer)
-      # TODO: IMPLEMENT THIS!
-      
-      
-      
-      
     end
     
   end

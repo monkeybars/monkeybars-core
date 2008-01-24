@@ -205,6 +205,8 @@ module Monkeybars
     def self.method_added(method_name)
       #TODO: When a method is added, check its name to see if a new listener should
       # be registered
+      
+      super
     end
     
     # Returns a frozen hash of ControllerName => [instances] pairs. This is
@@ -320,14 +322,6 @@ module Monkeybars
     # of model and messages
     def update_view
       @__view.update(model, transfer)
-    end
-    
-    def update_view_model_only
-      raise "Not implemented!"
-    end
-    
-    def update_view_transfer_only
-      raise "Not implemented!"
     end
     
     # Returns true if the view is visible, false otherwise
@@ -467,13 +461,13 @@ module Monkeybars
     def view_state
       unless self.class.model_class.nil?
         model = create_new_model 
-        @__view.write_state_to_model(model)
-        model
+        @__view.write_state(model, transfer)
+        return model, transfer
       else
         nil
       end
     end
-    
+
     def create_new_view
       self.class.view_class.new
     end
