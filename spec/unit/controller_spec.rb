@@ -179,9 +179,9 @@ describe "Controller's view_state method" do
     
     t = TestController.instance
     
-    t.send(:view_state).text.should == "A text field"
+    t.send(:view_state).first.text.should == "A text field"
     t.instance_variable_get("@__view").testTextField.text = "test data"
-    t.send(:view_state).text.should == "test data"
+    t.send(:view_state).first.text.should == "test data"
     t.close
   end
 end

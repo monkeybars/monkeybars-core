@@ -81,9 +81,10 @@ module Monkeybars
       @@instance_lock.synchronize do
         controller = @@instance_list[self]
         unless controller.empty?
-          controller.size == 1 ? controller.last : controller
+          1 == controller.size ? controller.last : controller
         else
-          __new__
+          controller << __new__
+          controller.last
         end
       end
     end

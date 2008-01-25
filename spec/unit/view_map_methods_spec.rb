@@ -3,7 +3,7 @@ $:.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
 require 'java'
 require 'monkeybars/view'
 
-describe "update_from_model method" do
+describe "update method" do
   before(:each) do
     Object.send(:remove_const, :TestView) if Object.const_defined? :TestView
     Object.send(:remove_const, :Model) if Object.const_defined? :Model
@@ -23,11 +23,11 @@ describe "update_from_model method" do
     model = Model.new
     
     model.model_field = 10
-    view.update_from_model(model)
+    view.update(model, {})
     view.view_field.should == 10
     
     model.model_field = "test string"
-    view.update_from_model(model)
+    view.update(model, {})
     view.view_field.should == "test string"
   end
   
@@ -45,11 +45,11 @@ describe "update_from_model method" do
     model = Model.new
     
     model.model_field = 10
-    view.update_from_model(model)
+    view.update(model, {})
     view.view_field.should == 10
     
     model.model_field = "string assigned to single level property"
-    view.update_from_model(model)
+    view.update(model, {})
     view.view_field.should == "string assigned to single level property"
   end
   
@@ -79,11 +79,11 @@ describe "update_from_model method" do
     model = Model.new
     
     model.model_field.sub_field = 42
-    view.update_from_model(model)
+    view.update(model, {})
     view.view_field.sub_field.should == 42
     
     model.model_field.sub_field = "string assigned to a nested property"
-    view.update_from_model(model)
+    view.update(model, {})
     view.view_field.sub_field.should == "string assigned to a nested property"
   end
   
@@ -105,7 +105,7 @@ describe "update_from_model method" do
     model = Model.new
     
     model.model_field = "value to be assigned to view_field"
-    view.update_from_model(model)
+    view.update(model, {})
     view.view_field.should == "value to be assigned to view_field plus text from the method"
   end
   
@@ -114,7 +114,7 @@ describe "update_from_model method" do
       raw_mapping :to_view_method, nil
       attr_accessor :view_field
       
-      def from_model_method(model)
+      def to_view_method(model, transfer)
         self.view_field = model.model_field * 10
       end
     end
@@ -127,11 +127,11 @@ describe "update_from_model method" do
     model = Model.new
     
     model.model_field = 4
-    view.update_from_model(model)
+    view.update(model, {})
     view.view_field.should == 40
     
     model.model_field = "a"
-    view.update_from_model(model)
+    view.update(model, {})
     view.view_field.should == "aaaaaaaaaa"
   end
   
@@ -150,7 +150,7 @@ describe "update_from_model method" do
     m.model_property = "test string"
     
     t = TestView.new
-    t.update_from_model(m)
+    t.update(m, {})
     t.property.should == "test string"
   end
   
@@ -167,14 +167,14 @@ describe "update_from_model method" do
     m = Model.new
     m.model_property = "model property string"
     v = TestView.new
-    v.update_from_model(m)
+    v.update(m, {})
     v.view_property.should == "model property string"
   end
   
   it "ignores handlers when .ignoring is used"
 end
 
-describe "write_state_to_model method" do
+describe "write_state method" do
   before(:each) do
     Object.send(:remove_const, :TestView) if Object.const_defined? :TestView
   end
@@ -193,11 +193,11 @@ describe "write_state_to_model method" do
     model = Model.new
     
     view.view_field = 7
-    view.write_state_to_model(model)
+    view.write_state(model, {})
     model.model_field.should == 7
     
     view.view_field = "string assigned to view property"
-    view.write_state_to_model(model)
+    view.write_state(model, {})
     model.model_field.should == "string assigned to view property"
   end
   
@@ -215,11 +215,11 @@ describe "write_state_to_model method" do
     model = Model.new
     
     view.view_field = 7
-    view.write_state_to_model(model)
+    view.write_state(model, {})
     model.model_field.should == 7
     
     view.view_field = "string assigned to view property"
-    view.write_state_to_model(model)
+    view.write_state(model, {})
     model.model_field.should == "string assigned to view property"
   end
   
@@ -248,11 +248,11 @@ describe "write_state_to_model method" do
     model = Model.new
     
     view.view_field.sub_field = 42
-    view.write_state_to_model(model)
+    view.write_state(model, {})
     model.model_field.sub_field .should == 42
     
     view.view_field.sub_field = "string assigned to a nested property"
-    view.write_state_to_model(model)
+    view.write_state(model, {})
     model.model_field.sub_field.should == "string assigned to a nested property"
   end
   
@@ -274,11 +274,11 @@ describe "write_state_to_model method" do
     model = Model.new
     
     view.view_field = 7
-    view.write_state_to_model(model)
+    view.write_state(model, {})
     model.model_field.should == 70
     
     view.view_field = "ha"
-    view.write_state_to_model(model)
+    view.write_state(model, {})
     model.model_field.should == "hahahahahahahahahaha"
   end
   
@@ -287,7 +287,7 @@ describe "write_state_to_model method" do
       raw_mapping nil, :method1
       attr_accessor :view_field
       
-      def method1(model)
+      def method1(model, transfer)
         model.model_field = "here you go: #{view_field}"
       end
     end
@@ -300,11 +300,11 @@ describe "write_state_to_model method" do
     model = Model.new
     
     view.view_field = 99
-    view.write_state_to_model(model)
+    view.write_state(model, {})
     model.model_field.should == "here you go: 99"
     
     view.view_field = "text!"
-    view.write_state_to_model(model)
+    view.write_state(model, {})
     model.model_field.should == "here you go: text!"
   end
   
@@ -322,7 +322,7 @@ describe "write_state_to_model method" do
     view.view_property = "some amazingly awesome view data"
     model = Model.new
     
-    view.write_state_to_model(model)
+    view.write_state(model, {})
     model.model_property.should == "some amazingly awesome view data"
   end
   
