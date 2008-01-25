@@ -1,4 +1,7 @@
 $:.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
+require 'java'
+require 'monkeybars/view'
+require 'spec/unit/test_files.jar'
 
 require 'monkeybars/view_mapping'
 
@@ -139,7 +142,22 @@ describe "Monkeybars::Mapping's transfer of data to the view" do
     Monkeybars::Mapping.new(:using => :raw_in).to_view view, :model, :transfer
   end
   
-  it "triggers disabling of declared listeners"
+  it "triggers disabling of declared listeners" do
+    class TestView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'  
+    end
+    
+    TEST_DATA = "foo"
+    model = Struct.new(:bar).new(:bar => TEST_DATA)
+    view = TestView.new
+    
+    view.should_receive(:get_field_value).with('test_label').and_return(view)
+    view.should_receive(:disable_handlers).twice
+    
+    Monkeybars::Mapping.new(:view => 'test_label.text', :model => 'bar', :ignoring => ['anything', 'everything']).to_view view, model, {}
+    
+  end
+  
   it "maps :default methods as property mappings"
 end
 
@@ -217,6 +235,5 @@ describe "Monkeybars::Mapping's transfer of data from the view" do
     Monkeybars::Mapping.new(:using => [nil, :raw_out]).from_view view, :model, :transfer
   end
   
-  it "triggers disabling of declared listeners"
   it "maps :default methods as property mappings"
 end

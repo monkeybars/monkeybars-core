@@ -161,7 +161,7 @@ describe "Controller's view_state method" do
     Object.send(:remove_const, :TestModel) if Object.const_defined? :TestModel
   end
   
-  it "returns the view's state as a model" do  
+  it "returns the view's state as a model and a transfer hash" do  
     class TestModel
       attr_accessor :text
       def initialize; @text= ""; end
@@ -179,9 +179,11 @@ describe "Controller's view_state method" do
     
     t = TestController.instance
     
-    t.send(:view_state).first.text.should == "A text field"
+    view_state, transfer = t.send(:view_state)
+    view_state.text.should == "A text field"
     t.instance_variable_get("@__view").testTextField.text = "test data"
-    t.send(:view_state).first.text.should == "test data"
+    t.send(:view_state)[0].text.should == "test data"
+    raise "Fix this spec to check the transfer's data"
     t.close
   end
 end

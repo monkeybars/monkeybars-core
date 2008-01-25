@@ -69,7 +69,7 @@ module Monkeybars
     end
     
     def to_view(view, model, transfer)
-      disable_declared_handlers do
+      disable_declared_handlers(view) do
         if model_mapping?
           model_to_view(view, model)
         else
@@ -79,7 +79,7 @@ module Monkeybars
     end
     
     def from_view(view, model, transfer)
-      disable_declared_handlers do
+      disable_declared_handlers(view) do
         if model_mapping?
           model_from_view(view, model)
         elsif transfer_mapping?
@@ -108,11 +108,14 @@ module Monkeybars
       end
     end
     
-    def disable_declared_handlers(&block)
+    def disable_declared_handlers(view, &block)
       if @event_types_to_ignore.empty?
         yield
       else
-        view.get_field_value(/^(\w+)\.?/.match(view_property)[1]).disable_handlers(@event_types_to_ignore[0], &block)
+        field = view.get_field_value(/^(\w+)\.?/.match(@view_property)[1])
+        @event_types_to_ignore.each do |event_type|
+          field.disable_handlers(event_type, &block)
+        end
       end
     end
   end
@@ -166,7 +169,7 @@ module Monkeybars
   
   class RawMapping < Mapping
     def to_view(view, model, transfer)
-      disable_declared_handlers do
+      disable_declared_handlers(view) do
         view.method(@to_view_method).call(model, transfer)
       end
     end
