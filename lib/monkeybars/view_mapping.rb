@@ -68,6 +68,14 @@ module Monkeybars
       set_direction(mapping_options)
     end
     
+    def maps_to_view?
+      (DIRECTION_BOTH == @direction) or (DIRECTION_TO_VIEW == @direction)
+    end
+    
+    def maps_from_view?
+      (DIRECTION_BOTH == @direction) or (DIRECTION_FROM_VIEW == @direction)
+    end
+    
     def to_view(view, model, transfer)
       disable_declared_handlers(view) do
         if model_mapping?
@@ -175,7 +183,7 @@ module Monkeybars
     end
     
     def from_view(view, model, transfer)
-      view.method(@from_view_method).call(model, transfer)
+      view.method(@from_view_method).call(model, transfer) unless @from_view_method.nil?
     end
   end
   

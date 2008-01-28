@@ -292,7 +292,7 @@ module Monkeybars
     end
     
     def update(model, transfer)
-      self.class.view_mappings.each {|mapping| mapping.to_view(self, model, transfer)}
+      self.class.view_mappings.select{|mapping| mapping.maps_to_view?}.each {|mapping| mapping.to_view(self, model, transfer)}
       transfer.clear
     end
     
@@ -300,7 +300,7 @@ module Monkeybars
     # the controller.
     def write_state(model, transfer)
       transfer.clear
-      self.class.view_mappings.each {|mapping| mapping.from_view(self, model, transfer)}
+      self.class.view_mappings.select{|mapping| mapping.maps_from_view?}.each {|mapping| mapping.from_view(self, model, transfer)}
     end
     
     # Stub to be overriden in sub-class.  This is where you put the code you would

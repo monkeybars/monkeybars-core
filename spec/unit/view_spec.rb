@@ -61,3 +61,26 @@ describe "view's validate_mapping method" do
   it "identifies mappings as in-only, out-only, or bi-directional"
   it "detects mis-named methods declared in a mapping"
 end
+
+describe "view's write_state method" do
+  it "only invokes mappings with direction to view or both" do
+    class TestView < Monkeybars::View; end
+    view = TestView.new
+
+    mock_mappings = Array.new(5) { |i| mock("Mapping#{i}", :from_view => nil)}
+    mock_mappings[0].should_receive(:maps_from_view?).and_return(true)
+    mock_mappings[0].should_receive(:from_view).once
+    mock_mappings[1].should_receive(:maps_from_view?).and_return(true)
+    mock_mappings[1].should_receive(:from_view).once
+    mock_mappings[2].should_receive(:maps_from_view?).and_return(false)
+    mock_mappings[2].should_not_receive(:from_view)
+    mock_mappings[3].should_receive(:maps_from_view?).and_return(false)
+    mock_mappings[3].should_not_receive(:from_view)
+    mock_mappings[4].should_receive(:maps_from_view?).and_return(false)
+    mock_mappings[4].should_not_receive(:from_view)
+    
+    TestView.should_receive(:view_mappings).and_return(mock_mappings)
+    
+    view.write_state(nil, {})
+  end
+end

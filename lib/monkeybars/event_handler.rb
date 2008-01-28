@@ -1,5 +1,7 @@
 require 'monkeybars/inflector'
 
+include_class 'javax.swing.SwingUtilities'
+
 module Monkeybars
     # This class is primarily used internally for setting up a handler for window 
   # close events although any of the WindowAdapter methods can be set.  To instantiate
@@ -37,9 +39,9 @@ module Monkeybars
   # handle_event method.
   module BaseHandler
     def method_missing(method, *args, &block)
-      puts "method: #{method}, args: #{args}"
-      puts "method_missing - SwingUtilities.isEventDispatchThread: #{SwingUtilities.isEventDispatchThread}"
-      #@controller.handle_event(method.underscore, args[0])
+      #puts "method: #{method}, args: #{args}"
+      #puts "method_missing - SwingUtilities.isEventDispatchThread: #{SwingUtilities.isEventDispatchThread}"
+      @controller.handle_event(method.underscore, args[0])
     end
   end
 
