@@ -334,7 +334,7 @@ module Monkeybars
       
       if field.nil?
         if @@is_a_java_class
-          [field_name.to_s, field_name.camelize, field_name.camelize(false)].uniq.each do |name|
+          [field_name.to_s, field_name.camelize, field_name.camelize(false), field_name.underscore].uniq.each do |name|
             begin
               field = self.class.instance_java_class.java_class.declared_field(name)
             rescue NameError, NoMethodError
