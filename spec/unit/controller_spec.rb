@@ -51,7 +51,7 @@ describe Monkeybars::Controller do
   end
 end
 
-describe "controller instantiation" do
+describe "Controller instantiation" do
   before(:each) do
     Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
   end
@@ -80,7 +80,7 @@ describe "controller instantiation" do
   end
 end
 
-describe "handle_event method" do
+describe Monkeybars::Controller, "#handle_event" do
   #mock out the post call since we're not actually running in Swing's event dispatch thread
   class Worker
     def self.post(runner)
@@ -132,7 +132,7 @@ describe "handle_event method" do
   it "spawns a Foxtrot worker so the GUI is not blocked"
 end
 
-describe "Controller's add_handler_for method" do
+describe Monkeybars::Controller, "#add_handler_for" do
   before(:each) do
     Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
   end
@@ -154,7 +154,7 @@ describe "Controller's add_handler_for method" do
   end
 end
 
-describe "Controller's view_state method" do
+describe Monkeybars::Controller, "#view_state" do
   before(:each) do
     Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
     Object.send(:remove_const, :TestView) if Object.const_defined? :TestView
@@ -188,7 +188,7 @@ describe "Controller's view_state method" do
   end
 end
 
-describe "Controller's update_model method" do
+describe Monkeybars::Controller, "#update_model" do
   before(:each) do
     Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
     Object.send(:remove_const, :TestView) if Object.const_defined? :TestView
@@ -216,7 +216,7 @@ describe "Controller's update_model method" do
   end
 end
 
-describe "implicit handler registration" do
+describe Monkeybars::Controller, "implicit handler registration" do
   before(:each) do
     Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
     Object.send(:remove_const, :TestView) if Object.const_defined? :TestView
@@ -241,4 +241,26 @@ describe "implicit handler registration" do
   end
   
   it "detects when a new method is added and registers a new listener if appropriate"
+end
+
+describe Monkeybars::Controller, "#signal" do
+  before(:each) do
+    Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
+    Object.send(:remove_const, :TestView) if Object.const_defined? :TestView
+  end
+  
+  it "invokes the view's process_signal method, passing along a block if given" do
+    class TestController < Monkeybars::Controller; end
+    class TestView
+      def process_signal(signal_name, &callback)
+	raise "No block given!" unless block_given?
+        raise "Incorrect signal name!" unless :signal1 == signal_name
+      end
+    end
+    
+    controller = TestController.instance
+    controller.instance_variable_set("@__view", TestView.new)
+    
+    lambda {controller.signal(:signal1) {"dummy block"}}.should_not raise_error(Exception)
+  end
 end

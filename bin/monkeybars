@@ -27,7 +27,7 @@ else
   else
     # create new directory and copy app skeleton over
     project_name = ARGV[0]
-    puts Dir::pwd
+    
     unless File.directory? project_name
       FileUtils.mkdir_p(project_name)
     end

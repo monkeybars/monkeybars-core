@@ -5,7 +5,11 @@ require "monkeybars/inflector"
 require 'monkeybars/validated_hash'
 require 'monkeybars/view_mapping'
 
+
 module Monkeybars
+  class UndefinedControlError < Exception; end
+  class InvalidSignalHandlerError < Exception; end
+
   # The view is the gatekeeper to the actual Java (or sometimes non-Java) view class.
   # The view defines how data moves into and out of the view via the model.  
   #
@@ -61,12 +65,12 @@ module Monkeybars
     end
     
     private
-    @@view_mappings_for_child_view = {}   
+    @@view_mappings_for_child_view ||= {}   
     def self.view_mappings
       @@view_mappings_for_child_view[self] ||= []
     end
     
-    @@java_class_for_child_view = {}
+    @@java_class_for_child_view ||= {}
     def self.instance_java_class
       @@java_class_for_child_view[self]
     end
@@ -74,10 +78,13 @@ module Monkeybars
     def self.instance_java_class=(java_class)
       @@java_class_for_child_view[self] = java_class
     end
+    
+    @@signal_mappings ||= {}
+    def self.signal_mappings
+      @@signal_mappings[self] ||= {}
+    end
+    
     public
-    
-    
-    
     # Declares what class to instantiate when creating the view.  Any listeners
     # set on the controller are added to this class as well as the setting of the
     # close action that is defined in the controller.
@@ -177,6 +184,10 @@ module Monkeybars
     # See View.map
     def self.raw_mapping(to_view_method, from_view_method, handlers_to_ignore = [])
       view_mappings << Mapping.new(:using => [to_view_method, from_view_method], :ignoring => handlers_to_ignore)
+    end
+    
+    def self.define_signal(signal, method_name)
+      signal_mappings[signal] = method_name
     end
     
     def initialize
@@ -303,6 +314,15 @@ module Monkeybars
       self.class.view_mappings.select{|mapping| mapping.maps_from_view?}.each {|mapping| mapping.from_view(self, model, transfer)}
     end
     
+    def process_signal(signal, &block)
+      handler = self.class.signal_mappings[signal]
+      begin
+        self.send(handler, &block) unless handler.nil?
+      rescue NoMethodError
+        raise InvalidSignalHandlerError, "There is no handler method '#{handler}' on view #{self.class}"
+      end
+    end
+    
     # Stub to be overriden in sub-class.  This is where you put the code you would
     # normally put in initialize, it will be called whenever a new class is instantiated
     def load; end
@@ -401,5 +421,3 @@ class Component
     end
   end
 end
-
-class UndefinedControlError < Exception; end

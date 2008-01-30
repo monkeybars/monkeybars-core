@@ -325,6 +325,10 @@ module Monkeybars
       @__view.update(model, transfer)
     end
     
+    def signal(signal_name, &callback)
+      @__view.process_signal(signal_name, &callback)
+    end
+    
     # Returns true if the view is visible, false otherwise
     def visible?
       @__view.visible?
