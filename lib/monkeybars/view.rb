@@ -31,9 +31,10 @@ module Monkeybars
   #
   #   class MyView < Monkeybars::View
   #     set_java_class "com.project.MyCoolJFrame"
-  #     map("titleLabel.text").to(:title_text)
-  #     map("okButton.text").to(:button_text)
-  #     map("mainTextArea.text").to(:text).using(:convert_to_string, :convert_to_array)
+  #     map :view => "titleLabel.text", :model => :title_text
+  #     map :view => "okButton.text", :model => :button_text
+  #     map :view => "mainTextArea.text", :model => :text, :using => [:convert_to_string, :convert_to_array]
+  #     map :view => "titleLabel.selected_text_color", :transfer => :text_color
   #   
   #     def convert_to_string(model) 
   #       model.text.join("\n")
@@ -94,28 +95,33 @@ module Monkeybars
       self.instance_java_class = const_get(class_name)
     end
     
-    # Declares a mapping between the controller's model's properties and
-    # properties of the view.  This mapping is used when creating the model.
+    # Declares a mapping between the properties of the view and either the model's 
+    # or the transfer's properties.  This mapping is used when creating the model.
     # If you wish to trigger subsequent updates of the view, you may call 
-    # update_from_model manually from the controller.
+    # update_view manually from the controller.
     #
     # There are several ways to declare a mapping based on what level of control
     # you need over the process.  The simplest form is:
     #
     #   map :view => :foo, :model => :bar
+    #   
+    #   or
+    #   
+    #   map :view => :foo, :transfer => :bar
     #
-    # Which means, when update_from_model is called, self.foo = model.bar
+    # Which means, when update is called, self.foo = model.bar and 
+    # self.foo = transfer[:bar] respectively.
     #
-    # Strings may also be used interchangably with symbols.  If you have nested
-    # properties you may specify them as a string:
+    # Strings may be used interchangably with symbols for model mappings.  If you 
+    # have nested view or properties you may specify them as a string:
     #
     #   map :view => "foo.sub_property", :model => "bar.other_sub_property"
     #
     # which means, self.foo.sub_property = model.bar.other_sub_property
     #
     # It should be noted that these mappings are bi-directional.  They are 
-    # referenced for both update_from_model and write_state_to_model.  When used
-    # for write_state_to_model the assignment direction is reversed, so a view with
+    # referenced for both update and write_state.  When used
+    # for write_state the assignment direction is reversed, so a view with
     #
     #   map :view => :foo, :model => :bar
     #
@@ -133,20 +139,20 @@ module Monkeybars
     #
     #   map :view => :foo, :method => :bar, :using => [:from_model, :to_model]
     #
-    # would mean self.foo = from_model() when called by update_from_model and
-    # model.bar = to_model() when called by write_state_to_model.
+    # would mean self.foo = from_model() when called by update and
+    # model.bar = to_model() when called by write_state.
     # 
     #   map :view => :foo, :model => :bar, :using => [:from_model, :default]
     #   
-    # would mean self.foo = from_model() when called by update_from_model and
-    # model.bar = self.foo when called by write_state_to_model.
+    # would mean self.foo = from_model() when called by update and
+    # model.bar = self.foo when called by write_state.
     #
     #   map :view => :foo, :model => :bar, :using => [:from_model, nil]
     #   
-    # would mean self.foo = from_model() when called by update_from_model and
-    # would do nothing when called by write_state_to_model.
+    # would mean self.foo = from_model() when called by update and
+    # would do nothing when called by write_state.
     #
-    # If you want to invoke disable_handlers during the call to update_from_model
+    # If you want to invoke disable_handlers during the call to update
     # you can add the :ignoring key.  The key's value is either a single type or
     # an array of types to be ignored during the update process.
     # 
@@ -164,7 +170,7 @@ module Monkeybars
     #     foo.bar = model.model_property
     #   end
     #   
-    # during a call to update_from_model.  During write_to_model, the ignoring
+    # during a call to update.  During write_to_model, the ignoring
     # definition has no meaning as there are no event handlers on models.
     #
     # The final option for mapping properties is a simply your own method.  As with
@@ -173,8 +179,8 @@ module Monkeybars
     #
     #   raw_mapping :from_model, :to_model
     #
-    # would simply invoke the associated method when update_from_model or 
-    # write_state_to_model was called.  Thus any assignment to view properties
+    # would simply invoke the associated method when update or 
+    # write_state was called.  Thus any assignment to view properties
     # must be done within the method (hence the 'raw').
     def self.map(properties)
       mapping = Mapping.new(properties)
@@ -307,7 +313,7 @@ module Monkeybars
       transfer.clear
     end
     
-    # The inverse of update_from_model.  Called when view_state is called in
+    # The inverse of update.  Called when view_state is called in
     # the controller.
     def write_state(model, transfer)
       transfer.clear

@@ -13,7 +13,9 @@ module Monkeybars
   # the overall characteristics of a view such as which events it will generate and how
   # it should respond to things like the close button being pressed.
   # For a general introduction to the idea of MVC and the role of a controller, 
-  # please see: http://en.wikipedia.org/wiki/Model-view-controller
+  # please see: http://en.wikipedia.org/wiki/Model-view-controller.  Monkeybars is not, 
+  # strictly speaking, an MVC framework.  However the general idea of the seperations 
+  # of concerns that most people think of when you say 'MVC' is applicable.
   #
   # The controller defines the model and view classes it is associated with.  Most
   # controllers will declare a view and a model that will be instantiated along with
@@ -27,22 +29,17 @@ module Monkeybars
   # Handlers are named either <component_event> or just <event> if you want a global handler.  
   # No events are actually generated and sent to the controller unless a listener has been added 
   # for that component, however, component-specific handlers will automatically add a listener 
-  # for that component when the class is instantiated.  Therefore a method named ok_button_action_performed
-  # would be the equivalent of 
+  # for that component when the class is instantiated.  Therefore a method named 
+  # ok_button_action_performed would be the equivalent of 
   # 
   #   add_listener :type => :action, :components => ["ok_button"]
   #   
-  # Global handlers cannot be declared in this fashion, you must use add_listener global action listener to the view.
+  # Global handlers cannot be declared in this fashion, you must use add_listener explicitly.
   # 
   # Handler methods can optionally take one parameter which is the event generated
   # by Swing.  This would look like
   # 
   #   def some_component_event_name(swing_event)
-  # 
-  # WARNING: Two Swing handler interfaces have conflicting method names, thus it was
-  # not possible to support all handler types in this fashion.  As a result, MouseInput, 
-  # HierarchyBounds, and TreeSelection listeners must be added using the add_listener
-  # method.
   #
   # ==========
   #
@@ -70,8 +67,8 @@ module Monkeybars
   #
   class Controller
     METHOD_NOT_FOUND = :method_not_found
-    @@instance_list = Hash.new {|hash, key| hash[key] = []}
-    @@instance_lock = Mutex.new
+    @@instance_list ||= Hash.new {|hash, key| hash[key] = []}
+    @@instance_lock ||= Mutex.new
     
     # Controllers cannot be instantiated via a call to new, instead use instance
     # to retrieve the instance of the view.  Currently only one instance of a
@@ -148,7 +145,7 @@ module Monkeybars
     #
     # If you wish to override the default event handling behavior, override handle_event
     def self.add_listener(details)
-      self.send(:class_variable_get, :@@handlers).push(details)
+      handlers.push(details)
       hide_protected_class_methods #workaround for JRuby bug #1283
     end
   
@@ -199,10 +196,10 @@ module Monkeybars
       self.send(:class_variable_set, :@@close_action, action)
     end
     
-    def self.inherited(subclass) #:nodoc:
-      subclass.send(:class_variable_set, :@@handlers, Array.new)
-    end
-    
+#    def self.inherited(subclass) #:nodoc:
+#      subclass.class.handlers = Array.new
+#    end
+#    
     def self.method_added(method_name)
       #TODO: When a method is added, check its name to see if a new listener should
       # be registered
@@ -224,9 +221,14 @@ module Monkeybars
     end
     
     private 
-    @@event_handler_procs = {}
+    @@event_handler_procs ||= {}
     def self.event_handler_procs
       @@event_handler_procs[self] ||= {}
+    end
+    
+    @@handlers ||= {}
+    def self.handlers
+      @@handlers[self] ||= []
     end
     
     def self.hide_protected_class_methods #JRuby bug #1283
@@ -246,11 +248,9 @@ module Monkeybars
       @__model = create_new_model unless self.class.model_class.nil?
       @__event_callback_mappings = {}
       @__transfer = {}
-      
-      handlers = self.class.send(:class_variable_get, :@@handlers)
 
       unless @__view.nil?
-        handlers.each do |handler|            
+        self.class.handlers.each do |handler|            
           add_handler_for handler[:type], handler[:components]
         end
         
@@ -268,7 +268,7 @@ module Monkeybars
           end
         end
       else
-        unless handlers.empty?
+        unless self.class.handlers.empty?
           raise "A view must be declared in order to add event listeners"
         end
       end
@@ -320,11 +320,14 @@ module Monkeybars
     end
 
     # Triggers updating of the view based on the mapping and the current contents
-    # of model and messages
+    # of the model and the transfer
     def update_view
       @__view.update(model, transfer)
     end
     
+    # Sends a signal to the view.  The view will process the signal (if it is
+    # defined in the view) and optionally invoke the callback that is passed in 
+    # as a block.
     def signal(signal_name, &callback)
       @__view.process_signal(signal_name, &callback)
     end
@@ -409,7 +412,7 @@ module Monkeybars
     end
     
     private
-    @@model_class_for_child_controller = {}
+    @@model_class_for_child_controller ||= {}
     def self.model_class
       @@model_class_for_child_controller[self]
     end
@@ -450,7 +453,7 @@ module Monkeybars
       self.class.model_class.new
     end
     
-    @@view_class_for_child_controller = {}
+    @@view_class_for_child_controller ||= {}
     def self.view_class
       @@view_class_for_child_controller[self]
     end
