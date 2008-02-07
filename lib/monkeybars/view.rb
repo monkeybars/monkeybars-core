@@ -263,39 +263,25 @@ module Monkeybars
     #
     # add_handler returns a hash of objects as keys and their normalized (underscored
     # and . replaced with _) names as values
-    def add_handler(type, handler, components)
-      mappings = {}
-      components = ["global"] if components.nil?
-      components.each do |component|
-        component = component.to_s
-        if "global" == component
-          get_all_components.each do |component|
-            listener = "add#{type.camelize}Listener"
-            if (component.respond_to?(listener))
-              mappings[component] = component.name.underscore.gsub(".", "_") if component.name
-              component.send(listener, handler)
-            end
-          end
-        elsif "java_window" == component.to_s
-          mappings[@main_view_component] = "java_window"
-          @main_view_component.send("add#{type.camelize}Listener", handler)
-        else
-          if component.index(".")
-            parts = component.split(".")
-            object = get_field_value(parts.shift)
-            parts.each do |method|
-              object = object.send(method)
-            end
-            mappings[object] = component.underscore.gsub(".", "_")
-            object.send("add#{type.camelize}Listener", handler)
-          else
-            object = get_field_value(component)
-            mappings[object] = component.underscore
-            object.send("add#{type.camelize}Listener", handler)
-          end
-        end
+    def add_handler(handler, component)
+#      if "global" == component
+#        get_all_components.each do |component|
+#          listener = "add#{type.camelize}Listener"
+#          if (component.respond_to?(listener))
+#            mappings[component] = component.name.underscore.gsub(".", "_") if component.name
+#            component.send(listener, handler)
+#          end
+#        end
+#      elsif
+#     TODO: HANDLE global
+      if "global" == component.to_s
+        raise "Global handler declarations are not yet supported"
+      elsif "java_window" == component.to_s
+        @main_view_component.send("add#{handler.type.camelize}Listener", handler)
+      else
+        object = eval component
+        object.send("add#{handler.type.camelize}Listener", handler)
       end
-      mappings
     end
     
     # Attempts to find a member variable in the underlying @main_view_component

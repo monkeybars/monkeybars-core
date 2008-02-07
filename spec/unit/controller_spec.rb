@@ -1,7 +1,8 @@
+require 'java'
+
 $:.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
 $CLASSPATH << File.expand_path(File.dirname(__FILE__) + "/../../lib/foxtrot.jar")
 
-require 'java'
 require 'monkeybars/view'
 require 'monkeybars/controller'
 require 'spec/unit/test_files.jar'
@@ -56,27 +57,12 @@ describe "Controller instantiation" do
     Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
   end
   
-  it "should only create one instance by default" do
+  it "will not create more than once instance" do
     class TestController < Monkeybars::Controller; end
     
     t = TestController.instance
     t2 = TestController.instance
     t.should equal(t2)
-  end
-  
-  it "should cache the normalized names of objects that have listeners assigned to them" do
-    class TestController < Monkeybars::Controller
-      set_view "TestView"
-      add_listener :type => :action, :components => ["testButton"]
-      add_listener :type => :document, :components => ["testTextField.document"]
-      add_listener :type => :mouse
-    end
-    
-    t = TestController.instance
-    t.instance_variable_get("@__event_callback_mappings").values.should include("test_button")
-    t.instance_variable_get("@__event_callback_mappings").values.should include("test_text_field_document")
-    t.instance_variable_get("@__event_callback_mappings").values.should include("test_label") # from global key mapping
-    t.close
   end
 end
 
@@ -95,16 +81,10 @@ describe Monkeybars::Controller, "#handle_event" do
       set_view "TestView"
       add_listener :type => :action, :components => ["testButton"]
       add_listener :type => :document, :components => ["testTextField.document"]
-      add_listener :type => :key
       
       def test_button_action_performed(event)
         $test_button_action_performed = true
       end
-      
-      def mouse_clicked(event)
-        $mouse_clicked = true
-      end
-      
     end
   end
   
@@ -113,22 +93,13 @@ describe Monkeybars::Controller, "#handle_event" do
     t = TestController.instance
     target_component = t.instance_variable_get("@__view").get_field_value("testButton")
     event = ActionEvent.new(target_component, ActionEvent::ACTION_PERFORMED, "")
-    t.handle_event('action_performed', event)
+    t.handle_event("test_button", 'action_performed', event)
     $test_button_action_performed.should == true
     
     t.close
   end
   
-  it "should call a global event handler if no specific component handler is defined" do
-    $mouse_clicked = false
-    t = TestController.instance
-    target_component = t.instance_variable_get("@__view").get_field_value("testLabel")
-    event = MouseEvent.new(target_component, MouseEvent::MOUSE_PRESSED, 0, 0, 0, 0, 1, false)
-    t.handle_event("mouse_clicked", event)
-    $mouse_clicked.should == true
-    t.close
-  end
-  
+  it "should call a global event handler if no specific component handler is defined"
   it "spawns a Foxtrot worker so the GUI is not blocked"
 end
 
@@ -218,6 +189,7 @@ end
 
 describe Monkeybars::Controller, "implicit handler registration" do
   before(:each) do
+    TestController.send(:handlers).clear if Object.const_defined? :TestController
     Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
     Object.send(:remove_const, :TestView) if Object.const_defined? :TestView
   end
@@ -225,6 +197,13 @@ describe Monkeybars::Controller, "implicit handler registration" do
   it "detects event names in methods and adds an appropriate listener during instantiation" do
     class TestView < Monkeybars::View
       set_java_class "org.monkeybars.TestView"
+      
+      def add_handler(handler, component)
+        handler.type.should == "Action"
+	handler.instance_variable_get("@component_name").should == "test_button"
+        component.should == "test_button"
+        $add_handler_called = true
+      end
     end
     
     class TestController < Monkeybars::Controller
@@ -236,10 +215,12 @@ describe Monkeybars::Controller, "implicit handler registration" do
     end
     
     t = TestController.instance
-    t.instance_variable_get("@__event_callback_mappings").values.member?("test_button").should be_true
+    $add_handler_called.should be_true
     t.close
   end
-  
+
+  it "does not add an implicit handler if an explict handler of that type was already added for that component"
+  it "detects the type of the listener to use for the component when using an implicit handler"
   it "detects when a new method is added and registers a new listener if appropriate"
 end
 

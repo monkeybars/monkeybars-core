@@ -41,11 +41,13 @@ module Monkeybars
     def method_missing(method, *args, &block)
 #      puts "method: #{method}, args: #{args}"
 #      puts "method_missing - SwingUtilities.isEventDispatchThread: #{SwingUtilities.isEventDispatchThread}"
-      @controller.handle_event(method.underscore, args[0])
+      @callback.handle_event(@component_name, method.underscore, args[0])
     end
   end
 
   module Handlers
+    # TODO: add bean types like vetoable change, property change, etc.
+    BEAN_TYPES = []
     AWT_TYPES = ["Action","Adjustment","AWTEvent","Component","Container","Focus",
              "HierarchyBounds","Hierarchy","InputMethod","Item","Key","Mouse",
              "MouseMotion","MouseWheel","Text", "WindowFocus","Window","WindowState"]       
@@ -54,7 +56,8 @@ module Monkeybars
                    "MenuDragMouse", "MenuKey", "Menu", "MouseInput", "PopupMenu", 
                    "TableColumnModel", "TableModel", "TreeExpansion", "TreeModel", 
                    "TreeSelection", "TreeWillExpand", "UndoableEdit"]
-    EVENT_NAMES = {}
+    ALL_EVENT_NAMES = []
+    EVENT_NAMES_BY_TYPE = Hash.new{|h,k| h[k] = []}
   end
 end
 
@@ -63,8 +66,13 @@ end
     eval <<-ENDL
       module Monkeybars
         class #{type}Handler
-          def initialize(controller)
-            @controller = controller
+          def initialize(callback, component_name)
+            @callback = callback
+            @component_name = component_name
+          end
+
+          def type
+            "#{type}"
           end
 
           include Monkeybars::BaseHandler
@@ -73,12 +81,11 @@ end
       end
     ENDL
     
-    unless ["MouseInput", "HierarchyBounds", "TreeSelection"].member? type
-      interface = eval "#{java_package}.#{type}Listener"
-      interface.java_class.java_instance_methods.each do |method|
-        Monkeybars::Handlers::EVENT_NAMES[method.name.underscore] = type
-      end
+    interface = eval "#{java_package}.#{type}Listener"
+    interface.java_class.java_instance_methods.each do |method|
+      Monkeybars::Handlers::ALL_EVENT_NAMES << method.name.underscore
+      Monkeybars::Handlers::EVENT_NAMES_BY_TYPE[type] << method.name.underscore
     end
-    
+    Monkeybars::Handlers::ALL_EVENT_NAMES.uniq!
   end
 end

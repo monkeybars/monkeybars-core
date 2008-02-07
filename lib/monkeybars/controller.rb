@@ -145,7 +145,7 @@ module Monkeybars
     #
     # If you wish to override the default event handling behavior, override handle_event
     def self.add_listener(details)
-      handlers.push(details)
+      handlers << details
       hide_protected_class_methods #workaround for JRuby bug #1283
     end
   
@@ -246,30 +246,44 @@ module Monkeybars
     def initialize
       @__view = create_new_view unless self.class.view_class.nil?
       @__model = create_new_model unless self.class.model_class.nil?
-      @__event_callback_mappings = {}
       @__transfer = {}
+      @__registered_handlers = Hash.new{|h,k| h[k] = []}
 
-      unless @__view.nil?
-        self.class.handlers.each do |handler|            
-          add_handler_for handler[:type], handler[:components]
+      unless self.class.handlers.empty?
+        if @__view.nil?
+          raise "A view must be declared in order to add event listeners"
         end
         
-        # Detect implicit handlers. This is very expensive the way it is coded n^y and
-        # we should look at it via profiling to see if it's impacting startup significantly
-        all_actions = Monkeybars::Handlers::EVENT_NAMES.keys
-        methods.each do |method|
-          all_actions.each do |action|
-            if index = method.index(action)
-              unless 0 == index
-                add_handler_for(Monkeybars::Handlers::EVENT_NAMES[action], method[0...index-1].camelize(false))
-              end
-              break
-            end
+        self.class.handlers.each do |handler|            
+          add_handler_for handler[:type], handler[:components]
+          handler[:components].each do |component|
+            @__registered_handlers[@__view.instance_eval(component.to_s)] << handler[:type].to_s
           end
         end
-      else
-        unless self.class.handlers.empty?
-          raise "A view must be declared in order to add event listeners"
+      end
+
+      methods.grep(/_/).each do |action|
+        component_match = nil
+        Monkeybars::Handlers::ALL_EVENT_NAMES.each do |event|
+          component_match = Regexp.new("(.*)_(#{event})").match(action)
+          break unless component_match.nil?
+        end
+
+        next if component_match.nil?
+        component_name, event_name = component_match[1], component_match[2]
+
+        begin
+          component = @__view.get_field_value(component_name)
+        rescue UndefinedControlError
+          # swallow, handlers for controls that don't exist is allowed
+        else
+          component.methods.each do |method|
+            listener_match = /add(.*)Listener/.match(method)
+            next if listener_match.nil?
+            if Monkeybars::Handlers::EVENT_NAMES_BY_TYPE[listener_match[1]].member? event_name
+              add_handler_for listener_match[1], component_name unless @__registered_handlers[component].member? listener_match[1].underscore
+            end
+          end
         end
       end
 
@@ -393,11 +407,9 @@ module Monkeybars
     # Specific handlers get precedence over general handlers, that is button_mouse_released
     # gets called before mouse_released. A component's name field must be defined in order
     # for the name_event_type style handlers to work.
-    def handle_event(event_name, event) #:nodoc:
+    def handle_event(component_name, event_name, event) #:nodoc:
 
       return if event.nil?
-
-      component_name = @__event_callback_mappings[event.source]
      
       proc = get_method("#{component_name}_#{event_name}".to_sym)
       if METHOD_NOT_FOUND == proc
@@ -405,7 +417,7 @@ module Monkeybars
       end
       
       unless METHOD_NOT_FOUND == proc
-        p = proc { 0 == proc.arity ? proc.call : proc.call(event) }
+        p = lambda { 0 == proc.arity ? proc.call : proc.call(event) }
         runner = Runner.new(&p)
         Worker.post(runner)
       end
@@ -481,9 +493,18 @@ module Monkeybars
     end
     
     def add_handler_for(handler_type, components)
-      handler = "Monkeybars::#{handler_type.camelize}Handler".constantize.new(self)
-      mappings = @__view.add_handler(handler_type, handler, components)
-      @__event_callback_mappings.merge! mappings
+      components = ["global"] if components.nil?
+      components = [components] unless components.respond_to? :each
+      components.each do |component|
+        if component.kind_of? Hash
+          component, component_name = component
+        else
+          component_name = component.to_s
+        end
+        
+        handler = "Monkeybars::#{handler_type.camelize}Handler".constantize.new(self, component_name)
+        @__view.add_handler(handler, component)
+      end
     end
     
     def get_method(method)
