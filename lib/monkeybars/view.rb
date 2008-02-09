@@ -274,9 +274,10 @@ module Monkeybars
 #        end
 #      elsif
 #     TODO: HANDLE global
-      if "global" == component.to_s
+      component = component.to_s
+      if "global" == component
         raise "Global handler declarations are not yet supported"
-      elsif "java_window" == component.to_s
+      elsif "java_window" == component
         @main_view_component.send("add#{handler.type.camelize}Listener", handler)
       else
         object = eval component
@@ -327,12 +328,16 @@ module Monkeybars
     #
     #   someControl.method
     def get_field_value(field_name)
-      field_name = field_name.to_sym
-      if @@is_a_java_class
-        field_object = get_field(field_name)
-        Java.java_to_ruby(field_object.value(Java.ruby_to_java(@main_view_component)))
+      if "java_window" == field_name.to_s
+        @main_view_component
       else
-        get_field(field_name).call
+        field_name = field_name.to_sym
+        if @@is_a_java_class
+          field_object = get_field(field_name)
+          Java.java_to_ruby(field_object.value(Java.ruby_to_java(@main_view_component)))
+        else
+          get_field(field_name).call
+        end
       end
     end
 

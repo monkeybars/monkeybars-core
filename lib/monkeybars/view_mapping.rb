@@ -81,7 +81,7 @@ module Monkeybars
         if model_mapping?
           model_to_view(view, model)
         else
-          transfer_to_view(view, transfer)
+          transfer_to_view(view, transfer) if mapped_transfer_key_present?(transfer)
         end
       end
     end
@@ -105,6 +105,10 @@ module Monkeybars
     end
 
     private
+
+    def mapped_transfer_key_present?(transfer)
+      transfer.has_key? @transfer_property
+    end
     
     def set_direction(mapping_options)
       @direction = if mapping_options.both_methods_present?
@@ -136,6 +140,8 @@ module Monkeybars
         raise InvalidMappingError, "Either model.#{@model_property} or self.#{@view_property} in #{view.class} is not valid."
       rescue TypeError => e
         raise InvalidMappingError, "Invalid types when assigning from model.#{@model_property} to self.#{@view_property}, #{e.message} in #{view.class}"
+      rescue UndefinedControlError
+        raise InvalidMappingError, "The view property #{@view_property} was not found on view #{view.class}"
       end
     end
     
@@ -198,15 +204,16 @@ module Monkeybars
       if :default == @to_view_method
         super
       else
-        instance_eval("view.#{@view_property} = view.method(@to_view_method).call(model)")
+        instance_eval("view.#{@view_property} = view.method(@to_view_method).call(model.#{@model_property})")
       end
     end
     
     def transfer_to_view(view, transfer)
+      puts "transfer: #{transfer.inspect}"
        if :default == @to_view_method
         super
       else
-        instance_eval("view.#{@view_property} = view.method(@to_view_method).call(transfer)")
+        instance_eval("view.#{@view_property} = view.method(@to_view_method).call(transfer[#{@transfer_property}])")
       end
     end
     
@@ -214,7 +221,7 @@ module Monkeybars
       if :default == @from_view_method
         super
       else
-        instance_eval("model.#{@model_property} = view.method(@from_view_method).call(model)")
+        instance_eval("model.#{@model_property} = view.method(@from_view_method).call(view.#{@view_property})")
       end
     end
     
@@ -222,7 +229,7 @@ module Monkeybars
       if :default == @from_view_method
         super
       else
-        instance_eval("transfer[#{@transfer_property.inspect}] = view.method(@from_view_method).call(transfer)")
+        instance_eval("transfer[#{@transfer_property.inspect}] = view.method(@from_view_method).call(view.#{@view_property})")
       end
     end
   end

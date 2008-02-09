@@ -41,6 +41,7 @@ module Monkeybars
     def method_missing(method, *args, &block)
 #      puts "method: #{method}, args: #{args}"
 #      puts "method_missing - SwingUtilities.isEventDispatchThread: #{SwingUtilities.isEventDispatchThread}"
+      puts "handle_event ? #{@callback.method(:handle_event).arity}"
       @callback.handle_event(@component_name, method.underscore, args[0])
     end
   end
