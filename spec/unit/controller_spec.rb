@@ -141,6 +141,11 @@ describe Monkeybars::Controller, "#view_state" do
     class TestView < Monkeybars::View
       set_java_class "org.monkeybars.TestView"
       map :view => "testTextField.text", :model => :text
+      map :view => "testTextField.columns", :transfer => :text_columns
+      
+      def load
+	testTextField.columns = 10
+      end
     end
     
     class TestController < Monkeybars::Controller
@@ -152,9 +157,13 @@ describe Monkeybars::Controller, "#view_state" do
     
     view_state, transfer = t.send(:view_state)
     view_state.text.should == "A text field"
+    transfer[:text_columns].should == 10
     t.instance_variable_get("@__view").testTextField.text = "test data"
-    t.send(:view_state)[0].text.should == "test data"
-    raise "Fix this spec to check the transfer's data"
+    t.instance_variable_get("@__view").testTextField.columns = 20
+    view_state, transfer = t.send(:view_state)
+    view_state.text.should == "test data"
+    transfer[:text_columns].should == 20
+    
     t.close
   end
 end
