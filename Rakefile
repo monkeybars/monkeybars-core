@@ -21,7 +21,7 @@ end
 
 desc "Run all specs"
 Spec::Rake::SpecTask.new do |t|
-  t.spec_files = FileList['spec/unit/**/*.rb']
+  t.spec_files = FileList['spec/unit/**/*_spec.rb']
   t.spec_opts = ['--color']
 end
 
