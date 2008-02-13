@@ -1,4 +1,4 @@
-$:.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
+$LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
 
 describe "ValidatedHash mixin" do
   it "adds three methods named validate_only, validate_all and validate_none to the Hash class" do

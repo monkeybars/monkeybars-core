@@ -366,7 +366,7 @@ module Monkeybars
     # defined in the view) and optionally invoke the callback that is passed in 
     # as a block.
     def signal(signal_name, &callback)
-      @__view.process_signal(signal_name, &callback)
+      @__view.process_signal(signal_name, model, transfer, &callback)
     end
     
     # Returns true if the view is visible, false otherwise
