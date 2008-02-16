@@ -115,7 +115,7 @@ describe Monkeybars::View, "#process_signal" do
     class TestView < Monkeybars::View
       define_signal :signal1, :handler
 
-      def handler
+      def handler(model, transfer)
         raise Exception unless block_given?
       end
     end
@@ -123,6 +123,6 @@ describe Monkeybars::View, "#process_signal" do
   
   it "invokes the method associated with the signal when called and passes along any block passed to it" do
     view = TestView.new
-    lambda {view.process_signal(:signal1) {"this is a dummy block"}}.should_not raise_error(Exception)
+    lambda {view.process_signal(:signal1, nil, nil) {"this is a dummy block"}}.should_not raise_error(Exception)
   end
 end

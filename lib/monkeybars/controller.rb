@@ -359,14 +359,14 @@ module Monkeybars
     # Triggers updating of the view based on the mapping and the current contents
     # of the model and the transfer
     def update_view
-      @__view.update(model, transfer)
+      on_edt { @__view.update(model, transfer) }
     end
     
     # Sends a signal to the view.  The view will process the signal (if it is
     # defined in the view) and optionally invoke the callback that is passed in 
     # as a block.
     def signal(signal_name, &callback)
-      @__view.process_signal(signal_name, model, transfer, &callback)
+      on_edt { @__view.process_signal(signal_name, model, transfer, &callback) }
     end
     
     # Returns true if the view is visible, false otherwise
@@ -447,6 +447,17 @@ module Monkeybars
     end
     
     private
+    # Passes the supplied block to execute on the Swing Event Dispatch Thread
+    # if it isn't already on there.  Otherwise, just calls the block
+    def on_edt(&block)
+      if is_on_edt; block.call 
+      else javax::swing::SwingUtilities.invoke_later(block) end
+    end
+    
+    def is_on_edt
+      javax::swing::SwingUtilities.is_event_dispatch_thread
+    end
+    
     @@model_class_for_child_controller ||= {}
     def self.model_class
       @@model_class_for_child_controller[self]
