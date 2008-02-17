@@ -81,7 +81,7 @@ module Monkeybars
     # controller is created but in the near future a configurable limit will be
     # available so that you can create n instances of a controller.
     def self.instance
-      @@instance_lock[self].synchronize do
+      @@instance_lock[self.class].synchronize do
         controller = @@instance_list[self]
         unless controller.empty?
           1 == controller.size ? controller.last : controller
@@ -395,7 +395,7 @@ module Monkeybars
       @__view.unload unless @__view.nil?
       unload
       @__view.dispose if @__view.respond_to? :dispose
-      @@instance_lock.synchronize do
+      @@instance_lock[self.class].synchronize do
         @@instance_list[self.class].delete self
       end
     end
@@ -403,7 +403,7 @@ module Monkeybars
     # Calls load if the controller has not been opened previously, then calls update_view
     # and shows the view.
     def open(*args)
-      @@instance_lock.synchronize do
+      @@instance_lock[self.class].synchronize do
         unless @@instance_list[self.class].member? self
           @@instance_list[self.class] << object
         end
