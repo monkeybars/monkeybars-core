@@ -30,6 +30,8 @@ else
     
     unless File.directory? project_name
       FileUtils.mkdir_p(project_name)
+      FileUtils.cd(project_name)
+      FileUtils.cp_r(File.dirname(__FILE__) + "/../skeleton", "./", :force => true)
     end
   end
 end

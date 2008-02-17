@@ -5,3 +5,4 @@ nbproject
 pkg
 .LCK*
 test_files.jar
+skeleton/lib/monkeybars*
