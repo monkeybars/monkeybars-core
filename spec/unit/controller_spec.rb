@@ -212,12 +212,12 @@ describe Monkeybars::Controller, "implicit handler registration" do
 end
 
 class OnedtController < Monkeybars::Controller
-  attr_accessor :on_edt_called
+  attr_accessor :execute_on_edt_called
   set_view 'TestView'
   
-  def on_edt
+  def execute_on_edt
     raise "Must be handed block" unless block_given?
-    @on_edt_called = true
+    @execute_on_edt_called = true
   end
 end
 
@@ -229,10 +229,10 @@ end
 
 describe Monkeybars::Controller, "#signal" do
   
-  it "should call on_edt to execute on the Event Dispatch Thread" do
+  it "should call execute_on_edt to execute on the Event Dispatch Thread" do
     t = OnedtController.instance
     lambda { t.signal(:foo) }.should_not raise_error(Exception)
-    t.on_edt_called.should be_true
+    t.execute_on_edt_called.should be_true
   end
   
   it "invokes the view's process_signal method, passing along a block if given" do
@@ -253,9 +253,9 @@ describe Monkeybars::Controller, "#signal" do
 end
 
 describe Monkeybars::Controller, "#update_view" do
-  it "should call on_edt to execute on the Event Dispatch Thread" do
+  it "should call execute_on_edt to execute on the Event Dispatch Thread" do
     t = OnedtController.instance
     lambda { t.update_view }.should_not raise_error(Exception)
-    t.on_edt_called.should be_true
+    t.execute_on_edt_called.should be_true
   end
 end
