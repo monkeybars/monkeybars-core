@@ -74,14 +74,14 @@ module Monkeybars
   class Controller
     METHOD_NOT_FOUND = :method_not_found
     @@instance_list ||= Hash.new {|hash, key| hash[key] = []}
-    @@instance_lock ||= Mutex.new
+    @@instance_lock ||= Hash.new {|hash, key| hash[key] = Mutex.new }
     
     # Controllers cannot be instantiated via a call to new, instead use instance
     # to retrieve the instance of the view.  Currently only one instance of a
     # controller is created but in the near future a configurable limit will be
     # available so that you can create n instances of a controller.
     def self.instance
-      @@instance_lock.synchronize do
+      @@instance_lock[self].synchronize do
         controller = @@instance_list[self]
         unless controller.empty?
           1 == controller.size ? controller.last : controller
