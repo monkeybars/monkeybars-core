@@ -223,7 +223,7 @@ module Monkeybars
     # The CloseActions::METHOD action expects a second parameter which should be a
     # MonkeybarsWindowAdapter.
     def close_action(action, handler = nil)
-      if @main_view_component.kind_of?(javax.swing.JFrame) || @main_view_component.kind_of?(javax.swing.JInternalFrame)
+      if @main_view_component.kind_of?(javax.swing.JFrame) || @main_view_component.kind_of?(javax.swing.JInternalFrame) || @main_view_component.kind_of?(javax.swing.JDialog)
         if :method == action
           @main_view_component.default_close_operation = CloseActions::DO_NOTHING
           unless @main_view_component.kind_of?(javax.swing.JInternalFrame)

@@ -318,12 +318,13 @@ module Monkeybars
         end  
       end
       
+      
       if self.class.class_variables.member?("@@close_action")
         action = self.class.send(:class_variable_get, :@@close_action)
       else
         action = :close
       end
-        
+      
       unless @__view.nil?
         case action.kind_of?(Hash) ? action.keys[0] : action
         when :nothing
@@ -344,7 +345,7 @@ module Monkeybars
           end
           @__view.close_action(Monkeybars::View::CloseActions::METHOD, MonkeybarsWindowAdapter.new(:windowClosing => close_handler))
         else
-          raise "Unkown close action: #{action.kind_of? Hash ? action.keys[0] : action}"
+          raise "Unknown close action: #{action.kind_of? Hash ? action.keys[0] : action}"
         end
       end
 
@@ -481,6 +482,12 @@ module Monkeybars
     def update_model(source, *properties)
       properties.each do |property|
         @__model.send("#{property}=", source.send(property))
+      end
+    end
+    
+    def update_provided_model(source, destination, *properties)
+      properties.each do |property|
+        destination.send("#{property}=", source.send(property))
       end
     end
     

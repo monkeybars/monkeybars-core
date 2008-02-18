@@ -209,11 +209,10 @@ module Monkeybars
     end
     
     def transfer_to_view(view, transfer)
-      puts "transfer: #{transfer.inspect}"
-       if :default == @to_view_method
+      if :default == @to_view_method
         super
       else
-        instance_eval("view.#{@view_property} = view.method(@to_view_method).call(transfer[#{@transfer_property}])")
+        instance_eval("view.#{@view_property} = view.method(@to_view_method).call(transfer[#{@transfer_property.inspect}])")
       end
     end
     
