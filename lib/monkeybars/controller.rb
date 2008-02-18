@@ -74,14 +74,14 @@ module Monkeybars
   class Controller
     METHOD_NOT_FOUND = :method_not_found
     @@instance_list ||= Hash.new {|hash, key| hash[key] = []}
-    @@instance_lock ||= Mutex.new
+    @@instance_lock ||= Hash.new {|hash, key| hash[key] = Mutex.new }
     
     # Controllers cannot be instantiated via a call to new, instead use instance
     # to retrieve the instance of the view.  Currently only one instance of a
     # controller is created but in the near future a configurable limit will be
     # available so that you can create n instances of a controller.
     def self.instance
-      @@instance_lock.synchronize do
+      @@instance_lock[self.class].synchronize do
         controller = @@instance_list[self]
         unless controller.empty?
           1 == controller.size ? controller.last : controller
@@ -360,14 +360,14 @@ module Monkeybars
     # Triggers updating of the view based on the mapping and the current contents
     # of the model and the transfer
     def update_view
-      @__view.update(model, transfer)
+      execute_on_edt { @__view.update(model, transfer) }
     end
     
     # Sends a signal to the view.  The view will process the signal (if it is
     # defined in the view) and optionally invoke the callback that is passed in 
     # as a block.
     def signal(signal_name, &callback)
-      @__view.process_signal(signal_name, &callback)
+      execute_on_edt { @__view.process_signal(signal_name, model, transfer, &callback) }
     end
     
     # Returns true if the view is visible, false otherwise
@@ -396,7 +396,7 @@ module Monkeybars
       @__view.unload unless @__view.nil?
       unload
       @__view.dispose if @__view.respond_to? :dispose
-      @@instance_lock.synchronize do
+      @@instance_lock[self.class].synchronize do
         @@instance_list[self.class].delete self
       end
     end
@@ -404,7 +404,7 @@ module Monkeybars
     # Calls load if the controller has not been opened previously, then calls update_view
     # and shows the view.
     def open(*args)
-      @@instance_lock.synchronize do
+      @@instance_lock[self.class].synchronize do
         unless @@instance_list[self.class].member? self
           @@instance_list[self.class] << object
         end
@@ -448,6 +448,17 @@ module Monkeybars
     end
     
     private
+    # Passes the supplied block to execute on the Swing Event Dispatch Thread
+    # if it isn't already on there.  Otherwise, just calls the block
+    def execute_on_edt(&block)
+      if is_on_edt; block.call 
+      else javax::swing::SwingUtilities.invoke_later(block) end
+    end
+    
+    def is_on_edt
+      javax::swing::SwingUtilities.is_event_dispatch_thread
+    end
+    
     @@model_class_for_child_controller ||= {}
     def self.model_class
       @@model_class_for_child_controller[self]

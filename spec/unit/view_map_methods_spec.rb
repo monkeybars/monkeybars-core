@@ -1,4 +1,4 @@
-$:.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
+$LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
 
 require 'java'
 require 'monkeybars/view'
@@ -90,10 +90,10 @@ describe "update method" do
   it "invokes 'from_model' method when specified" do
     class TestView < Monkeybars::View
       attr_accessor :view_field
-      map :view => :view_field, :model => :ignored_when_mapping_from_model_to_view, :using => [:view_field_from_model_method, nil]
+      map :view => :view_field, :model => :model_field, :using => [:view_field_from_model_method, nil]
       
-      def view_field_from_model_method(model)
-        model.model_field + " plus text from the method"
+      def view_field_from_model_method(model_field)
+        model_field + " plus text from the method"
       end
     end
     

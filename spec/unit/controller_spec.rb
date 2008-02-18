@@ -1,6 +1,6 @@
 require 'java'
 
-$:.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
+$LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
 $CLASSPATH << File.expand_path(File.dirname(__FILE__) + "/../../lib/foxtrot.jar")
 
 require 'monkeybars/view'
@@ -17,9 +17,6 @@ class TestView < Monkeybars::View
 end
 
 describe Monkeybars::Controller do
-  before(:each) do
-    Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
-  end
   
   it "allows the model and view to be set externally" do
     class TestController < Monkeybars::Controller; end
@@ -75,9 +72,8 @@ describe Monkeybars::Controller, "#handle_event" do
   end
   
   before(:each) do
-    Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
     
-    class TestController < Monkeybars::Controller
+    class HandleEventController < Monkeybars::Controller
       set_view "TestView"
       add_listener :type => :action, :components => ["testButton"]
       add_listener :type => :document, :components => ["testTextField.document"]
@@ -90,7 +86,7 @@ describe Monkeybars::Controller, "#handle_event" do
   
   it "should try to call the most specific handler available first" do
     $test_button_action_performed = false
-    t = TestController.instance
+    t = HandleEventController.instance
     target_component = t.instance_variable_get("@__view").get_field_value("testButton")
     event = ActionEvent.new(target_component, ActionEvent::ACTION_PERFORMED, "")
     t.handle_event("test_button", 'action_performed', event)
@@ -104,12 +100,9 @@ describe Monkeybars::Controller, "#handle_event" do
 end
 
 describe Monkeybars::Controller, "#add_handler_for" do
-  before(:each) do
-    Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
-  end
   
   it "does not overwrite the controller's method_missing method" do
-    class TestController < Monkeybars::Controller
+    class AddHandlerForController < Monkeybars::Controller
       set_view "TestView"
       
       add_listener :type => :action, :components => ["testButton"]
@@ -119,59 +112,58 @@ describe Monkeybars::Controller, "#add_handler_for" do
       end
     end
     
-    t = TestController.instance
+    t = AddHandlerForController.instance
     t.foobar.should == "original method missing"
     t.close
   end
 end
 
 describe Monkeybars::Controller, "#view_state" do
-  before(:each) do
-    Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
-    Object.send(:remove_const, :TestView) if Object.const_defined? :TestView
-    Object.send(:remove_const, :TestModel) if Object.const_defined? :TestModel
-  end
   
   it "returns the view's state as a model and a transfer hash" do  
-    class TestModel
+    class ViewStateModel
       attr_accessor :text
       def initialize; @text= ""; end
     end
     
-    class TestView < Monkeybars::View
+    class ViewStateView < Monkeybars::View
       set_java_class "org.monkeybars.TestView"
       map :view => "testTextField.text", :model => :text
+      map :view => "testTextField.columns", :transfer => :text_columns
+      
+      def load
+	testTextField.columns = 10
+      end
     end
     
-    class TestController < Monkeybars::Controller
-      set_view "TestView"
-      set_model "TestModel"
+    class ViewStateController < Monkeybars::Controller
+      set_view "ViewStateView"
+      set_model "ViewStateModel"
     end
     
-    t = TestController.instance
+    t = ViewStateController.instance
     
     view_state, transfer = t.send(:view_state)
     view_state.text.should == "A text field"
+    transfer[:text_columns].should == 10
     t.instance_variable_get("@__view").testTextField.text = "test data"
-    t.send(:view_state)[0].text.should == "test data"
-    raise "Fix this spec to check the transfer's data"
+    t.instance_variable_get("@__view").testTextField.columns = 20
+    view_state, transfer = t.send(:view_state)
+    view_state.text.should == "test data"
+    transfer[:text_columns].should == 20
+    
     t.close
   end
 end
 
 describe Monkeybars::Controller, "#update_model" do
-  before(:each) do
-    Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
-    Object.send(:remove_const, :TestView) if Object.const_defined? :TestView
-    Object.send(:remove_const, :TestModel) if Object.const_defined? :TestModel
-  end
   
   it "updates the declared properties of the model from the view_state" do
-    class TestModel; attr_accessor :text, :text2, :text3; end
-    class TestController < Monkeybars::Controller; set_model "TestModel"; end
+    class UpdateModelModel; attr_accessor :text, :text2, :text3; end
+    class UpdateModelController < Monkeybars::Controller; set_model "UpdateModelModel"; end
     
-    t = TestController.instance
-    m = TestModel.new
+    t = UpdateModelController.instance
+    m = UpdateModelModel.new
     m.text = "some test data"
     m.text2 = "some test data"
     m.text3 = "some test data"
@@ -188,14 +180,9 @@ describe Monkeybars::Controller, "#update_model" do
 end
 
 describe Monkeybars::Controller, "implicit handler registration" do
-  before(:each) do
-    TestController.send(:handlers).clear if Object.const_defined? :TestController
-    Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
-    Object.send(:remove_const, :TestView) if Object.const_defined? :TestView
-  end
   
   it "detects event names in methods and adds an appropriate listener during instantiation" do
-    class TestView < Monkeybars::View
+    class ImplicitRegisterView < Monkeybars::View
       set_java_class "org.monkeybars.TestView"
       
       def add_handler(handler, component)
@@ -206,15 +193,15 @@ describe Monkeybars::Controller, "implicit handler registration" do
       end
     end
     
-    class TestController < Monkeybars::Controller
-      set_view "TestView"
+    class ImplicitRegisterController < Monkeybars::Controller
+      set_view "ImplicitRegisterView"
       
       def test_button_action_performed
 	
       end
     end
     
-    t = TestController.instance
+    t = ImplicitRegisterController.instance
     $add_handler_called.should be_true
     t.close
   end
@@ -224,24 +211,51 @@ describe Monkeybars::Controller, "implicit handler registration" do
   it "detects when a new method is added and registers a new listener if appropriate"
 end
 
+class OnedtController < Monkeybars::Controller
+  attr_accessor :execute_on_edt_called
+  set_view 'TestView'
+  
+  def execute_on_edt
+    raise "Must be handed block" unless block_given?
+    @execute_on_edt_called = true
+  end
+end
+
+module AlreadyOnEdt
+  def is_on_edt
+    true
+  end
+end
+
 describe Monkeybars::Controller, "#signal" do
-  before(:each) do
-    Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
-    Object.send(:remove_const, :TestView) if Object.const_defined? :TestView
+  
+  it "should call execute_on_edt to execute on the Event Dispatch Thread" do
+    t = OnedtController.instance
+    lambda { t.signal(:foo) }.should_not raise_error(Exception)
+    t.execute_on_edt_called.should be_true
   end
   
   it "invokes the view's process_signal method, passing along a block if given" do
-    class TestController < Monkeybars::Controller; end
-    class TestView
-      def process_signal(signal_name, &callback)
+    class SignalView < Monkeybars::View
+      def process_signal(signal_name, model, transfer, &callback)
 	raise "No block given!" unless block_given?
         raise "Incorrect signal name!" unless :signal1 == signal_name
       end
     end
+    class SignalController < Monkeybars::Controller
+      include AlreadyOnEdt
+      set_view 'SignalView'
+    end
     
-    controller = TestController.instance
-    controller.instance_variable_set("@__view", TestView.new)
-    
+    controller = SignalController.instance
     lambda {controller.signal(:signal1) {"dummy block"}}.should_not raise_error(Exception)
+  end
+end
+
+describe Monkeybars::Controller, "#update_view" do
+  it "should call execute_on_edt to execute on the Event Dispatch Thread" do
+    t = OnedtController.instance
+    lambda { t.update_view }.should_not raise_error(Exception)
+    t.execute_on_edt_called.should be_true
   end
 end

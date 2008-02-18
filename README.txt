@@ -1,4 +1,4 @@
-Monkeybars 0.5
+Monkeybars 0.6.0
     by David Koontz
     http://monkeybars.rubyforge.org
 

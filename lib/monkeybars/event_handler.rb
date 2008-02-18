@@ -39,8 +39,6 @@ module Monkeybars
   # handle_event method.
   module BaseHandler
     def method_missing(method, *args, &block)
-#      puts "method: #{method}, args: #{args}"
-#      puts "method_missing - SwingUtilities.isEventDispatchThread: #{SwingUtilities.isEventDispatchThread}"
       @callback.handle_event(@component_name, method.underscore, args[0])
     end
   end

@@ -307,14 +307,13 @@ module Monkeybars
       self.class.view_mappings.select{|mapping| mapping.maps_from_view?}.each {|mapping| mapping.from_view(self, model, transfer)}
     end
     
-    def process_signal(signal, &block)
+    def process_signal(signal, model, transfer, &block)
       handler = self.class.signal_mappings[signal]
-      begin
-        self.send(handler, &block) unless handler.nil?
-      rescue NoMethodError
-        raise InvalidSignalHandlerError, "There is no handler method '#{handler}' on view #{self.class}"
-      end
+      raise InvalidSignalHandlerError, "There is no handler method '#{handler}' on view #{self.class}" unless respond_to? handler
+      self.send(handler, model, transfer, &block) unless handler.nil?
     end
+    
+    
     
     # Stub to be overriden in sub-class.  This is where you put the code you would
     # normally put in initialize, it will be called whenever a new class is instantiated
