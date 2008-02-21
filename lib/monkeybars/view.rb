@@ -300,8 +300,7 @@ module Monkeybars
       transfer.clear
     end
     
-    # The inverse of update.  Called when view_state is called in
-    # the controller.
+    # The inverse of update.  Called when view_state is called in the controller.
     def write_state(model, transfer)
       transfer.clear
       self.class.view_mappings.select{|mapping| mapping.maps_from_view?}.each {|mapping| mapping.from_view(self, model, transfer)}
@@ -312,8 +311,6 @@ module Monkeybars
       raise InvalidSignalHandlerError, "There is no handler method '#{handler}' on view #{self.class}" unless respond_to? handler
       self.send(handler, model, transfer, &block) unless handler.nil?
     end
-    
-    
     
     # Stub to be overriden in sub-class.  This is where you put the code you would
     # normally put in initialize, it will be called whenever a new class is instantiated
