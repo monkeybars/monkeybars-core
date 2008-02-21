@@ -219,17 +219,6 @@ module Monkeybars
       self.send(:class_variable_set, :@@close_action, action)
     end
     
-#    def self.inherited(subclass) #:nodoc:
-#      subclass.class.handlers = Array.new
-#    end
-#    
-    def self.method_added(method_name)
-      #TODO: When a method is added, check its name to see if a new listener should
-      # be registered
-      
-      super
-    end
-    
     # Returns a frozen hash of ControllerName => [instances] pairs. This is
     # useful if you need to iterate over all active controllers to call update
     # or to check for a status.
@@ -285,29 +274,8 @@ module Monkeybars
         end
       end
 
-      methods.grep(/_/).each do |action|
-        component_match = nil
-        Monkeybars::Handlers::ALL_EVENT_NAMES.each do |event|
-          component_match = Regexp.new("(.*)_(#{event})").match(action)
-          break unless component_match.nil?
-        end
-
-        next if component_match.nil?
-        component_name, event_name = component_match[1], component_match[2]
-
-        begin
-          component = @__view.get_field_value(component_name)
-        rescue UndefinedControlError
-          # swallow, handlers for controls that don't exist is allowed
-        else
-          component.methods.each do |method|
-            listener_match = /add(.*)Listener/.match(method)
-            next if listener_match.nil?
-            if Monkeybars::Handlers::EVENT_NAMES_BY_TYPE[listener_match[1]].member? event_name
-              add_handler_for listener_match[1], component_name unless @__registered_handlers[component].member? listener_match[1].underscore
-            end
-          end
-        end
+      methods.grep(/_/).each do |method|
+        add_implicit_handler_for_method(method)
       end
 
       if self.class.class_variables.member?("@@update_method_name")
@@ -432,12 +400,15 @@ module Monkeybars
     # gets called before mouse_released. A component's name field must be defined in order
     # for the name_event_type style handlers to work.
     def handle_event(component_name, event_name, event) #:nodoc:
-
       return if event.nil?
-     
+      
       proc = get_method("#{component_name}_#{event_name}".to_sym)
       if METHOD_NOT_FOUND == proc
         proc = get_method(event_name.to_sym)
+      end
+      
+      if METHOD_NOT_FOUND == proc
+        proc = event_handler_procs[event_name]
       end
       
       unless METHOD_NOT_FOUND == proc
@@ -448,6 +419,24 @@ module Monkeybars
     end
     
     private
+    @@model_class_for_child_controller ||= {}
+    def self.model_class
+      @@model_class_for_child_controller[self]
+    end
+    
+    def self.model_class=(model)
+      @@model_class_for_child_controller[self] = model
+    end
+    
+    @@view_class_for_child_controller ||= {}
+    def self.view_class
+      @@view_class_for_child_controller[self]
+    end
+    
+    def self.view_class=(view)
+      @@view_class_for_child_controller[self] = view
+    end
+    
     # Passes the supplied block to execute on the Swing Event Dispatch Thread
     # if it isn't already on there.  Otherwise, just calls the block
     def execute_on_edt(&block)
@@ -459,13 +448,29 @@ module Monkeybars
       javax::swing::SwingUtilities.is_event_dispatch_thread
     end
     
-    @@model_class_for_child_controller ||= {}
-    def self.model_class
-      @@model_class_for_child_controller[self]
-    end
-    
-    def self.model_class=(model)
-      @@model_class_for_child_controller[self] = model
+    def add_implicit_handler_for_method(method)
+      component_match = nil
+      Monkeybars::Handlers::ALL_EVENT_NAMES.each do |event|
+        component_match = Regexp.new("(.*)_(#{event})").match(method)
+        break unless component_match.nil?
+      end
+
+      return if component_match.nil?
+      component_name, event_name = component_match[1], component_match[2]
+
+      begin
+        component = @__view.get_field_value(component_name)
+      rescue UndefinedControlError
+        # swallow, handlers for controls that don't exist is allowed
+      else
+        component.methods.each do |method|
+          listener_match = /add(.*)Listener/.match(method)
+          next if listener_match.nil?
+          if Monkeybars::Handlers::EVENT_NAMES_BY_TYPE[listener_match[1]].member? event_name
+            add_handler_for listener_match[1], component_name unless @__registered_handlers[component].member? listener_match[1].underscore
+          end
+        end
+      end
     end
     
     def model
@@ -504,15 +509,6 @@ module Monkeybars
     
     def create_new_model
       self.class.model_class.new
-    end
-    
-    @@view_class_for_child_controller ||= {}
-    def self.view_class
-      @@view_class_for_child_controller[self]
-    end
-    
-    def self.view_class=(view)
-      @@view_class_for_child_controller[self] = view
     end
     
     # Returns the contents of the view as defined by the view's mappings.  For use

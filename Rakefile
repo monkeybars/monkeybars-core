@@ -36,7 +36,7 @@ end
 
 desc "Creates monkeybars.jar file for distribution"
 task :jar => [:prepare] do
-  sh "jar cf #{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar -C lib monkeybars.rb -C lib monkeybars -C #{BUILD_DIR} ."
+  puts `jar cf #{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar -C lib monkeybars.rb -C lib monkeybars -C #{BUILD_DIR} .`
   FileUtils.cp("#{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar", "skeleton/lib/monkeybars.jar")
 end
 
@@ -45,11 +45,11 @@ task :clean_jar => [:clean, :jar]
 
 desc "Use this instead of the hoe included install_gem"
 task :mb_install_gem => [:jar, :gem] do
-    `gem install pkg/monkeybars-#{Monkeybars::VERSION}.gem`
+    puts `gem install pkg/monkeybars-#{Monkeybars::VERSION}.gem`
 end
 
 desc "Only used to make RSpec usable with Java Swing code. Wraps up the target of various view tests into a jar that can be require'd and thus loaded on the classpath by JRuby"
 task :spec_prepare do
-  sh 'javac spec/unit/org/monkeybars/TestView.java'
-  sh 'jar -cf spec/unit/test_files.jar -C spec/unit org'
+  puts `javac spec/unit/org/monkeybars/TestView.java`
+  puts `jar -cf spec/unit/test_files.jar -C spec/unit org`
 end
