@@ -193,7 +193,7 @@ module Monkeybars
     #     # handle the event here
     #   end
     def self.define_handler(action, &block)
-      event_handler_procs[action] = block
+      event_handler_procs[action.to_sym] = block
     end
     
     # Valid close actions are
@@ -274,10 +274,10 @@ module Monkeybars
         end
       end
 
-      methods.grep(/_/).each do |method|
-        add_implicit_handler_for_method(method)
-      end
+      methods.grep(/_/).each {|method| add_implicit_handler_for_method(method) }
 
+      event_handler_procs.each {|method, proc| add_implicit_handler_for_method(method)}
+      
       if self.class.class_variables.member?("@@update_method_name")
         begin
           self.class.send(:class_variable_set, :@@update_method, method(self.class.send(:class_variable_get, :@@update_method_name)))
@@ -285,7 +285,6 @@ module Monkeybars
           raise "Update method: '#{self.class.send(:class_variable_get, :@@update_method_name)}' was not found for class #{self.class}"
         end  
       end
-      
       
       if self.class.class_variables.member?("@@close_action")
         action = self.class.send(:class_variable_get, :@@close_action)
