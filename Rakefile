@@ -32,6 +32,7 @@ end
 task :prepare do
   Dir.mkdir(OUTPUT_DIR) unless File.directory?(OUTPUT_DIR)
   Dir.mkdir(BUILD_DIR) unless File.directory?(BUILD_DIR)
+  Dir.mkdir("skeleton/lib") unless File.directory?("skeleton/lib")
 end
 
 desc "Creates monkeybars.jar file for distribution"
