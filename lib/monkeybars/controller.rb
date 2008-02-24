@@ -285,7 +285,7 @@ module Monkeybars
 
       methods.grep(/_/).each {|method| add_implicit_handler_for_method(method) }
 
-      event_handler_procs.each {|method, proc| add_implicit_handler_for_method(method)}
+      self.class.event_handler_procs.each {|method, proc| add_implicit_handler_for_method(method)}
       
       if self.class.class_variables.member?("@@update_method_name")
         begin
@@ -413,10 +413,6 @@ module Monkeybars
       proc = get_method("#{component_name}_#{event_name}".to_sym)
       if METHOD_NOT_FOUND == proc
         proc = get_method(event_name.to_sym)
-      end
-      
-      if METHOD_NOT_FOUND == proc
-        proc = event_handler_procs[event_name]
       end
       
       unless METHOD_NOT_FOUND == proc
