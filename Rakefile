@@ -37,6 +37,10 @@ end
 
 desc "Creates monkeybars.jar file for distribution"
 task :jar => [:prepare] do
+  Dir.chdir(BUILD_DIR) do
+    `jar xvf ../../lib/foxtrot.jar`
+    FileUtils.remove_dir('META-INF', true)
+  end
   puts `jar cf #{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar -C lib monkeybars.rb -C lib monkeybars -C #{BUILD_DIR} .`
   FileUtils.cp("#{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar", "skeleton/lib/monkeybars.jar")
 end
