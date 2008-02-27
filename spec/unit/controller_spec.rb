@@ -1,15 +1,12 @@
 require 'java'
 
 $LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
-$CLASSPATH << File.expand_path(File.dirname(__FILE__) + "/../../lib/foxtrot.jar")
 
 require 'monkeybars/view'
 require 'monkeybars/controller'
 require 'spec/unit/test_files.jar'
 include_class 'java.awt.event.ActionEvent'
 include_class 'java.awt.event.MouseEvent'
-include_class "foxtrot.Worker"
-include_class "foxtrot.Job"
 
 
 class TestView < Monkeybars::View
@@ -64,13 +61,6 @@ describe "Controller instantiation" do
 end
 
 describe Monkeybars::Controller, "#handle_event" do
-  #mock out the post call since we're not actually running in Swing's event dispatch thread
-  class Worker
-    def self.post(runner)
-      runner.run
-    end
-  end
-  
   before(:each) do
     
     class HandleEventController < Monkeybars::Controller
@@ -96,7 +86,6 @@ describe Monkeybars::Controller, "#handle_event" do
   end
   
   it "should call a global event handler if no specific component handler is defined"
-  it "spawns a Foxtrot worker so the GUI is not blocked"
 end
 
 describe Monkeybars::Controller, "#add_handler_for" do
@@ -211,29 +200,7 @@ describe Monkeybars::Controller, "implicit handler registration" do
   it "detects when a new method is added and registers a new listener if appropriate"
 end
 
-class OnedtController < Monkeybars::Controller
-  attr_accessor :execute_on_edt_called
-  set_view 'TestView'
-  
-  def execute_on_edt
-    raise "Must be handed block" unless block_given?
-    @execute_on_edt_called = true
-  end
-end
-
-module AlreadyOnEdt
-  def is_on_edt
-    true
-  end
-end
-
 describe Monkeybars::Controller, "#signal" do
-  
-  it "should call execute_on_edt to execute on the Event Dispatch Thread" do
-    t = OnedtController.instance
-    lambda { t.signal(:foo) }.should_not raise_error(Exception)
-    t.execute_on_edt_called.should be_true
-  end
   
   it "invokes the view's process_signal method, passing along a block if given" do
     class SignalView < Monkeybars::View
@@ -243,19 +210,10 @@ describe Monkeybars::Controller, "#signal" do
       end
     end
     class SignalController < Monkeybars::Controller
-      include AlreadyOnEdt
       set_view 'SignalView'
     end
     
     controller = SignalController.instance
     lambda {controller.signal(:signal1) {"dummy block"}}.should_not raise_error(Exception)
-  end
-end
-
-describe Monkeybars::Controller, "#update_view" do
-  it "should call execute_on_edt to execute on the Event Dispatch Thread" do
-    t = OnedtController.instance
-    lambda { t.update_view }.should_not raise_error(Exception)
-    t.execute_on_edt_called.should be_true
   end
 end

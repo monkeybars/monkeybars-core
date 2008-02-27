@@ -4,6 +4,7 @@ include_class javax.swing.KeyStroke
 require "monkeybars/inflector"
 require 'monkeybars/validated_hash'
 require 'monkeybars/view_mapping'
+require 'monkeybars/task_processor'
 
 
 module Monkeybars
@@ -56,6 +57,7 @@ module Monkeybars
   # should respond to any methods that normally interact with the Java object such
   # as visisble?, hide, and dispose
   class View
+    include TaskProcessor
  
     module CloseActions #:nodoc:
       DO_NOTHING = javax::swing::WindowConstants::DO_NOTHING_ON_CLOSE

@@ -3,10 +3,7 @@ require 'thread'
 require "monkeybars/inflector"
 require "monkeybars/view"
 require "monkeybars/event_handler"
-require 'foxtrot.jar'
-include_class "foxtrot.Worker"
-include_class "foxtrot.Job"
-
+require "monkeybars/task_processor"
 module Monkeybars
   # Controllers are the traffic cops of your application.  They decide how to react to
   # events, they coordinate interaction with other controllers and they define some of
@@ -72,6 +69,7 @@ module Monkeybars
   # super as the first line).
   #
   class Controller
+    include TaskProcessor
     METHOD_NOT_FOUND = :method_not_found
     @@instance_list ||= Hash.new {|hash, key| hash[key] = []}
     @@instance_lock ||= Hash.new {|hash, key| hash[key] = Mutex.new }
@@ -342,14 +340,14 @@ module Monkeybars
     # Triggers updating of the view based on the mapping and the current contents
     # of the model and the transfer
     def update_view
-      execute_on_edt { @__view.update(model, transfer) }
+      @__view.update(model, transfer)
     end
     
     # Sends a signal to the view.  The view will process the signal (if it is
     # defined in the view) and optionally invoke the callback that is passed in 
     # as a block.
     def signal(signal_name, &callback)
-      execute_on_edt { @__view.process_signal(signal_name, model, transfer, &callback) }
+      @__view.process_signal(signal_name, model, transfer, &callback)
     end
     
     # Returns true if the view is visible, false otherwise
@@ -422,9 +420,7 @@ module Monkeybars
       end
       
       unless METHOD_NOT_FOUND == proc
-        p = lambda { 0 == proc.arity ? proc.call : proc.call(event) }
-        runner = Runner.new(&p)
-        Worker.post(runner)
+        0 == proc.arity ? proc.call : proc.call(event)
       end
     end
     
@@ -445,17 +441,6 @@ module Monkeybars
     
     def self.view_class=(view)
       @@view_class_for_child_controller[self] = view
-    end
-    
-    # Passes the supplied block to execute on the Swing Event Dispatch Thread
-    # if it isn't already on there.  Otherwise, just calls the block
-    def execute_on_edt(&block)
-      if is_on_edt; block.call 
-      else javax::swing::SwingUtilities.invoke_later(block) end
-    end
-    
-    def is_on_edt
-      javax::swing::SwingUtilities.is_event_dispatch_thread
     end
     
     def add_implicit_handler_for_method(method)
@@ -572,16 +557,6 @@ module Monkeybars
     end
   end
 
-  class Runner < Job
-    attr_accessor :proc
-    def initialize(&proc)
-      @proc = proc
-    end
-    
-    def run
-      @proc.call
-    end
-  end
 end
 
 
