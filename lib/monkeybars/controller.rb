@@ -185,15 +185,24 @@ module Monkeybars
     #
     # So, if you have declared:
     #
-    #   add_listener :type => :mouse, :components => [:ok_button]
+    #   add_listener :type => :action, :components => [:ok_button]
     #
     # you could implement the handler using:
     #
-    #   define_handler(:ok_button_mouse_released) do |view_state, event|
+    #   define_handler(:ok_button_action_performed) do |event|
     #     # handle the event here
     #   end
-    def self.define_handler(action, &block)
-      event_handler_procs[action.to_sym] = block
+    #   
+    # Note that handlers defined using this method will create implicit listener
+    # registrations the same as a declared method would.
+    #   
+    # define_handler also accepts an array of event names
+    #
+    #   define_handler([:ok_button_action_performed, :cancel_button_action_performed]) do
+    #     # handle event(s) here
+    #   end
+    def self.define_handler(*actions, &block)
+      actions.each {|action| event_handler_procs[action.to_sym] = block}
     end
     
     # Valid close actions are
@@ -408,17 +417,8 @@ module Monkeybars
       return if event.nil?
       
       proc = get_method("#{component_name}_#{event_name}".to_sym)
-      
-      if METHOD_NOT_FOUND == proc
-        proc = event_handler_procs["#{component_name}_#{event_name}".to_sym]
-      end
-
       if METHOD_NOT_FOUND == proc
         proc = get_method(event_name.to_sym)
-      end
-      
-      if METHOD_NOT_FOUND == proc
-        proc = event_handler_procs[event_name]
       end
       
       unless METHOD_NOT_FOUND == proc
@@ -461,8 +461,7 @@ module Monkeybars
     def add_implicit_handler_for_method(method)
       component_match = nil
       Monkeybars::Handlers::ALL_EVENT_NAMES.each do |event|
-				
-        component_match = Regexp.new("(.*)_(#{event})").match(method.to_s)
+        component_match = Regexp.new("(.*)_(#{event})").match(method)
         break unless component_match.nil?
       end
 
