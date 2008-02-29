@@ -1,5 +1,4 @@
-$LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
-
+require File.dirname(__FILE__) + '/../spec_helper.rb'
 require 'monkeybars/inflector'
 
 describe Monkeybars::Inflector do

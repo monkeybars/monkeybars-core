@@ -1,8 +1,4 @@
-require 'java'
-
-$LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
-$CLASSPATH << File.expand_path(File.dirname(__FILE__) + "/../../lib/foxtrot.jar")
-
+require File.dirname(__FILE__) + '/../spec_helper.rb'
 require 'monkeybars/task_processor'
 
 describe Monkeybars::TaskProcessor, '#repaint_while' do

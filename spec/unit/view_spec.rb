@@ -1,6 +1,4 @@
-$LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
-
-require 'java'
+require File.dirname(__FILE__) + '/../spec_helper.rb'
 require 'monkeybars/view'
 require 'monkeybars/controller'
 require 'spec/unit/test_files.jar'
@@ -64,8 +62,8 @@ end
 
 describe Monkeybars::View, "#update" do
   it "only invokes mappings with direction to view or both" do
-    class TestView < Monkeybars::View; end
-    view = TestView.new
+    class InvokeMappingToView < Monkeybars::View; end
+    view = InvokeMappingToView.new
 
     mock_mappings = Array.new(5) { |i| mock("Mapping#{i}", :from_view => nil)}
     mock_mappings[0].should_receive(:maps_to_view?).and_return(true)
@@ -79,7 +77,7 @@ describe Monkeybars::View, "#update" do
     mock_mappings[4].should_receive(:maps_to_view?).and_return(false)
     mock_mappings[4].should_not_receive(:to_view)
     
-    TestView.should_receive(:view_mappings).and_return(mock_mappings)
+    InvokeMappingToView.should_receive(:view_mappings).and_return(mock_mappings)
     
     view.update(nil, {})
   end
@@ -87,8 +85,8 @@ end
 
 describe Monkeybars::View, "#write_state" do
   it "only invokes mappings with direction from view or both" do
-    class TestView < Monkeybars::View; end
-    view = TestView.new
+    class InvokeMappingFromView < Monkeybars::View; end
+    view = InvokeMappingFromView.new
 
     mock_mappings = Array.new(5) { |i| mock("Mapping#{i}", :from_view => nil)}
     mock_mappings[0].should_receive(:maps_from_view?).and_return(true)
@@ -102,27 +100,24 @@ describe Monkeybars::View, "#write_state" do
     mock_mappings[4].should_receive(:maps_from_view?).and_return(false)
     mock_mappings[4].should_not_receive(:from_view)
     
-    TestView.should_receive(:view_mappings).and_return(mock_mappings)
+    InvokeMappingFromView.should_receive(:view_mappings).and_return(mock_mappings)
     
     view.write_state(nil, {})
   end
 end
 
 describe Monkeybars::View, "#process_signal" do
-  before(:each) do
-    Object.send(:remove_const, :TestView) if Object.const_defined? :TestView
     
-    class TestView < Monkeybars::View
+    class ProcessSignalView < Monkeybars::View
       define_signal :signal1, :handler
 
       def handler(model, transfer)
         raise Exception unless block_given?
       end
     end
-  end
   
   it "invokes the method associated with the signal when called and passes along any block passed to it" do
-    view = TestView.new
+    view = ProcessSignalView.new
     lambda {view.process_signal(:signal1, nil, nil) {"this is a dummy block"}}.should_not raise_error(Exception)
   end
 end

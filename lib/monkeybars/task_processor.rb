@@ -1,4 +1,3 @@
-require 'foxtrot.jar'
 include_class "foxtrot.Worker"
 include_class "foxtrot.Job"
 

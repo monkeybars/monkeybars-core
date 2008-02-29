@@ -1,6 +1,4 @@
-$LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
-
-require 'java'
+require File.dirname(__FILE__) + '/../spec_helper.rb'
 require 'monkeybars'
 
 describe "disable_handlers method" do

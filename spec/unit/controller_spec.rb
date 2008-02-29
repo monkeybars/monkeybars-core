@@ -1,7 +1,4 @@
-require 'java'
-
-$LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
-
+require File.dirname(__FILE__) + '/../spec_helper.rb'
 require 'monkeybars/view'
 require 'monkeybars/controller'
 require 'spec/unit/test_files.jar'

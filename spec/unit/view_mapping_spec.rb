@@ -1,9 +1,10 @@
-$LOAD_PATH.unshift(File.expand_path(File.dirname(__FILE__) + "/../../lib"))
-require 'java'
+require File.dirname(__FILE__) + '/../spec_helper.rb'
 require 'monkeybars/view'
 require 'spec/unit/test_files.jar'
 
 require 'monkeybars/view_mapping'
+
+TEST_DATA = "bazz"
 
 describe Monkeybars::Mapping, "instantiation" do
   it "only accepts :view, :model, :tranfer, :using and :ignoring as parameter keys" do
@@ -81,7 +82,6 @@ describe "Monkeybars::Mapping's transfer of data to the view" do
     class MockData; attr_accessor :foo, :bar ;end
     view = MockData.new
     model = MockData.new
-    TEST_DATA = "bazz"    
     model.bar = TEST_DATA
     
     mapping = Monkeybars::Mapping.new(:view => "foo", :model => "bar")
@@ -91,7 +91,6 @@ describe "Monkeybars::Mapping's transfer of data to the view" do
   
   it "transfers mapped transfer hash properties to the related view properties" do
     class MockData; attr_accessor :view_property ;end
-    TEST_DATA = "bazz"
     transfer = {"foo" => TEST_DATA, :bar => TEST_DATA}
      
     view = MockData.new
@@ -143,8 +142,7 @@ describe "Monkeybars::Mapping's transfer of data to the view" do
   end
   
   it "triggers disabling of declared listeners" do
-    TEST_DATA = "foo"
-    model = Struct.new(:bar).new(:bar => TEST_DATA)
+    model = Struct.new(:bar).new(:bar => "foo")
     view = mock("View")
  
     view.should_receive(:get_field_value).with("test_label").and_return(view)
@@ -161,7 +159,6 @@ describe "Monkeybars::Mapping's transfer of data from the view" do
     class MockData; attr_accessor :foo, :bar ;end
     view = MockData.new
     model = MockData.new
-    TEST_DATA = "bazz"    
     view.foo = TEST_DATA
     
     mapping = Monkeybars::Mapping.new(:view => "foo", :model => "bar")
@@ -171,7 +168,6 @@ describe "Monkeybars::Mapping's transfer of data from the view" do
   
   it "transfers mapped transfer hash properties from the related view properties" do
     class MockData; attr_accessor :view_property ;end
-    TEST_DATA = "bazz"
     view = MockData.new
     view.view_property = TEST_DATA
   
