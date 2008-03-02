@@ -4,6 +4,7 @@ require 'monkeybars/controller'
 require 'spec/unit/test_files.jar'
 include_class 'java.awt.event.ActionEvent'
 include_class 'java.awt.event.MouseEvent'
+include_class 'java.awt.event.WindowEvent'
 
 
 class TestView < Monkeybars::View
@@ -214,3 +215,95 @@ describe Monkeybars::Controller, "#signal" do
     lambda {controller.signal(:signal1) {"dummy block"}}.should_not raise_error(Exception)
   end
 end
+
+describe Monkeybars::Controller, "closing the controller" do
+  
+  module Monkeybars
+    class Controller
+      def self.cleanup_instances
+        class_variable_get(:@@instance_list).clear
+      end
+    end
+  end
+  
+  before(:each) { Monkeybars::Controller::cleanup_instances }
+  
+  class ClosingTestView < Monkeybars::View
+    set_java_class 'org.monkeybars.TestView'
+    def close
+      java_window.process_window_event WindowEvent.new(java_window, WindowEvent::WINDOW_CLOSING)
+    end
+  end
+
+  class ClosingController < Monkeybars::Controller
+    set_view 'ClosingTestView'
+  end
+  
+  class AnotherClosingController < Monkeybars::Controller
+    set_view 'ClosingTestView'
+  end
+  
+
+  def close_controller_test_case(close_action = nil)
+    ClosingController.set_close_action(close_action) unless close_action.nil?
+    controller = ClosingController.instance
+    view = controller.instance_variable_get("@__view")
+    yield controller, view
+    view.close
+  end
+  
+  it "should trigger unload if no close action is specified" do
+    close_controller_test_case do |controller, view| # default
+      controller.should_receive :unload
+      view.should_receive :unload
+      view.should_receive :dispose
+    end
+  end
+  
+  it "should should trigger unload if :close action is specified" do
+    close_controller_test_case :close do |controller, view|
+      controller.should_receive :unload
+      view.should_receive :unload
+      view.should_receive :dispose
+    end
+  end
+  
+  it "should should trigger unload on all controllers if :exit action is specified and the system should exit" do
+    close_controller_test_case :exit do |controller, view|
+      expectations = lambda {|c, v|
+        c.should_receive :unload
+        v.should_receive :unload
+        v.should_receive :dispose
+      }
+      expectations.call(controller, view)
+      
+      another_controller = AnotherClosingController.instance
+      another_view = another_controller.instance_variable_get("@__view")
+      expectations.call(another_controller, another_view)
+
+      java.lang.System.should_receive :exit
+    end
+  end
+  
+  it "should not trigger unload when the controller is configured with :nothing action" do
+    close_controller_test_case :nothing do |controller, view|
+      controller.should_not_receive :unload
+      view.should_not_receive :unload
+    end
+  end
+
+  it "should not trigger unload when the controller is configured with :dispose action but the view should be disposed" do
+    close_controller_test_case(:dispose) do |controller, view|
+      controller.should_not_receive :unload
+      view.should_receive :dispose
+    end
+  end
+
+  it "should not trigger unload when the controller is configured with :hide action but the view should be hidden" do
+    close_controller_test_case(:hide) do |controller, view|
+      controller.should_not_receive :unload
+      view.should_receive :hide
+    end
+  end
+end
+

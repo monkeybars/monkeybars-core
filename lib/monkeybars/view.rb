@@ -226,7 +226,7 @@ module Monkeybars
     # MonkeybarsWindowAdapter.
     def close_action(action, handler = nil)
       if @main_view_component.kind_of?(javax.swing.JFrame) || @main_view_component.kind_of?(javax.swing.JInternalFrame) || @main_view_component.kind_of?(javax.swing.JDialog)
-        if :method == action
+        if CloseActions::METHOD == action
           @main_view_component.default_close_operation = CloseActions::DO_NOTHING
           unless @main_view_component.kind_of?(javax.swing.JInternalFrame)
             @main_view_component.add_window_listener(handler)

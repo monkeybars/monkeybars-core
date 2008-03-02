@@ -82,10 +82,9 @@ module Monkeybars
       @@instance_lock[self.class].synchronize do
         controller = @@instance_list[self]
         unless controller.empty?
-          1 == controller.size ? controller.last : controller
-        else
-          controller << __new__
           controller.last
+        else
+          __new__
         end
       end
     end
@@ -207,7 +206,6 @@ module Monkeybars
     # * :nothing
     # * :close (default)
     # * :exit
-    # * :method => symbol_of_method_to_invoke_on_close
     # * :dispose
     # * :hide
     #
@@ -216,8 +214,6 @@ module Monkeybars
     # - action :close - calls the controller's close method
     # - action :exit - closes the application when the window's close
     #   button is pressed    
-    # - action :method => :my_close_method # sets a window listener to
-    #   invoke :my_close_method when the windowClosing event is fired
     # - action :dispose - default action, calls Swing's dispose method which
     #   will release the resources for the window and its components, can be 
     #   brought back with a call to show
@@ -258,7 +254,7 @@ module Monkeybars
     
     def self.__new__
       object = new
-      @@instance_list[self.class] << object
+      @@instance_list[self] << object
       object
     end    
     
@@ -293,10 +289,9 @@ module Monkeybars
         end  
       end
       
-      if self.class.class_variables.member?("@@close_action")
-        action = self.class.send(:class_variable_get, :@@close_action)
-      else
-        action = :close
+      action = close_action
+      unless [:nothing, :close, :exit, :dispose, :hide].include?(action)
+        raise "Unknown close action: #{action}.  Only :nothing, :close, :exit, :dispose, and :hide are supported"
       end
       
       window_type = if @__view.instance_variable_get(:@main_view_component).kind_of? javax.swing.JInternalFrame
@@ -306,32 +301,21 @@ module Monkeybars
       end
       
       unless @__view.nil?
-        case action.kind_of?(Hash) ? action.keys[0] : action
-        when :nothing
-          @__view.close_action(Monkeybars::View::CloseActions::DO_NOTHING)
-        when :dispose
-          @__view.close_action(Monkeybars::View::CloseActions::DISPOSE)
-        when :exit
-          @__view.close_action(Monkeybars::View::CloseActions::EXIT)
-        when :hide
-          @__view.close_action(Monkeybars::View::CloseActions::HIDE)
-        when :close
-          @__view.close_action(Monkeybars::View::CloseActions::METHOD, MonkeybarsWindowAdapter.new(:"#{window_type}Closing" => self.method(:built_in_close_method)))
-        when :method
-          begin
-            close_handler = self.method(action[:method])
-          rescue NameError
-            raise "Close action method: '#{action[:method]}' was not found for class #{self.class}"
-          end
-          @__view.close_action(Monkeybars::View::CloseActions::METHOD, MonkeybarsWindowAdapter.new(:"#{window_type}Closing" => close_handler))
-        else
-          raise "Unknown close action: #{action.kind_of? Hash ? action.keys[0] : action}"
-        end
+        @__view.close_action(Monkeybars::View::CloseActions::METHOD, MonkeybarsWindowAdapter.new(:"#{window_type}Closing" => self.method(:built_in_close_method)))
       end
-
+      
       @closed = true
     end
-
+    
+    def close_action
+      if self.class.class_variables.member?("@@close_action")
+        action = self.class.send(:class_variable_get, :@@close_action)
+      else
+        action = :close
+      end
+      action
+    end
+    
     public
     def update
       self.class.send(:class_variable_get, :@@update_method).call if self.class.class_variables.member?("@@update_method_name")
@@ -358,6 +342,11 @@ module Monkeybars
     # Hides the view
     def hide
       @__view.hide
+    end
+    
+    # Disposes the view
+    def dispose
+      @__view.dispose
     end
 
     # Shows the view
@@ -553,7 +542,19 @@ module Monkeybars
     end
     
     def built_in_close_method(event)
-      close
+      if event.getID == java.awt.event.WindowEvent::WINDOW_CLOSING
+        case close_action
+        when :close
+          close
+        when :exit
+          Monkeybars::Controller.active_controllers.values.flatten.each {|c| c.close }
+          java.lang.System.exit(0)
+        when :hide
+          hide
+        when :dispose
+          dispose
+        end
+      end
     end
   end
 
