@@ -4,7 +4,7 @@ include_class javax.swing.KeyStroke
 require "monkeybars/inflector"
 require 'monkeybars/validated_hash'
 require 'monkeybars/view_mapping'
-
+require 'monkeybars/view_nesting'
 
 module Monkeybars
   class UndefinedControlError < Exception; end
@@ -66,6 +66,11 @@ module Monkeybars
     end
     
     private
+    @@view_nestings_for_child_view ||= {}
+    def self.view_nestings
+      @@view_nestings_for_child_view[self] ||= {}
+    end
+    
     @@view_mappings_for_child_view ||= {}   
     def self.view_mappings
       @@view_mappings_for_child_view[self] ||= []
@@ -196,9 +201,15 @@ module Monkeybars
       signal_mappings[signal] = method_name
     end
     
+    # Nests subcontrollers
+    def self.nest(properties)
+      view_nestings[properties[:sub_view]] ||= []
+      view_nestings[properties[:sub_view]] << Nesting.new(properties)
+    end
+    
     def initialize
       @__field_references = {}
-
+      
       @@is_a_java_class = !self.class.instance_java_class.nil? && self.class.instance_java_class.ancestors.member?(java.lang.Object)
       if @@is_a_java_class
         @main_view_component = self.class.instance_java_class.new
@@ -295,6 +306,14 @@ module Monkeybars
       end
     end
     
+    def add_nested_view(nested_name, nested_view, nested_view_component, model, transfer)
+      self.class.view_nestings[nested_name].select{|nesting| nesting.nests_with_add?}.each {|nesting| nesting.add(self, nested_view, nested_view_component, model, transfer)}
+    end
+    
+    def remove_nested_view(nested_name, model, transfer)
+      self.class.view_nestings[nested_name].select{|nesting| nesting.nests_with_remove?}.each {|nesting| nesting.remove(self, model, transfer)}
+    end
+    
     def update(model, transfer)
       self.class.view_mappings.select{|mapping| mapping.maps_to_view?}.each {|mapping| mapping.to_view(self, model, transfer)}
       transfer.clear
@@ -385,10 +404,8 @@ module Monkeybars
   
 end
 
-Component = java.awt.Component
-# The java.awt.Component class is opened and a new method is added to allow
-# you to ignore certain events during a call to update_view.
-class Component
+
+module HandlerContainer
   # Removes the handlers associated with a control for the duration of the block.
   # All handlers are re-added to the component afterwards.
   #
@@ -413,4 +430,16 @@ class Component
       end 
     end
   end
+end
+
+PlainDocument = javax.swing.text.PlainDocument
+class PlainDocument
+  include HandlerContainer
+end
+
+Component = java.awt.Component
+# The java.awt.Component class is opened and a new method is added to allow
+# you to ignore certain events during a call to update_view.
+class Component
+  include HandlerContainer
 end

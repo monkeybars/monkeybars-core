@@ -92,6 +92,21 @@ module Monkeybars
       end
     end
     
+    def self.create_instance
+      @@instance_lock[self.class].synchronize do
+        controllers = @@instance_list[self]
+        controllers << __new__
+        controllers.last
+      end
+    end
+    
+    def self.destroy_instance(controller)
+      @@instance_lock[self.class].synchronize do
+        controllers = @@instance_list[self]
+        controllers.delete controller
+      end
+    end
+    
     # Declares the view class (as a symbol) to use when instantiating the controller.
     # 
     #   set_view :MyView
@@ -269,7 +284,8 @@ module Monkeybars
       @__model = create_new_model unless self.class.model_class.nil?
       @__transfer = {}
       @__registered_handlers = Hash.new{|h,k| h[k] = []}
-
+      @__nested_controllers = {}
+      
       unless self.class.handlers.empty?
         if @__view.nil?
           raise "A view must be declared in order to add event listeners"
@@ -342,7 +358,10 @@ module Monkeybars
     # Triggers updating of the view based on the mapping and the current contents
     # of the model and the transfer
     def update_view
-      execute_on_edt { @__view.update(model, transfer) }
+      execute_on_edt do 
+        @__view.update(model, transfer)
+        @__nested_controllers.values.each {|controller_group| controller_group.each {|controller| controller.update_view}}
+      end
     end
     
     # Sends a signal to the view.  The view will process the signal (if it is
@@ -350,6 +369,19 @@ module Monkeybars
     # as a block.
     def signal(signal_name, &callback)
       execute_on_edt { @__view.process_signal(signal_name, model, transfer, &callback) }
+    end
+    
+    # Stores a controller under this one with the given key
+    def add_nested_controller(name, sub_controller)
+      @__nested_controllers[name] ||= []
+      @__nested_controllers[name] << sub_controller
+      nested_view = sub_controller.instance_variable_get(:@__view)
+      @__view.add_nested_view(name, nested_view, nested_view.instance_variable_get(:@main_view_component), model, transfer)
+    end
+    
+    # Removes the controller with the given name
+    def remove_nested_controller(name, sub_controller)
+      @__nested_controllers[name].delete sub_controller
     end
     
     # Returns true if the view is visible, false otherwise
@@ -481,6 +513,10 @@ module Monkeybars
           end
         end
       end
+    end
+    
+    def sub_controllers
+      @__sub_controllers ||= {}
     end
     
     def model

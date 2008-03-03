@@ -126,7 +126,11 @@ module Monkeybars
       else
         field = view.get_field_value(/^(\w+)\.?/.match(@view_property)[1])
         @event_types_to_ignore.each do |event_type|
-          field.disable_handlers(event_type, &block)
+          unless event_type.to_s == "document"
+            field.disable_handlers(event_type, &block)
+          else
+            field.document.disable_handlers(event_type, &block)
+          end
         end
       end
     end
