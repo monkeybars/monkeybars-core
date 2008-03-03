@@ -19,6 +19,7 @@ end
 
 desc "Run all specs"
 Spec::Rake::SpecTask.new do |t|
+  t.libs << File.expand_path(File.dirname(__FILE__) + "/lib")
   t.spec_files = FileList['spec/unit/**/*_spec.rb']
   t.spec_opts = ['--color']
 end

@@ -4,6 +4,7 @@ include_class javax.swing.KeyStroke
 require "monkeybars/inflector"
 require 'monkeybars/validated_hash'
 require 'monkeybars/view_mapping'
+require 'monkeybars/task_processor'
 require 'monkeybars/view_nesting'
 
 module Monkeybars
@@ -56,6 +57,7 @@ module Monkeybars
   # should respond to any methods that normally interact with the Java object such
   # as visisble?, hide, and dispose
   class View
+    include TaskProcessor
  
     module CloseActions #:nodoc:
       DO_NOTHING = javax::swing::WindowConstants::DO_NOTHING_ON_CLOSE
@@ -235,7 +237,7 @@ module Monkeybars
     # MonkeybarsWindowAdapter.
     def close_action(action, handler = nil)
       if @main_view_component.kind_of?(javax.swing.JFrame) || @main_view_component.kind_of?(javax.swing.JInternalFrame) || @main_view_component.kind_of?(javax.swing.JDialog)
-        if :method == action
+        if CloseActions::METHOD == action
           @main_view_component.default_close_operation = CloseActions::DO_NOTHING
           unless @main_view_component.kind_of?(javax.swing.JInternalFrame)
             @main_view_component.add_window_listener(handler)

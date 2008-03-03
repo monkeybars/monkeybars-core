@@ -7,6 +7,8 @@
 
 package org.monkeybars;
 
+import java.awt.event.WindowEvent;
+
 public class TestView extends javax.swing.JFrame {
     
     private int primitiveVariable = 20;
@@ -15,6 +17,20 @@ public class TestView extends javax.swing.JFrame {
     /** Creates new form TestView */
     public TestView() {
         initComponents();
+    }
+    
+    /**
+     * Added as a convenience method to be able to send WindowEvents to this frame.
+     * This is effectively the same as what happens when the user controls the window
+     * via the minimize/maximize or close buttons
+     * 
+     * The parent method is protected so this one just exposes the call for testing
+     * purposes.
+     * @param e
+     */
+    @Override
+    public void processWindowEvent(WindowEvent e) {
+        super.processWindowEvent(e);
     }
     
     /** This method is called from within the constructor to

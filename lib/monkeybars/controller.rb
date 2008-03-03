@@ -3,10 +3,7 @@ require 'thread'
 require "monkeybars/inflector"
 require "monkeybars/view"
 require "monkeybars/event_handler"
-require 'foxtrot.jar'
-include_class "foxtrot.Worker"
-include_class "foxtrot.Job"
-
+require "monkeybars/task_processor"
 module Monkeybars
   # Controllers are the traffic cops of your application.  They decide how to react to
   # events, they coordinate interaction with other controllers and they define some of
@@ -72,6 +69,7 @@ module Monkeybars
   # super as the first line).
   #
   class Controller
+    include TaskProcessor
     METHOD_NOT_FOUND = :method_not_found
     @@instance_list ||= Hash.new {|hash, key| hash[key] = []}
     @@instance_lock ||= Hash.new {|hash, key| hash[key] = Mutex.new }
@@ -84,10 +82,9 @@ module Monkeybars
       @@instance_lock[self.class].synchronize do
         controller = @@instance_list[self]
         unless controller.empty?
-          1 == controller.size ? controller.last : controller
-        else
-          controller << __new__
           controller.last
+        else
+          __new__
         end
       end
     end
@@ -224,7 +221,6 @@ module Monkeybars
     # * :nothing
     # * :close (default)
     # * :exit
-    # * :method => symbol_of_method_to_invoke_on_close
     # * :dispose
     # * :hide
     #
@@ -233,8 +229,6 @@ module Monkeybars
     # - action :close - calls the controller's close method
     # - action :exit - closes the application when the window's close
     #   button is pressed    
-    # - action :method => :my_close_method # sets a window listener to
-    #   invoke :my_close_method when the windowClosing event is fired
     # - action :dispose - default action, calls Swing's dispose method which
     #   will release the resources for the window and its components, can be 
     #   brought back with a call to show
@@ -275,7 +269,7 @@ module Monkeybars
     
     def self.__new__
       object = new
-      @@instance_list[self.class] << object
+      @@instance_list[self] << object
       object
     end    
     
@@ -311,10 +305,9 @@ module Monkeybars
         end  
       end
       
-      if self.class.class_variables.member?("@@close_action")
-        action = self.class.send(:class_variable_get, :@@close_action)
-      else
-        action = :close
+      action = close_action
+      unless [:nothing, :close, :exit, :dispose, :hide].include?(action)
+        raise "Unknown close action: #{action}.  Only :nothing, :close, :exit, :dispose, and :hide are supported"
       end
       
       window_type = if @__view.instance_variable_get(:@main_view_component).kind_of? javax.swing.JInternalFrame
@@ -324,32 +317,21 @@ module Monkeybars
       end
       
       unless @__view.nil?
-        case action.kind_of?(Hash) ? action.keys[0] : action
-        when :nothing
-          @__view.close_action(Monkeybars::View::CloseActions::DO_NOTHING)
-        when :dispose
-          @__view.close_action(Monkeybars::View::CloseActions::DISPOSE)
-        when :exit
-          @__view.close_action(Monkeybars::View::CloseActions::EXIT)
-        when :hide
-          @__view.close_action(Monkeybars::View::CloseActions::HIDE)
-        when :close
-          @__view.close_action(Monkeybars::View::CloseActions::METHOD, MonkeybarsWindowAdapter.new(:"#{window_type}Closing" => self.method(:built_in_close_method)))
-        when :method
-          begin
-            close_handler = self.method(action[:method])
-          rescue NameError
-            raise "Close action method: '#{action[:method]}' was not found for class #{self.class}"
-          end
-          @__view.close_action(Monkeybars::View::CloseActions::METHOD, MonkeybarsWindowAdapter.new(:"#{window_type}Closing" => close_handler))
-        else
-          raise "Unknown close action: #{action.kind_of? Hash ? action.keys[0] : action}"
-        end
+        @__view.close_action(Monkeybars::View::CloseActions::METHOD, MonkeybarsWindowAdapter.new(:"#{window_type}Closing" => self.method(:built_in_close_method)))
       end
-
+      
       @closed = true
     end
-
+    
+    def close_action
+      if self.class.class_variables.member?("@@close_action")
+        action = self.class.send(:class_variable_get, :@@close_action)
+      else
+        action = :close
+      end
+      action
+    end
+    
     public
     def update
       self.class.send(:class_variable_get, :@@update_method).call if self.class.class_variables.member?("@@update_method_name")
@@ -358,17 +340,14 @@ module Monkeybars
     # Triggers updating of the view based on the mapping and the current contents
     # of the model and the transfer
     def update_view
-      execute_on_edt do 
-        @__view.update(model, transfer)
-        @__nested_controllers.values.each {|controller_group| controller_group.each {|controller| controller.update_view}}
-      end
+      @__view.update(model, transfer)
+      @__nested_controllers.values.each {|controller_group| controller_group.each {|controller| controller.update_view}}
     end
     
     # Sends a signal to the view.  The view will process the signal (if it is
     # defined in the view) and optionally invoke the callback that is passed in 
     # as a block.
-    def signal(signal_name, &callback)
-      execute_on_edt { @__view.process_signal(signal_name, model, transfer, &callback) }
+      @__view.process_signal(signal_name, model, transfer, &callback)
     end
     
     # Stores a controller under this one with the given key
@@ -383,7 +362,7 @@ module Monkeybars
     def remove_nested_controller(name, sub_controller)
       @__nested_controllers[name].delete sub_controller
     end
-    
+
     # Returns true if the view is visible, false otherwise
     def visible?
       @__view.visible?
@@ -392,6 +371,11 @@ module Monkeybars
     # Hides the view
     def hide
       @__view.hide
+    end
+    
+    # Disposes the view
+    def dispose
+      @__view.dispose
     end
 
     # Shows the view
@@ -454,9 +438,7 @@ module Monkeybars
       end
       
       unless METHOD_NOT_FOUND == proc
-        p = lambda { 0 == proc.arity ? proc.call : proc.call(event) }
-        runner = Runner.new(&p)
-        Worker.post(runner)
+        0 == proc.arity ? proc.call : proc.call(event)
       end
     end
     
@@ -477,17 +459,6 @@ module Monkeybars
     
     def self.view_class=(view)
       @@view_class_for_child_controller[self] = view
-    end
-    
-    # Passes the supplied block to execute on the Swing Event Dispatch Thread
-    # if it isn't already on there.  Otherwise, just calls the block
-    def execute_on_edt(&block)
-      if is_on_edt; block.call 
-      else javax::swing::SwingUtilities.invoke_later(block) end
-    end
-    
-    def is_on_edt
-      javax::swing::SwingUtilities.is_event_dispatch_thread
     end
     
     def add_implicit_handler_for_method(method)
@@ -604,20 +575,22 @@ module Monkeybars
     end
     
     def built_in_close_method(event)
-      close
+      if event.getID == java.awt.event.WindowEvent::WINDOW_CLOSING
+        case close_action
+        when :close
+          close
+        when :exit
+          Monkeybars::Controller.active_controllers.values.flatten.each {|c| c.close }
+          java.lang.System.exit(0)
+        when :hide
+          hide
+        when :dispose
+          dispose
+        end
+      end
     end
   end
 
-  class Runner < Job
-    attr_accessor :proc
-    def initialize(&proc)
-      @proc = proc
-    end
-    
-    def run
-      @proc.call
-    end
-  end
 end
 
 

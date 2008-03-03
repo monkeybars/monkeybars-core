@@ -98,11 +98,11 @@
 				</blockquote>
 				
 				<p>
-						How about setting the form to invoke a certain method when the user clicks the close button in the upper corner?
+						How about sending some long-running task off to its own thread without freezing the GUI until it is done?
 				</p>
 				
 				<blockquote>
-						<p>close_action :method => :my_close_method
+						<p>repaint_while { # call some long running method }
 				</blockquote>
 
 				<p>
