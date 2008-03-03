@@ -347,6 +347,7 @@ module Monkeybars
     # Sends a signal to the view.  The view will process the signal (if it is
     # defined in the view) and optionally invoke the callback that is passed in 
     # as a block.
+    def signal(signal_name, &callback)
       @__view.process_signal(signal_name, model, transfer, &callback)
     end
     
