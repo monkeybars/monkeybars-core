@@ -9,7 +9,6 @@ lib/monkeybars/key.rb
 lib/monkeybars/controller.rb
 lib/monkeybars/event_handler.rb
 lib/monkeybars/inflector.rb
-lib/monkeybars/raketask.rb
 lib/monkeybars/validated_hash.rb
 lib/monkeybars/view.rb
 lib/monkeybars/view_mapping.rb
@@ -19,6 +18,9 @@ skeleton/Rakefile
 skeleton/lib
 skeleton/lib/monkeybars.jar
 skeleton/src
+skeleton/src/main.rb
+skeleton/src/application_controller.rb
+skeleton/src/application_view.rb
 spec/unit/component_mixin_spec.rb
 spec/unit/controller_spec.rb
 spec/unit/inflector_spec.rb
