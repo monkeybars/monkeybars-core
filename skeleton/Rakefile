@@ -1,41 +1,81 @@
 require 'rake'
 require 'fileutils'
 
-rule(/generate.+/) do |t|
-  match = /generate (.+)/.match(t.to_s)
-  if match[1]
-    generate_tuple(match[1])
+# Beginning of generator tasks =================================================
+
+rule(/^generate/) do |t|
+  ARGV[1..-1].each do |generator_command|
+    command, argument = generator_command.split("=")
+    puts "generate: #{command} with args: #{argument}"
+    case command
+    when "ALL"
+      generate_tuple(argument)
+    when "VIEW"
+      generate_view(argument)
+    when "CONTROLLER"
+      generate_controller(argument)
+    when "MODEL"
+      generate_model(argument)
+    end
   end
 end
 
 def generate_tuple(path)
-  FileUtils.mkdir_p path.gsub("\\", "/")
-  FileUtils.cd(path)
-  name = path.split("/").last
-  controller = File.new("#{name}_controller.rb", "w+")
-  File.new("#{name}_model.rb")
-  view = File.new("#{name}_view.rb", "w+")
-  
+  pwd = FileUtils.pwd
+  generate_controller(path)
+  FileUtils.cd(pwd)
+  generate_model(path)
+  FileUtils.cd(pwd)
+  generate_view(path)
+end
+
+def generate_controller(path)
+  name = setup_directory(path)
+  controller = File.new("#{name}_controller.rb", "w")
   name = camelize(name)
   controller << <<-ENDL
-    class #{name}Controller < Monkeybars::Controller
-      set_model '#{name}Model'
-      set_view '#{name}View'
-    end
-  ENDL
-  
-  view << <<-ENDL
-    class #{name}View < Monkeybars::View
-      set_java_class ''
-    end
+class #{name}Controller < ApplicationController
+  set_model '#{name}Model'
+  set_view '#{name}View'
+  close_action :exit
+end
   ENDL
 end
 
-def camelize(first_letter_in_uppercase = true)
+def generate_model(path)
+  name = setup_directory(path)
+  model = File.new("#{name}_model.rb", "w")
+  name = camelize(name)
+  model << <<-ENDL
+class #{name}Model
+
+end
+  ENDL
+end
+
+def generate_view(path)
+  name = setup_directory(path)
+  view = File.new("#{name}_view.rb", "w")
+  name = camelize(name)
+  view << <<-ENDL
+class #{name}View < ApplicationView
+  set_java_class ''
+end
+  ENDL
+end
+
+def setup_directory(path)
+  FileUtils.mkdir_p path.gsub("\\", "/")
+  FileUtils.cd(path)
+  path.split("/").last
+end
+
+def camelize(name, first_letter_in_uppercase = true)
+  name = name.to_s
   if first_letter_in_uppercase
-    self.to_s.gsub(/\/(.?)/) { "::" + $1.upcase }.gsub(/(^|_)(.)/) { $2.upcase }
+    name.gsub(/\/(.?)/) { "::" + $1.upcase }.gsub(/(^|_)(.)/) { $2.upcase }
   else
-    self.to_s[0..0] + camelize(self.to_s)[1..-1]
+    name[0..0] + camelize(name[1..-1])
   end
 end
 
