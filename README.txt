@@ -41,4 +41,4 @@ Monkeybars is the work of many contributors.
 
 David Koontz - Core contributor, original author
 Logan Barnett - Core contributor, nested views, signals, many bug fixes
-Mario Aquino - Core contributor, listener registration, foxtrot integration, many bug fixes and specs
+Mario Aquino - Core contributor, listener registration, Foxtrot integration, many bug fixes and specs
