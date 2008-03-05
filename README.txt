@@ -1,6 +1,6 @@
 Monkeybars 0.6.0
     by David Koontz
-    http://monkeybars.rubyforge.org
+    http://www.monkeybars.org
 
 == Description:
   
@@ -19,10 +19,26 @@ There are three ways to obtain Monkeybars.  All are located on the RubyForge pro
 
 == Mailing list, downloads and bug reports
 
-All three of these services can be found on the RubyForge project page:
+The mailing list is hosted by Google
+
+ http://groups.google.com/group/monkeybars
+
+The issue tracking system is hosted by Happy Camper Studios
+
+ http://rm.happycamperstudios.com/projects/show/3
+
+Downloads are hosted by RubyForge
 
  http://rubyforge.org/projects/monkeybars
 
 == License:
 
 Monkeybars is licensed under the Ruby licence, see COPYING.txt.
+
+== Attribution:
+
+Monkeybars is the work of many contributors.
+
+David Koontz - Core contributor, original author
+Logan Barnett - Core contributor, nested views, signals, many bug fixes
+Mario Aquino - Core contributor, listener registration, Foxtrot integration, many bug fixes and specs
