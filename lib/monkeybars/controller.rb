@@ -44,6 +44,19 @@ module Monkeybars
   # 
   #   def some_component_event_name(swing_event)
   #
+  # While an event handler is running, the Swing Event Dispatch Thread (usually called the EDT)
+  # is blocked and as such, no repaint events will occur and no new events will be proccessed.
+  # If you have a process that is long running, but you don't want to make asynchronous
+  # by spawning a new thread, you can use the repaint_while method which takes a block to execute
+  # while still allowing Swing to process graphical events (but not new interaction events like
+  # mouse clicking or typing).
+  #
+  #   def button_action_performed
+  #     repaint_while do
+  #       sleep(20) # the gui is still responsive while we're in here sleeping
+  #       some_component.text = "done sleeping!"
+  #     end
+  #   end
   # ==========
   #
   # Example of a controller, this assumes the existance of a Ruby class named MyModel that
@@ -67,7 +80,6 @@ module Monkeybars
   # It is important that you do not implement your own initialize and update methods, this
   # will interfere with the operation of the Controller class (or if you do be sure to call
   # super as the first line).
-  #
   class Controller
     include TaskProcessor
     METHOD_NOT_FOUND = :method_not_found
@@ -328,8 +340,14 @@ module Monkeybars
     end
     
     # Sends a signal to the view.  The view will process the signal (if it is
-    # defined in the view) and optionally invoke the callback that is passed in 
-    # as a block.
+    # defined in the view via View.define_signal) and optionally invoke the 
+    #callback that is passed in as a block.
+    #
+    # This is useful for communicating one off events such as a state transition
+    #
+    #   def update
+    #     signal(:red_alert) if model.threshold_exceeded?
+    #   end
     def signal(signal_name, &callback)
       @__view.process_signal(signal_name, model, transfer, &callback)
     end
@@ -387,7 +405,6 @@ module Monkeybars
       update_view
       show
     end
-
     
     # Stub to be overriden in sub-class.  This is where you put the code you would
     # normally put in initialize, it will be called the first time open is called
@@ -471,14 +488,15 @@ module Monkeybars
     # on the model.
     # 
     #   def ok_button_action_perfomed(event)
-    #     update_model(view_state, :user_name, :password)
+    #     view_model, view_transfer = view_state
+    #     update_model(view_model, :user_name, :password)
     #   end
     # 
     # This would have the same effect as:
     # 
-    #   new_state = view_state
-    #   model.user_name = new_state.user_name
-    #   model.password = new_state.password
+    #   view_model, view_transfer = view_state
+    #   model.user_name = view_model.user_name
+    #   model.password = view_model.password
     def update_model(source, *properties)
       properties.each do |property|
         @__model.send("#{property}=", source.send(property))
@@ -495,10 +513,21 @@ module Monkeybars
       self.class.model_class.new
     end
     
+    def create_new_view
+      self.class.view_class.new
+    end
+    
     # Returns the contents of the view as defined by the view's mappings.  For use
     # in event handlers.  In an event handler this method is thread safe as Swing
     # is single threaded and blocks any modification to the GUI while the handler
-    # is being proccessed.
+    # is being proccessed.  Each time this method is called the view mappings are
+    # called, so if you want to use several model or transfer properties you should
+    # save off the return values into a local variable.
+    #
+    #   def ok_button_action_performed
+    #     view_model, view_transfer = view_state
+    #     # do various things with view_model or view_transfer here
+    #    end
     def view_state
       unless self.class.model_class.nil?
         model = create_new_model 
@@ -507,10 +536,6 @@ module Monkeybars
       else
         nil
       end
-    end
-
-    def create_new_view
-      self.class.view_class.new
     end
     
     def add_handler_for(handler_type, components)
