@@ -199,6 +199,8 @@ module Monkeybars
       view_mappings << Mapping.new(:using => [to_view_method, from_view_method], :ignoring => handlers_to_ignore)
     end
     
+    # Declares a mapping between a signal and a method to process the signal.  Only
+    # signals that are declared are processed.
     def self.define_signal(signal, method_name)
       signal_mappings[signal] = method_name
     end
@@ -275,18 +277,8 @@ module Monkeybars
     # field.
     #
     # add_handler returns a hash of objects as keys and their normalized (underscored
-    # and . replaced with _) names as values
+    # and . replaced with _ ) names as values
     def add_handler(handler, component)
-#      if "global" == component
-#        get_all_components.each do |component|
-#          listener = "add#{type.camelize}Listener"
-#          if (component.respond_to?(listener))
-#            mappings[component] = component.name.underscore.gsub(".", "_") if component.name
-#            component.send(listener, handler)
-#          end
-#        end
-#      elsif
-#     TODO: HANDLE global
       component = component.to_s
       if "global" == component
         raise "Global handler declarations are not yet supported"

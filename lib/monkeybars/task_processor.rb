@@ -2,6 +2,8 @@ include_class "foxtrot.Worker"
 include_class "foxtrot.Job"
 
 module Monkeybars
+  # Module that contains methods and classes used to take care of background
+  # task processing.  Primarily this is the repaint_while method.
   module TaskProcessor
     # Passes the supplied block to a separate thread and returns the result 
     # of the executed block back to the caller.  This should be utilized for long-
