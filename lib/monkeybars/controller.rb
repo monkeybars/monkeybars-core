@@ -109,23 +109,15 @@ module Monkeybars
     # the MyView class.
     #
     def self.set_view(view)
-      begin
-        self.view_class = view.constantize
-      rescue NameError
-        require view.underscore
-        self.view_class = view.constantize
-      end
+      puts "assigning #{view} as view class"
+      self.view_class = view
     end
 
     # See set_view.  The declared model class is also auto-required prior to the
     # class being instantiated.
     def self.set_model(model)
-      begin
-        self.model_class = model.constantize
-      rescue NameError
-        require model.underscore
-        self.model_class = model.constantize
-      end
+      puts "assigning #{model} as model class"
+      self.model_class = model
     end
 
     # Declares which components you want events to be generated for.  add_listener
@@ -510,11 +502,21 @@ module Monkeybars
     end
     
     def create_new_model
-      self.class.model_class.new
+      begin
+        self.class.model_class.constantize.new
+      rescue NameError
+        require self.class.model_class.underscore
+        self.class.model_class.constantize.new
+      end
     end
     
     def create_new_view
-      self.class.view_class.new
+      begin
+        self.class.view_class.constantize.new
+      rescue NameError
+        require self.class.view_class.underscore
+        self.class.view_class.constantize.new
+      end
     end
     
     # Returns the contents of the view as defined by the view's mappings.  For use
