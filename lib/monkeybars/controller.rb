@@ -109,14 +109,12 @@ module Monkeybars
     # the MyView class.
     #
     def self.set_view(view)
-      puts "assigning #{view} as view class"
       self.view_class = view
     end
 
     # See set_view.  The declared model class is also auto-required prior to the
     # class being instantiated.
     def self.set_model(model)
-      puts "assigning #{model} as model class"
       self.model_class = model
     end
 
