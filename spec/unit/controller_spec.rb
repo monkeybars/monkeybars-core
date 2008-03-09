@@ -21,8 +21,8 @@ describe Monkeybars::Controller do
     TestController.set_view "MyTestView"
     TestController.set_model "MyTestModel"
     
-    TestController.send(:view_class).should == MyTestView
-    TestController.send(:model_class).should == MyTestModel
+    TestController.send(:view_class).should == "MyTestView"
+    TestController.send(:model_class).should == "MyTestModel"
   end
   
   it "allows the model and view to be overriden externally" do
@@ -39,8 +39,8 @@ describe Monkeybars::Controller do
     TestController.set_view "MyTestView2"
     TestController.set_model "MyTestModel2"
     
-    TestController.send(:view_class).should == MyTestView2
-    TestController.send(:model_class).should == MyTestModel2
+    TestController.send(:view_class).should == "MyTestView2"
+    TestController.send(:model_class).should == "MyTestModel2"
   end
 end
 
