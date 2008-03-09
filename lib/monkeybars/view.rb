@@ -6,7 +6,6 @@ require 'monkeybars/validated_hash'
 require 'monkeybars/view_mapping'
 require 'monkeybars/task_processor'
 
-
 module Monkeybars
   class UndefinedControlError < Exception; end
   class InvalidSignalHandlerError < Exception; end
