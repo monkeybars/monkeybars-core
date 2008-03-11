@@ -27,7 +27,7 @@ end
 desc "Removes the output directory"
 task :clean do
   FileUtils.remove_dir(OUTPUT_DIR) if File.directory? OUTPUT_DIR
-  FileUtils.rm("skeleton/lib/monkeybars.jar", :force => true)
+  FileUtils.rm("skeleton/lib/monkeybars-#{Monkeybars::VERSION}.jar", :force => true)
 end
 
 task :prepare do
@@ -43,7 +43,7 @@ task :jar => [:prepare] do
     FileUtils.remove_dir('META-INF', true)
   end
   puts `jar cf #{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar -C lib monkeybars.rb -C lib monkeybars -C #{BUILD_DIR} .`
-  FileUtils.cp("#{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar", "skeleton/lib/monkeybars.jar")
+  FileUtils.cp("#{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar", "skeleton/lib/monkeybars-#{Monkeybars::VERSION}.jar")
 end
 
 desc "Executes a clean followed by a jar"
@@ -51,7 +51,7 @@ task :clean_jar => [:clean, :jar]
 
 desc "Use this instead of the hoe included install_gem"
 task :mb_install_gem => [:jar, :gem] do
-    puts `gem install pkg/monkeybars-#{Monkeybars::VERSION}.gem`
+    puts `gem install -l pkg/monkeybars-#{Monkeybars::VERSION}.gem`
 end
 
 desc "Only used to make RSpec usable with Java Swing code. Wraps up the target of various view tests into a jar that can be require'd and thus loaded on the classpath by JRuby"

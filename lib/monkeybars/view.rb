@@ -63,7 +63,6 @@ module Monkeybars
       DISPOSE = javax::swing::WindowConstants::DISPOSE_ON_CLOSE
       EXIT = javax::swing::WindowConstants::EXIT_ON_CLOSE
       HIDE = javax::swing::WindowConstants::HIDE_ON_CLOSE
-      METHOD = :method
     end
     
     private

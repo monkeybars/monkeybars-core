@@ -1,3 +1,7 @@
+== 0.6.1 / 2008-3-12
+ * Fixed several errors in the generator.
+ * Improved usability of Monkeybars outside of an IDE
+
 == 0.6.0 / 2008-02-14
  * New mechanism (transfer) for transferring data to/from the view
  * New way of informing the view of events (signal)

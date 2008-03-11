@@ -1,4 +1,4 @@
-Monkeybars 0.6.0
+Monkeybars 0.6.1
     by David Koontz
     http://www.monkeybars.org
 

@@ -6,7 +6,6 @@ require 'fileutils'
 rule(/^generate/) do |t|
   ARGV[1..-1].each do |generator_command|
     command, argument = generator_command.split("=")
-    puts "generate: #{command} with args: #{argument}"
     case command
     when "ALL"
       generate_tuple(argument)
@@ -37,7 +36,7 @@ def generate_controller(path)
 class #{name}Controller < ApplicationController
   set_model '#{name}Model'
   set_view '#{name}View'
-  close_action :exit
+  set_close_action :exit
 end
   ENDL
 end

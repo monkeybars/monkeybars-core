@@ -14,10 +14,9 @@ lib/monkeybars/validated_hash.rb
 lib/monkeybars/view.rb
 lib/monkeybars/view_mapping.rb
 lib/monkeybars_version.rb
-lib/foxtrot.jar
 skeleton/Rakefile
 skeleton/lib
-skeleton/lib/monkeybars.jar
+skeleton/lib/monkeybars-0.6.1.jar
 skeleton/src
 skeleton/src/manifest.rb
 skeleton/src/main.rb
