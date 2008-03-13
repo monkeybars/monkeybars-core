@@ -21,8 +21,8 @@ describe Monkeybars::Controller do
     TestController.set_view "MyTestView"
     TestController.set_model "MyTestModel"
     
-    TestController.send(:view_class).should == MyTestView
-    TestController.send(:model_class).should == MyTestModel
+    TestController.send(:view_class).should == "MyTestView"
+    TestController.send(:model_class).should == "MyTestModel"
   end
   
   it "allows the model and view to be overriden externally" do
@@ -39,8 +39,8 @@ describe Monkeybars::Controller do
     TestController.set_view "MyTestView2"
     TestController.set_model "MyTestModel2"
     
-    TestController.send(:view_class).should == MyTestView2
-    TestController.send(:model_class).should == MyTestModel2
+    TestController.send(:view_class).should == "MyTestView2"
+    TestController.send(:model_class).should == "MyTestModel2"
   end
 end
 
@@ -55,6 +55,46 @@ describe "Controller instantiation" do
     t = TestController.instance
     t2 = TestController.instance
     t.should equal(t2)
+  end
+end
+
+describe Monkeybars::Controller, ' nesting' do
+  it "invokes controller group's nesting#add on add_nested_controller" do
+    controller = TestController.instance
+    controller.stub! :model
+    controller.stub! :transfer
+    view = mock("view")
+    view.should_receive :add_nested_view
+    controller.instance_variable_set(:@__view, view)
+    
+    foo_component = mock("foo_component")
+    
+    foo_view = mock("foo_view")
+    foo_view.instance_variable_set(:@main_view_component, foo_component)
+    
+    foo_controller = mock("foo_controller")
+    foo_controller.instance_variable_set(:@__view, foo_view)
+    
+    controller.add_nested_controller :foo, foo_controller
+  end
+  
+  it "invokes controller group's nesting#remove on remove_nested_controller" do
+    controller = TestController.instance
+    controller.stub! :model
+    controller.stub! :transfer
+    view = mock("view")
+    view.should_receive :remove_nested_view
+    controller.instance_variable_set(:@__view, view)
+    
+    foo_component = mock("foo_component")
+    
+    foo_view = mock("foo_view")
+    foo_view.instance_variable_set(:@main_view_component, foo_component)
+    
+    foo_controller = mock("foo_controller")
+    foo_controller.instance_variable_set(:@__view, foo_view)
+    
+    controller.remove_nested_controller :foo, foo_controller
   end
 end
 

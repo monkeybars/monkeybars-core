@@ -1,4 +1,4 @@
-require 'monkeybars'
+require 'manifest'
 require 'rbconfig'
 
 #===============================================================================

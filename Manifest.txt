@@ -19,6 +19,7 @@ skeleton/Rakefile
 skeleton/lib
 skeleton/lib/monkeybars.jar
 skeleton/src
+skeleton/src/manifest.rb
 skeleton/src/main.rb
 skeleton/src/application_controller.rb
 skeleton/src/application_view.rb

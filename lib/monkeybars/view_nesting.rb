@@ -38,12 +38,12 @@ module Monkeybars
       true
     end
     
-    def add(view, model, transfer)
-      instance_eval("view.#{@view_property}.add #{@sub_view}")
+    def add(view, nested_view, nested_component, model, transfer)
+      instance_eval("view.#{@view_property}.add nested_component")
     end
     
-    def remove(view, model, transfer)
-      instance_eval("view.#{@view_property}.remove #{@sub_view}")
+    def remove(view, nested_view, nested_component, model, transfer)
+      instance_eval("view.#{@view_property}.remove nested_component")
     end
   end
   
@@ -70,9 +70,9 @@ module Monkeybars
       view.send(@add_method, nested_view, nested_component, model, transfer)
     end
     
-    def remove(view, model, transfer)
+    def remove(view, nested_view, nested_component, model, transfer)
       #instance_eval("view.#{@remove_method}(@sub_view, model, transfer)")
-      view.send(@remove_method, @sub_view, model, transfer)
+      view.send(@remove_method, nested_view, nested_component, model, transfer)
     end
   end
   
