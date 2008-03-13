@@ -7,9 +7,10 @@ require 'monkeybars/view_mapping'
 TEST_DATA = "bazz"
 
 describe Monkeybars::Mapping, "instantiation" do
-  it "only accepts :view, :model, :tranfer, :using and :ignoring as parameter keys" do
+  it "only accepts :view, :model, :tranfer, :using , :translate_using and :ignoring as parameter keys" do
       lambda{Monkeybars::Mapping.new(:view => '', :model => '', :using => '', :ignoring => '')}.should_not raise_error(InvalidHashKeyError)
       lambda{Monkeybars::Mapping.new(:view => '', :transfer => '', :using => '', :ignoring => '')}.should_not raise_error(InvalidHashKeyError)
+      lambda{Monkeybars::Mapping.new(:view => '', :transfer => '', :translate_using => '', :ignoring => '')}.should_not raise_error(InvalidHashKeyError)
       lambda{Monkeybars::Mapping.new(:foo => '', :bar => '', :baz => '')}.should raise_error(InvalidHashKeyError)  
     end
     
@@ -25,6 +26,10 @@ describe Monkeybars::Mapping, "instantiation" do
     
     it "raises an InvalidMappingError when both a model and transfer parameters are given" do
       lambda {Monkeybars::Mapping.new(:model => '', :transfer => '')}.should raise_error(Monkeybars::InvalidMappingError)
+    end
+    
+    it "raises an InvalidMappingError when both a :using and :translate_using parameters are given" do
+      lambda {Monkeybars::Mapping.new(:view => '', :model => '', :using => '', :translate_using => '')}.should raise_error(Monkeybars::InvalidMappingError)
     end
     
     it "creates a PropertyMapping object when a view and model are given" do
@@ -53,6 +58,10 @@ describe Monkeybars::Mapping, "instantiation" do
       Monkeybars::Mapping.new(:view => "", :transfer => "", :using => ["",""]).class.should == Monkeybars::MethodMapping
     end
     
+    it "creates a MethodMapping object when :translate_using is provided" do
+      Monkeybars::Mapping.new(:view => "", :transfer => "", :translate_using => {}).class.should == Monkeybars::MethodMapping
+    end
+    
     it "sets the mapping direction to DIRECTION_TO_VIEW when the first (or only one) method is provided" do
       Monkeybars::Mapping.new(:view => "", :transfer => "", :using => "").send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_TO_VIEW
       Monkeybars::Mapping.new(:view => "", :transfer => "", :using => ["", nil]).send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_TO_VIEW
@@ -78,6 +87,17 @@ describe Monkeybars::Mapping, "instantiation" do
 end
 
 describe "Monkeybars::Mapping's transfer of data to the view" do
+  it "uses the right hand value (value) on the translation to the view property" do
+    class MockData; attr_accessor :foo, :bar ;end
+    view = MockData.new
+    model = MockData.new
+    model.bar = :model_data
+    
+    mapping = Monkeybars::Mapping.new(:view => "foo", :model => "bar", :translate_using => {:model_data => "view_data"})
+    mapping.to_view view, model, nil
+    view.foo.should == "view_data"
+  end
+  
   it "transfers mapped model properties to the related view properties" do
     class MockData; attr_accessor :foo, :bar ;end
     view = MockData.new
@@ -108,7 +128,7 @@ describe "Monkeybars::Mapping's transfer of data to the view" do
     class MockData
       attr_accessor :bar
       def in_method(foo)
-          foo + 1
+        foo + 1
       end
     end
     model = Struct.new(:foo).new(5)
@@ -122,7 +142,7 @@ describe "Monkeybars::Mapping's transfer of data to the view" do
     class MockData
       attr_accessor :bar
       def in_method(foo)
-	      foo + 1
+	foo + 1
       end
     end
     transfer = {:foo => 5}
@@ -155,6 +175,17 @@ describe "Monkeybars::Mapping's transfer of data to the view" do
 end
 
 describe "Monkeybars::Mapping's transfer of data from the view" do
+  it "uses the left hand value (key) on the translation to the view property" do
+    class MockData; attr_accessor :foo, :bar ;end
+    view = MockData.new
+    model = MockData.new
+    view.foo = "view_data"
+    
+    mapping = Monkeybars::Mapping.new(:view => "foo", :model => "bar", :translate_using => {:model_data => "view_data"})
+    mapping.from_view(view, model, nil)
+    model.bar.should == :model_data
+  end
+  
   it "transfers mapped model properties from the related view properties" do
     class MockData; attr_accessor :foo, :bar ;end
     view = MockData.new
