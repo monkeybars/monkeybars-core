@@ -2,7 +2,7 @@ require 'monkeybars/validated_hash'
 
 module Monkeybars
   class InvalidMappingError < Exception; end
-
+  class TranslationError < Exception; end
   # This is an internal class used only by Monkeybars::View
   #
   # A Mapping records the relationship between the fields of a model or
@@ -221,7 +221,12 @@ module Monkeybars
     
     def model_to_view(view, model)
       if using_translation?
-        instance_eval("view.#{@view_property} = @to_view_translation[model.#{@model_property}]")
+        model_data = instance_eval("model.#{@model_property}")
+        unless @to_view_translation.has_key? model_data
+          raise Monkeybars::TranslationError.new("The key #{model_data.inspect} for model #{model.class} does not exist #{@to_view_translation.inspect}") 
+        end
+        
+        instance_eval("view.#{@view_property} = @to_view_translation[model_data]")
       elsif :default == @to_view_method
         super
       else
@@ -231,7 +236,11 @@ module Monkeybars
     
     def transfer_to_view(view, transfer)
       if using_translation?
-        instance_eval("view.#{@view_property} = @to_view_translation[transfer[#{@transfer_property.inspect}]]")
+        transfer_data = instance_eval("transfer[#{@transfer_property.inspect}]")
+        unless @to_view_translation.has_key? transfer_data
+          raise Monkeybars::TranslationError.new("The key #{transfer_data.inspect} for transfer does not exist #{@to_view_translation.inspect}")
+        end
+        instance_eval("view.#{@view_property} = @to_view_translation[transfer_data]")
       elsif :default == @to_view_method
         super
       else
@@ -241,7 +250,11 @@ module Monkeybars
     
     def model_from_view(view, model)
       if using_translation?
-        instance_eval("model.#{@model_property} = @from_view_translation[view.#{@view_property}]")
+        view_data = instance_eval("view.#{@view_property}")
+        unless @from_view_translation.has_key? view_data
+          raise Monkeybars::TranslationError.new("The key #{view_data.inspect} for view #{view.class} does not exist #{@from_view_translation.inspect}")
+        end
+        instance_eval("model.#{@model_property} = @from_view_translation[view_data]")
       elsif :default == @from_view_method
         super
       else
@@ -251,7 +264,11 @@ module Monkeybars
     
     def transfer_from_view(view, transfer)
       if using_translation?
-        instance_eval("transfer[#{@transfer_property.inspect}] = @from_view_translation[view.#{@view_property}]")
+        view_data = instance_eval("view.#{@view_property}")
+        unless @from_view_translation.has_key? view_data
+          raise Monkeybars::TranslationError.new("The key #{view_data.inspect} for view #{view.class} does not exist #{@from_view_translation.inspect}")
+        end
+        instance_eval("transfer[#{@transfer_property.inspect}] = @from_view_translation[view_data]")
       elsif :default == @from_view_method
         super
       else
