@@ -474,7 +474,7 @@ module Monkeybars
     def add_implicit_handler_for_method(method)
       component_match = nil
       Monkeybars::Handlers::ALL_EVENT_NAMES.each do |event|
-        component_match = Regexp.new("(.*)_(#{event})").match(method)
+        component_match = Regexp.new("(.*)_(#{event})").match(method.to_s)
         break unless component_match.nil?
       end
 
@@ -603,21 +603,26 @@ module Monkeybars
     end
     
     def built_in_close_method(event)
-      if event.getID == java.awt.event.WindowEvent::WINDOW_CLOSING
+      if event.getID == java.awt.event.WindowEvent::WINDOW_CLOSING || event.getID == javax.swing.event.InternalFrameEvent::INTERNAL_FRAME_CLOSING
         case close_action
         when :close
           close
         when :exit
+          #TODO: Potential infinite recursion for multiple controllers
           Monkeybars::Controller.active_controllers.values.flatten.each {|c| c.close }
           java.lang.System.exit(0)
         when :hide
           hide
         when :dispose
           dispose
+        else
+          raise Monkeybars::InvalidCloseAction.new("Invalid close action: #{event.getID.inspect}")
         end
       end
     end
   end
+  
+  class InvalidCloseAction < Exception; end
 
 end
 
