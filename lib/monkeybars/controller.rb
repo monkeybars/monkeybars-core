@@ -604,7 +604,7 @@ module Monkeybars
     
     def built_in_close_method(event)
       if event.getID == java.awt.event.WindowEvent::WINDOW_CLOSING || event.getID == javax.swing.event.InternalFrameEvent::INTERNAL_FRAME_CLOSING
-        case close_action
+        case (action = close_action)
         when :close
           close
         when :exit
@@ -616,7 +616,7 @@ module Monkeybars
         when :dispose
           dispose
         else
-          raise Monkeybars::InvalidCloseAction.new("Invalid close action: #{event.getID.inspect}")
+          raise Monkeybars::InvalidCloseAction.new("Invalid close action: #{action}") unless action == :nothing
         end
       end
     end
