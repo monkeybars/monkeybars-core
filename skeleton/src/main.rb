@@ -1,3 +1,8 @@
+$LOAD_PATH << File.dirname(__FILE__)
+Dir.glob(File.expand_path(File.dirname(__FILE__) + "/**")).each do |directory|
+  $LOAD_PATH << directory unless directory =~ /\.\w+$/ #File.directory? is broken in current JRuby for dirs inside jars
+end
+
 require 'manifest'
 require 'rbconfig'
 
@@ -7,9 +12,9 @@ require 'rbconfig'
 
 case Config::CONFIG["host_os"]
 when /darwin/i
-  apple.laf.use_screen_menu_bar="true"
+  java.lang.System.setProperty("apple.laf.useScreenMenuBar", "true")
 end
 
-# End of platoform specific code
+# End of platform specific code
 #===============================================================================
 
