@@ -2,7 +2,7 @@ require 'monkeybars/validated_hash'
 
 module Monkeybars
   class InvalidMappingError < Exception; end
-
+  class TranslationError < Exception; end
   # This is an internal class used only by Monkeybars::View
   #
   # A Mapping records the relationship between the fields of a model or
@@ -22,7 +22,7 @@ module Monkeybars
     end
     
     def self.new(mapping_options = {})
-      mapping_options.validate_only(:view, :model, :transfer, :using, :ignoring)
+      mapping_options.validate_only(:view, :model, :transfer, :using, :ignoring, :translate_using)
       mapping_options.extend HashMappingValidation
       
       if mapping_options.properties_only?
@@ -40,6 +40,8 @@ module Monkeybars
       @view_property = mapping_options[:view] || nil
       @model_property = mapping_options[:model] || nil
       @transfer_property = mapping_options[:transfer] || nil
+      @data_translation_hash = mapping_options[:translate_using]
+      
       @to_view_method, @from_view_method = if mapping_options[:using]
         if mapping_options[:using].kind_of? Array
           [mapping_options[:using][0], mapping_options[:using][1]]
@@ -126,7 +128,11 @@ module Monkeybars
       else
         field = view.get_field_value(/^(\w+)\.?/.match(@view_property)[1])
         @event_types_to_ignore.each do |event_type|
-          field.disable_handlers(event_type, &block)
+          unless event_type.to_s == "document"
+            field.disable_handlers(event_type, &block)
+          else
+            field.document.disable_handlers(event_type, &block)
+          end
         end
       end
     end
@@ -200,8 +206,28 @@ module Monkeybars
   end
 
   class MethodMapping < BasicPropertyMapping
+    
+    def initialize(mapping_properties)
+      super
+      if using_translation?
+        @to_view_translation = @data_translation_hash
+        @from_view_translation = @data_translation_hash.invert
+      end
+    end
+    
+    def using_translation?
+      !@data_translation_hash.nil?
+    end
+    
     def model_to_view(view, model)
-      if :default == @to_view_method
+      if using_translation?
+        model_data = instance_eval("model.#{@model_property}")
+        unless @to_view_translation.has_key? model_data
+          raise Monkeybars::TranslationError.new("The key #{model_data.inspect} for model #{model.class} does not exist #{@to_view_translation.inspect}") 
+        end
+        
+        instance_eval("view.#{@view_property} = @to_view_translation[model_data]")
+      elsif :default == @to_view_method
         super
       else
         instance_eval("view.#{@view_property} = view.method(@to_view_method).call(model.#{@model_property})")
@@ -209,7 +235,13 @@ module Monkeybars
     end
     
     def transfer_to_view(view, transfer)
-      if :default == @to_view_method
+      if using_translation?
+        transfer_data = instance_eval("transfer[#{@transfer_property.inspect}]")
+        unless @to_view_translation.has_key? transfer_data
+          raise Monkeybars::TranslationError.new("The key #{transfer_data.inspect} for transfer does not exist #{@to_view_translation.inspect}")
+        end
+        instance_eval("view.#{@view_property} = @to_view_translation[transfer_data]")
+      elsif :default == @to_view_method
         super
       else
         instance_eval("view.#{@view_property} = view.method(@to_view_method).call(transfer[#{@transfer_property.inspect}])")
@@ -217,7 +249,13 @@ module Monkeybars
     end
     
     def model_from_view(view, model)
-      if :default == @from_view_method
+      if using_translation?
+        view_data = instance_eval("view.#{@view_property}")
+        unless @from_view_translation.has_key? view_data
+          raise Monkeybars::TranslationError.new("The key #{view_data.inspect} for view #{view.class} does not exist #{@from_view_translation.inspect}")
+        end
+        instance_eval("model.#{@model_property} = @from_view_translation[view_data]")
+      elsif :default == @from_view_method
         super
       else
         instance_eval("model.#{@model_property} = view.method(@from_view_method).call(view.#{@view_property})")
@@ -225,7 +263,13 @@ module Monkeybars
     end
     
     def transfer_from_view(view, transfer)
-      if :default == @from_view_method
+      if using_translation?
+        view_data = instance_eval("view.#{@view_property}")
+        unless @from_view_translation.has_key? view_data
+          raise Monkeybars::TranslationError.new("The key #{view_data.inspect} for view #{view.class} does not exist #{@from_view_translation.inspect}")
+        end
+        instance_eval("transfer[#{@transfer_property.inspect}] = @from_view_translation[view_data]")
+      elsif :default == @from_view_method
         super
       else
         instance_eval("transfer[#{@transfer_property.inspect}] = view.method(@from_view_method).call(view.#{@view_property})")
@@ -235,15 +279,22 @@ module Monkeybars
   
   module HashMappingValidation
     def properties_only?
-      (at_least_one_property_present? and !at_least_one_method_present?) ? true : false
+      properties = (at_least_one_property_present? and !at_least_one_method_present?) 
+      (properties and not translate_using_present?) ? true : false
     end
 
     def both_properties_and_methods?
-      (both_properties_present? and at_least_one_method_present?) ? true : false
+      using = (both_properties_present? and at_least_one_method_present?) 
+      translation = translate_using_present?
+      ((using or translation) and not (using and translation)) ? true : false
     end
-
+    
     def methods_only?
       (!at_least_one_property_present? and at_least_one_method_present?) ? true : false
+    end
+    
+    def translate_using_present?
+      !self[:translate_using].nil?
     end
 
     def both_properties_present?
@@ -255,7 +306,7 @@ module Monkeybars
     end
     
     def both_methods_present?
-      !to_view_method.nil? and !from_view_method.nil?
+      ((!to_view_method.nil? and !from_view_method.nil?) or translate_using_present?)
     end
 
     def to_view_method_present?

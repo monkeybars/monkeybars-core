@@ -58,6 +58,46 @@ describe "Controller instantiation" do
   end
 end
 
+describe Monkeybars::Controller, ' nesting' do
+  it "invokes controller group's nesting#add on add_nested_controller" do
+    controller = TestController.instance
+    controller.stub! :model
+    controller.stub! :transfer
+    view = mock("view")
+    view.should_receive :add_nested_view
+    controller.instance_variable_set(:@__view, view)
+    
+    foo_component = mock("foo_component")
+    
+    foo_view = mock("foo_view")
+    foo_view.instance_variable_set(:@main_view_component, foo_component)
+    
+    foo_controller = mock("foo_controller")
+    foo_controller.instance_variable_set(:@__view, foo_view)
+    
+    controller.add_nested_controller :foo, foo_controller
+  end
+  
+  it "invokes controller group's nesting#remove on remove_nested_controller" do
+    controller = TestController.instance
+    controller.stub! :model
+    controller.stub! :transfer
+    view = mock("view")
+    view.should_receive :remove_nested_view
+    controller.instance_variable_set(:@__view, view)
+    
+    foo_component = mock("foo_component")
+    
+    foo_view = mock("foo_view")
+    foo_view.instance_variable_set(:@main_view_component, foo_component)
+    
+    foo_controller = mock("foo_controller")
+    foo_controller.instance_variable_set(:@__view, foo_view)
+    
+    controller.remove_nested_controller :foo, foo_controller
+  end
+end
+
 describe Monkeybars::Controller, "#handle_event" do
   before(:each) do
     

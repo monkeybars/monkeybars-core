@@ -101,6 +101,21 @@ module Monkeybars
       end
     end
     
+    def self.create_instance
+      @@instance_lock[self.class].synchronize do
+        controllers = @@instance_list[self]
+        controllers << __new__
+        controllers.last
+      end
+    end
+    
+    def self.destroy_instance(controller)
+      @@instance_lock[self.class].synchronize do
+        controllers = @@instance_list[self]
+        controllers.delete controller
+      end
+    end
+    
     # Declares the view class (as a symbol) to use when instantiating the controller.
     # 
     #   set_view :MyView
@@ -265,7 +280,8 @@ module Monkeybars
       @__model = create_new_model unless self.class.model_class.nil?
       @__transfer = {}
       @__registered_handlers = Hash.new{|h,k| h[k] = []}
-
+      @__nested_controllers = {}
+      
       unless self.class.handlers.empty?
         if @__view.nil?
           raise "A view must be declared in order to add event listeners"
@@ -327,6 +343,7 @@ module Monkeybars
     # of the model and the transfer
     def update_view
       @__view.update(model, transfer)
+      @__nested_controllers.values.each {|controller_group| controller_group.each {|controller| controller.update_view}}
     end
     
     # Sends a signal to the view.  The view will process the signal (if it is
@@ -342,6 +359,21 @@ module Monkeybars
       @__view.process_signal(signal_name, model, transfer, &callback)
     end
     
+    # Stores a controller under this one with the given key
+    def add_nested_controller(name, sub_controller)
+      @__nested_controllers[name] ||= []
+      @__nested_controllers[name] << sub_controller
+      nested_view = sub_controller.instance_variable_get(:@__view)
+      @__view.add_nested_view(name, nested_view, nested_view.instance_variable_get(:@main_view_component), model, transfer)
+    end
+    
+    # Removes the controller with the given name
+    def remove_nested_controller(name, sub_controller)
+      @__nested_controllers[name].delete sub_controller
+      nested_view = sub_controller.instance_variable_get(:@__view)
+      @__view.remove_nested_view(name, nested_view, nested_view.instance_variable_get(:@main_view_component), model, transfer)
+    end
+
     # Returns true if the view is visible, false otherwise
     def visible?
       @__view.visible?
@@ -442,7 +474,7 @@ module Monkeybars
     def add_implicit_handler_for_method(method)
       component_match = nil
       Monkeybars::Handlers::ALL_EVENT_NAMES.each do |event|
-        component_match = Regexp.new("(.*)_(#{event})").match(method)
+        component_match = Regexp.new("(.*)_(#{event})").match(method.to_s)
         break unless component_match.nil?
       end
 
@@ -462,6 +494,10 @@ module Monkeybars
           end
         end
       end
+    end
+    
+    def sub_controllers
+      @__sub_controllers ||= {}
     end
     
     def model
@@ -567,21 +603,26 @@ module Monkeybars
     end
     
     def built_in_close_method(event)
-      if event.getID == java.awt.event.WindowEvent::WINDOW_CLOSING
-        case close_action
+      if event.getID == java.awt.event.WindowEvent::WINDOW_CLOSING || event.getID == javax.swing.event.InternalFrameEvent::INTERNAL_FRAME_CLOSING
+        case (action = close_action)
         when :close
           close
         when :exit
+          #TODO: Potential infinite recursion for multiple controllers
           Monkeybars::Controller.active_controllers.values.flatten.each {|c| c.close }
           java.lang.System.exit(0)
         when :hide
           hide
         when :dispose
           dispose
+        else
+          raise Monkeybars::InvalidCloseAction.new("Invalid close action: #{action}") unless action == :nothing
         end
       end
     end
   end
+  
+  class InvalidCloseAction < Exception; end
 
 end
 

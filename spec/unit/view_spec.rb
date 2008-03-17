@@ -7,6 +7,14 @@ class TestingView < Monkeybars::View
   set_java_class 'org.monkeybars.TestView'  
 end
 
+describe Monkeybars::View, ".nest" do
+  it 'creates a Nesting object for this subclass' do
+    TestingView.nest :sub_view => :foo , :view => :bar
+    TestingView.send(:view_nestings)[:foo].size.should > 0
+  end
+end
+
+
 describe Monkeybars::View, "#get_field_value" do
   before(:each) do
     @view = TestingView.new
