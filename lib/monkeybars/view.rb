@@ -205,7 +205,37 @@ module Monkeybars
       signal_mappings[signal] = method_name
     end
     
-    # Nests subcontrollers
+    # Declares how nested views from their respective nested controllers are to be
+    # added and removed from the view. Multiple nestings for the different nested
+    # controllers are possible through the :sub_view value, which is basically a grouping
+    # name. Two kinds of mapping are possible: A property nesting, and a method nesting.
+    # Property nesting:
+    # 
+    #   nest :sub_view => :user_list, :view => :user_panel
+    #   
+    # This essentially calls user_panel.add nested_view_component on Monkeybars::Controller#add_nested_controller
+    # and user_panel.remove nested_view_componenent on Monkeybars::Controller#remove_nested_controller.
+    # A layout on the container being used is preferred, as no orientational information will be conveyed
+    # to either component.
+    # 
+    # Method nesting:
+    #   
+    #   nest :sub_view => :user_list, :using => [:add_user, :remove_user]
+    # 
+    #   def add_user(nested_view, nested_component, model, transfer)
+    #     user_panel.add nested_component
+    #     nested_component.set_location(nested_component.x, nested_component.height * transfer[:user_list_size])
+    #   end
+    #   
+    #   def remove_user(nested_view, nested_component, model, transfer)
+    #     user_panel.remove nested_component
+    #     # lots of code to re-order previous components
+    #   end
+    # 
+    # Method nesting calls the methods in :using (in the same way that :using works for mapping) during
+    # add and remove (Monkeybars::Controller#add_nested_controller and Monkeybars::Controller#remove_nested_controller).
+    # Both methods are passed in the view, the view's main view component, the mode, and the transfer, respectively.
+    # 
     def self.nest(properties)
       view_nestings[properties[:sub_view]] ||= []
       view_nestings[properties[:sub_view]] << Nesting.new(properties)

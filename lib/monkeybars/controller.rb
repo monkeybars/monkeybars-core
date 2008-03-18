@@ -101,6 +101,13 @@ module Monkeybars
       end
     end
     
+    # Always returns a new instance of the controller. 
+    # 
+    #   controller = MyController.create_instance
+    #   
+    # Controllers created this way must be destroyed using
+    # Monkeybars::Controller#destroy_instance.
+    #
     def self.create_instance
       @@instance_lock[self.class].synchronize do
         controllers = @@instance_list[self]
@@ -109,6 +116,10 @@ module Monkeybars
       end
     end
     
+    # Destroys the instance of the controller passed in.
+    # 
+    #    MyController.destroy_instance(controller)
+    # 
     def self.destroy_instance(controller)
       @@instance_lock[self.class].synchronize do
         controllers = @@instance_list[self]
@@ -359,7 +370,15 @@ module Monkeybars
       @__view.process_signal(signal_name, model, transfer, &callback)
     end
     
-    # Stores a controller under this one with the given key
+    # Nests a controller under this controller with the given key
+    #   def add_user_button_action_performed
+    #     @controllers << UserController.create_instance
+    #     add_nested_controller(:user_list, @controllers.last)
+    #     @controllers.last.open
+    #   end
+    # This forces the view to perform its nesting.
+    # See also Monkeybars::Controller#remove_nested_controller
+    #
     def add_nested_controller(name, sub_controller)
       @__nested_controllers[name] ||= []
       @__nested_controllers[name] << sub_controller
@@ -367,7 +386,18 @@ module Monkeybars
       @__view.add_nested_view(name, nested_view, nested_view.instance_variable_get(:@main_view_component), model, transfer)
     end
     
-    # Removes the controller with the given name
+    # Removes the nested controller with the given key
+    # This does not do any cleanup on the nested controller's instance.
+    #
+    #   def remove_user_button_action_performed
+    #     remove_nested_controller(:user_list, @controllers.last)
+    #     UserController.destroy_instance @controllers.last
+    #     @controllers.delete @controllers.last
+    #   end
+    #   
+    # This performs the view's nesting.
+    # See also Monkeybars::Controller#add_nested_controller
+    #
     def remove_nested_controller(name, sub_controller)
       @__nested_controllers[name].delete sub_controller
       nested_view = sub_controller.instance_variable_get(:@__view)
