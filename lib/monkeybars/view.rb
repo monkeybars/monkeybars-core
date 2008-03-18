@@ -36,6 +36,8 @@ module Monkeybars
   #     map :view => "okButton.text", :model => :button_text
   #     map :view => "mainTextArea.text", :model => :text, :using => [:convert_to_string, :convert_to_array]
   #     map :view => "titleLabel.selected_text_color", :transfer => :text_color
+  #     COLOR_TRANSLATION = {:red => Color.new(1.0, 0.0, 0.0), :green => Color.new(0.0, 1.0, 0.0), :blue => Color.new(0.0, 0.0, 1.0)} 
+  #     map :view => "titleLabel.selected_text_color", :model => :text, :translate_using => COLOR_TRANSLATION
   #   
   #     def convert_to_string(model) 
   #       model.text.join("\n")
@@ -158,6 +160,13 @@ module Monkeybars
     #   
     # would mean self.foo = from_model() when called by update and
     # would do nothing when called by write_state.
+    # 
+    # For constant value translation, :translate_using provides a one-line approach.
+    # :translate_using takes a hash with the model values as the key, and the view values as the value.
+    # This only works when the view state and the model state has a one-to-one translation.
+    # 
+    #   COLOR_TRANSLATION = {:red => Color.new(1.0, 0.0, 0.0), :green => Color.new(0.0, 1.0, 0.0), :blue => Color.new(0.0, 0.0, 1.0)} 
+    #   map :view => "titleLabel.selected_text_color", :model => :text, :translate_using => COLOR_TRANSLATION
     #
     # If you want to invoke disable_handlers during the call to update
     # you can add the :ignoring key.  The key's value is either a single type or
