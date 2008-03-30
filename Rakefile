@@ -39,10 +39,10 @@ end
 desc "Creates monkeybars.jar file for distribution"
 task :jar => [:prepare] do
   Dir.chdir(BUILD_DIR) do
-    puts `jar xvf ../../lib/foxtrot.jar`
+    $stdout << `jar xvf ../../lib/foxtrot.jar`
     FileUtils.remove_dir('META-INF', true)
   end
-  puts `jar cf #{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar -C lib monkeybars.rb -C lib monkeybars -C #{BUILD_DIR} .`
+  $stdout << `jar cf #{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar -C lib monkeybars.rb -C lib monkeybars -C #{BUILD_DIR} .`
   FileUtils.cp("#{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar", "skeleton/lib/monkeybars-#{Monkeybars::VERSION}.jar")
 end
 
@@ -51,11 +51,11 @@ task :clean_jar => [:clean, :jar]
 
 desc "Use this instead of the hoe included install_gem"
 task :mb_install_gem => [:jar, :gem] do
-    puts `gem install -l pkg/monkeybars-#{Monkeybars::VERSION}.gem`
+    $stdout << `gem install -l pkg/monkeybars-#{Monkeybars::VERSION}.gem`
 end
 
 desc "Only used to make RSpec usable with Java Swing code. Wraps up the target of various view tests into a jar that can be require'd and thus loaded on the classpath by JRuby"
 task :spec_prepare do
-  puts `javac spec/unit/org/monkeybars/TestView.java`
-  puts `jar -cf spec/unit/test_files.jar -C spec/unit org`
+  $stdout << `javac spec/unit/org/monkeybars/TestView.java`
+  $stdout << `jar -cf spec/unit/test_files.jar -C spec/unit org`
 end

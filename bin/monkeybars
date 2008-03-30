@@ -5,8 +5,8 @@ require 'rubygems'
 require 'monkeybars_version'
 
 def help(message = nil)
-  puts message + "\n-----------------------------------\n" unless message.nil?
-  puts <<-ENDL
+  $stdout << message + "\n-----------------------------------\n" unless message.nil?
+  $stdout << <<-ENDL
   Usage:
       monkeybars -h/--help
       monkeybars -v/--version
@@ -23,15 +23,19 @@ else
   when "-h" || "--help" || nil
     help
   when "-v" || "--version"
-    puts "Monkeybars version #{Monkeybars::VERSION}"
+    $stdout << "Monkeybars version #{Monkeybars::VERSION}\n"
   else
     # create new directory and copy app skeleton over
     project_name = ARGV[0]
     
     unless File.directory? project_name
+      $stdout << "Creating directory #{project_name}\n"
       FileUtils.mkdir_p(project_name)
       FileUtils.cd(project_name)
+      $stdout << "Copying monkeybars project structure\n"
       FileUtils.cp_r(File.dirname(__FILE__) + "/../skeleton/.", "./")
+    else
+      $stdout << "Directory already exists, aborting\n"
     end
   end
 end

@@ -13,3 +13,9 @@ module Monkeybars
     end
   end
 end
+
+class Object
+  def add_to_classpath(path)
+    $CLASSPATH << File.expand_path(File.dirname(__FILE__) + "/" + path.gsub("\\", "/"))
+  end
+end

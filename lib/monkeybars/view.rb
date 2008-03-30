@@ -324,7 +324,7 @@ module Monkeybars
       elsif "java_window" == component
         @main_view_component.send("add#{handler.type.camelize}Listener", handler)
       else
-        object = eval component
+        object = instance_eval(component, __FILE__, __LINE__)
         object.send("add#{handler.type.camelize}Listener", handler)
       end
     end
@@ -450,7 +450,7 @@ module HandlerContainer
     types.map! { |t| t.camelize }
     listeners = {}
     types.each do |type|  
-      listener_class = Monkeybars::Handlers::AWT_TYPES.member?(type) ? eval("java.awt.event.#{type}Listener") : eval("javax.swing.event.#{type}Listener")
+      listener_class = Monkeybars::Handlers::AWT_TYPES.member?(type) ? instance_eval("java.awt.event.#{type}Listener", __FILE__, __LINE__) : instance_eval("javax.swing.event.#{type}Listener", __FILE__, __LINE__)
       listeners[type] = self.get_listeners(listener_class.java_class)
       listeners[type].each do |listener|
         self.send("remove#{type}Listener", listener)

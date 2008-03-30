@@ -18,13 +18,17 @@ require 'application_view'
 #===============================================================================
 #
 # Add your own application-wide libraries below.  To include jars, append to
-# $CLASSPATH, for example:
+# $CLASSPATH, or use add_to_classpath, for example:
 # 
 # $CLASSPATH << File.expand_path(File.dirname(__FILE__) + "/../lib/swing-layout-1.0.3.jar")
+#
+# or
+#
+# add_to_classpath "../lib/swing-layout-1.0.3.jar"
 
 case Monkeybars::Resolver.run_location
 when Monkeybars::Resolver::IN_FILE_SYSTEM
   # Files to be added only when running from the file system go here
 when Monkeybars::Resolver::IN_JAR_FILE
-  # Files to be added only when running from within a jar file go here
+  # Files to be added only when run from inside a jar file
 end

@@ -301,7 +301,10 @@ module Monkeybars
         self.class.handlers.each do |handler|            
           add_handler_for handler[:type], handler[:components]
           handler[:components].each do |component|
-            @__registered_handlers[@__view.instance_eval(component.to_s)] << handler[:type].to_s
+            if component.kind_of? Array
+              component = component.first
+            end
+            @__registered_handlers[@__view.instance_eval(component.to_s, __FILE__, __LINE__)] << handler[:type].to_s
           end
         end
       end
@@ -613,14 +616,17 @@ module Monkeybars
       components = ["global"] if components.nil?
       components = [components] unless components.respond_to? :each
       components.each do |component|
-        if component.kind_of? Hash
-          component, component_name = component
+        # handle :components => {"text_area.document" => "text_area"}
+        if component.kind_of? Array
+          component_field = component[0]
+          component_name = component[1]
         else
-          component_name = component.to_s
+          component_field = component
+          component_name = component
         end
         
-        handler = "Monkeybars::#{handler_type.camelize}Handler".constantize.new(self, component_name)
-        @__view.add_handler(handler, component)
+        handler = "Monkeybars::#{handler_type.camelize}Handler".constantize.new(self, component_name.to_s)
+        @__view.add_handler(handler, component_field)
       end
     end
     

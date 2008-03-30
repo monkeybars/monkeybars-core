@@ -23,6 +23,7 @@ skeleton/src/main.rb
 skeleton/src/application_controller.rb
 skeleton/src/application_view.rb
 skeleton/src/resolver.rb
+skeleton/tasks/monkeybars.rake
 spec/unit/component_mixin_spec.rb
 spec/unit/controller_spec.rb
 spec/unit/inflector_spec.rb
