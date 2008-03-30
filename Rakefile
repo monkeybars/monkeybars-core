@@ -46,6 +46,11 @@ task :jar => [:prepare] do
   FileUtils.cp("#{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar", "skeleton/lib/monkeybars-#{Monkeybars::VERSION}.jar")
 end
 
+desc "Creates a zip file version of the project, excluding files from exclude.lst.  **ONLY WORKS ON OSX/Linux**  Yes this sucks, no I don't want to add another dependency at the moment."
+task :zip do
+  `zip -vr pkg/monkeybars-#{Monkeybars::VERSION}.zip ../monkeybars -x@exclude.lst`
+end
+
 desc "Executes a clean followed by a jar"
 task :clean_jar => [:clean, :jar]
 
