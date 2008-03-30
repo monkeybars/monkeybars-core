@@ -46,7 +46,7 @@
 				
 				<p><b>NOTE: For specific syntax examples please see the RDoc.</b></p>
 				<p>
-					Monkeybars, at its core, is an implementation of the <a href="http://en.wikipedia.org/wiki/Model-view-controller">MVC</a> pattern. Monkeybars only specifies constraints for the controller and view by way of a base class, the model can be any Ruby object. 
+					Monkeybars, at its core, is a system for dealing with common tedious programming tasks related to Swing.  Secondarily Monkeybars is an abstraction layer that decouples your logic from your view making testing far easier than in a conventional GUI application.  Monkeybars only specifies constraints for the controller and view by way of a base class, the model can be any Ruby object.
 					<ul>
 						<li>
 							Controllers are responsible for most of the app logic and are the place that event handlers are implemented. Controllers communicate with the view via the model, there is no direct interaction. Controllers act mostly like singletons in that you cannot call Controller.new on one, you must use Controller.instance instead. Controller are different from singletons in that (soon, not quite implemented yet) you can define how many instances of a particular controller can be instantiated. This is useful for commonly reused windows such as an error message box.
@@ -58,7 +58,7 @@
 							Views are responsible for defining what Java class to use when instantiating the controller and how to map data from the model into the view fields. An example of this can be seen by looking at the documentation for View#map.
 						</li>
 					</ul>
-					So let's look at an example of instantiating a MVC set, all three work together as a (mostly) atomic whole. So, in your main file you have:
+					So let's look at an example of instantiating a MVC triad, all three work together as a (mostly) atomic whole. So, in your main file you have:
 				</p>
 				<blockquote>
 					<p>MyController.instance</p>

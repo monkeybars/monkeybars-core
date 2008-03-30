@@ -1,0 +1,10 @@
+This sample application demonstrates the basics of hooking up a form to a
+Controller/Model/View triad.  Just a single button and a single text field
+exist in the form and activating the button changes the text on the
+label on the form.
+
+Run with: jruby src/main.rb
+
+The class files were compiled using Netbeans, thus the existence of a build
+directory, if using rawr or another compilation tool you will need to adjust
+the classpath in manifest.rb to load that location.
