@@ -115,14 +115,28 @@ describe Monkeybars::View, "#write_state" do
 end
 
 describe Monkeybars::View, "#process_signal" do
-    
-    class ProcessSignalView < Monkeybars::View
-      define_signal :signal1, :handler
+  class BasicSignalHandler < Monkeybars::View
+    define_signal :signal1, :handler
+  end  
 
-      def handler(model, transfer)
-        raise Exception unless block_given?
-      end
+  class ProcessSignalView < Monkeybars::View
+    define_signal :signal1, :handler
+
+    def handler(model, transfer)
+      raise Exception unless block_given?
     end
+  end
+
+  it "invokes the mapped method when a signal is received" do
+    view = BasicSignalHandler.new
+    view.should_receive(:handler)
+    view.process_signal(:signal1, nil, nil)
+  end
+  
+  it "ignores signals that have not been defined" do
+    view = BasicSignalHandler.new
+    lambda {view.process_signal(:signal2, nil, nil)}.should_not raise_error(Exception)
+  end
   
   it "invokes the method associated with the signal when called and passes along any block passed to it" do
     view = ProcessSignalView.new

@@ -368,8 +368,10 @@ module Monkeybars
     
     def process_signal(signal, model, transfer, &block)
       handler = self.class.signal_mappings[signal]
-      raise InvalidSignalHandlerError, "There is no handler method '#{handler}' on view #{self.class}" unless respond_to? handler
-      self.send(handler, model, transfer, &block) unless handler.nil?
+      unless handler.nil?
+        raise InvalidSignalHandlerError, "There is no handler method '#{handler}' on view #{self.class}" unless respond_to?(handler)
+        self.send(handler, model, transfer, &block) unless handler.nil?
+      end
     end
     
     # Stub to be overriden in sub-class.  This is where you put the code you would
