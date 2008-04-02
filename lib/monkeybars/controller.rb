@@ -486,6 +486,68 @@ module Monkeybars
     end
     
     private
+    
+    # Returns the model object.  This is the object that is read by the view
+    # when processing view mappings.
+    def model # :doc:
+      @__model
+    end
+    
+    # Returns the transfer object which is a transient hash passed to the view
+    # whenever update_view is called.  The transfer is cleared after each call
+    # to update_view.
+    def transfer # :doc:
+      @__transfer      
+    end
+    
+    # Returns an array containing a model and a transfer hash of the view's current
+    # contents as defined by the view's mappings.  This is for use in event handlers.
+    # The contents of the model and transfer are *not* the same as the contents of
+    # the model and transfer in the controller, if you wish to propogate the values
+    # from the temporary model into the actual model, you must do this yourself.  A
+    # helper method #update_model is provided to make this easier. In an 
+    # event handler this method is thread safe as Swing is single threaded and blocks
+    # any modification to the GUI while the handler is being proccessed.  Each time 
+    # this method is called the view mappings are called, so if you want to use 
+    # several model or transfer properties you should save off the return values 
+    # into a local variable.
+    #
+    #   def ok_button_action_performed
+    #     view_model, view_transfer = view_state
+    #     # do various things with view_model or view_transfer here
+    #   end
+    #
+    def view_state # :doc:
+      unless self.class.model_class.nil?
+        model = create_new_model 
+        @__view.write_state(model, transfer)
+        return model, transfer
+      else
+        nil
+      end
+    end
+    
+    # This method is almost always used from within an event handler to propogate
+    # the view_state to the model. Updates the model from the source provided 
+    # (typically from view_state). The list of properties defines what is modified 
+    # on the model.
+    # 
+    #   def ok_button_action_perfomed(event)
+    #     view_model, view_transfer = view_state
+    #     update_model(view_model, :user_name, :password)
+    #   end
+    # 
+    # This would have the same effect as:
+    # 
+    #   view_model, view_transfer = view_state
+    #   model.user_name = view_model.user_name
+    #   model.password = view_model.password
+    def update_model(source, *properties) # :doc:
+      properties.each do |property|
+        @__model.send("#{property}=", source.send(property))
+      end
+    end
+    
     @@model_class_for_child_controller ||= {}
     def self.model_class
       @@model_class_for_child_controller[self]
@@ -533,40 +595,6 @@ module Monkeybars
       @__sub_controllers ||= {}
     end
     
-    # Returns the model object.  This is the object that is read by the view
-    # when processing view mappings.
-    def model
-      @__model
-    end
-    
-    # Returns the transfer object which is a transient hash passed to the view
-    # whenever update_view is called.  The transfer is cleared after each call
-    # to update_view.
-    def transfer
-      @__transfer      
-    end
-    
-    # This method is almost always used from within an event handler to propogate
-    # the view_state to the model. Updates the model from the source provided 
-    # (typically from view_state). The list of properties defines what is modified 
-    # on the model.
-    # 
-    #   def ok_button_action_perfomed(event)
-    #     view_model, view_transfer = view_state
-    #     update_model(view_model, :user_name, :password)
-    #   end
-    # 
-    # This would have the same effect as:
-    # 
-    #   view_model, view_transfer = view_state
-    #   model.user_name = view_model.user_name
-    #   model.password = view_model.password
-    def update_model(source, *properties)
-      properties.each do |property|
-        @__model.send("#{property}=", source.send(property))
-      end
-    end
-    
     def update_provided_model(source, destination, *properties)
       properties.each do |property|
         destination.send("#{property}=", source.send(property))
@@ -590,29 +618,7 @@ module Monkeybars
         self.class.view_class.constantize.new
       end
     end
-    
-    # Returns the contents of the view as defined by the view's mappings.  For use
-    # in event handlers.  In an event handler this method is thread safe as Swing
-    # is single threaded and blocks any modification to the GUI while the handler
-    # is being proccessed.  Each time this method is called the view mappings are
-    # called, so if you want to use several model or transfer properties you should
-    # save off the return values into a local variable.
-    #
-    #   def ok_button_action_performed
-    #     view_model, view_transfer = view_state
-    #     # do various things with view_model or view_transfer here
-    #   end
-    #
-    def view_state
-      unless self.class.model_class.nil?
-        model = create_new_model 
-        @__view.write_state(model, transfer)
-        return model, transfer
-      else
-        nil
-      end
-    end
-    
+
     def add_handler_for(handler_type, components)
       components = ["global"] if components.nil?
       components = [components] unless components.respond_to? :each
