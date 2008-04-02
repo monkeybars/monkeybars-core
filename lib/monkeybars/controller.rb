@@ -601,7 +601,8 @@ module Monkeybars
     #   def ok_button_action_performed
     #     view_model, view_transfer = view_state
     #     # do various things with view_model or view_transfer here
-    #    end
+    #   end
+    #
     def view_state
       unless self.class.model_class.nil?
         model = create_new_model 

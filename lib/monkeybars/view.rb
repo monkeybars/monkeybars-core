@@ -209,7 +209,15 @@ module Monkeybars
     end
     
     # Declares a mapping between a signal and a method to process the signal.  Only
-    # signals that are declared are processed.
+    # signals that are declared are processed.  When the signal is recieved, the method
+    # is called with the model and the transfer as parameters.
+    #
+    # define_signal :error_state, :disable_go_button
+    # 
+    # def disable_go_button(model, transfer)
+    #   go_button.enabled = false
+    # end
+    #
     def self.define_signal(signal, method_name)
       signal_mappings[signal] = method_name
     end
