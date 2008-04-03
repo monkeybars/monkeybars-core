@@ -11,8 +11,10 @@ require 'rbconfig'
 # that don't work for your platform/application
 
 case Config::CONFIG["host_os"]
-when /darwin/i
+when /darwin/i # OSX specific code
   java.lang.System.setProperty("apple.laf.useScreenMenuBar", "true")
+when /mswin/i # Windows specific code
+when /linux/i # Linux specific code
 end
 
 # End of platform specific code

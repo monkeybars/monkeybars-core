@@ -22,7 +22,7 @@ require 'application_view'
 # 
 # $CLASSPATH << File.expand_path(File.dirname(__FILE__) + "/../lib/swing-layout-1.0.3.jar")
 #
-# or
+# is equivalent to
 #
 # add_to_classpath "../lib/swing-layout-1.0.3.jar"
 
