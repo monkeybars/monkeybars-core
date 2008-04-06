@@ -362,26 +362,26 @@ describe Monkeybars::Controller, "define_handler (class-level)" do
     end
     
     controller = MultiHandlerController.instance
-    controller.handle_event 'test_button', 'action_performed', :foo_event
+    controller.instance_variable_get("@__view").get_field_value("testButton").do_click
     callback_count.should == 2
   end
   
   it "should support multiple handlers for the same event even when there is an explicit callback method declared in the controller" do
     class MultiHandlerController < Monkeybars::Controller
       attr_accessor :callback_count
-      def test_text_field_document_insert_update
+      def test_button_action_performed
         @callback_count += 1
       end
     end
 
     callback_count = 0    
-    MultiHandlerController::define_handler(:test_text_field_document_insert_update) do
+    MultiHandlerController::define_handler(:test_button_action_performed) do
       callback_count += 1
     end
     
     controller = MultiHandlerController.instance
     controller.callback_count = 0
-    controller.handle_event 'test_text_field_document', 'insert_update', :foo_event
+    controller.instance_variable_get("@__view").get_field_value("testButton").do_click
     (callback_count + controller.callback_count).should == 2
   end
 end
@@ -406,17 +406,26 @@ describe Monkeybars::Controller, "#define_handler (instance-level)" do
   it "should trigger both instance and class-level callbacks for a given event" do
     callback_count = 0
     
+    class InstanceHandlerController < Monkeybars::Controller
+      attr_accessor :callback_count
+      def test_button_action_performed
+        @callback_count += 1
+      end
+    end
+    
     InstanceHandlerController::define_handler(:test_button_action_performed) do
       callback_count += 1
     end
     
     controller = InstanceHandlerController.instance
+    controller.callback_count = 0
+    
     controller.define_handler(:test_button_action_performed) do
       callback_count += 1
     end
     
-    controller.handle_event 'test_button', 'action_performed', :foo_event
-    callback_count.should == 2
+    controller.instance_variable_get("@__view").get_field_value("testButton").do_click
+    (callback_count + controller.callback_count).should == 3
   end
 end
 

@@ -311,12 +311,11 @@ module Monkeybars
         end
         
         self.class.handlers.each do |handler|            
-          add_handler_for handler[:type], handler[:components]
           handler[:components].each do |component|
             if component.kind_of? Array
               component = component.first
             end
-            @__registered_handlers[@__view.instance_eval(component.to_s, __FILE__, __LINE__)] << handler[:type].to_s
+            add_handler_for handler[:type], handler[:components], @__view.instance_eval(component.to_s, __FILE__, __LINE__)
           end
         end
       end
@@ -595,7 +594,7 @@ module Monkeybars
           listener_match = /add(.*)Listener/.match(method)
           next if listener_match.nil?
           if Monkeybars::Handlers::EVENT_NAMES_BY_TYPE[listener_match[1]].member? event_name
-            add_handler_for listener_match[1], component_name unless @__registered_handlers[component].member? listener_match[1].underscore
+            add_handler_for listener_match[1], component_name, component
           end
         end
       end
@@ -629,7 +628,7 @@ module Monkeybars
       end
     end
 
-    def add_handler_for(handler_type, components)
+    def add_handler_for(handler_type, components, java_component)
       components = ["global"] if components.nil?
       components = [components] unless components.respond_to? :each
       components.each do |component|
@@ -641,9 +640,11 @@ module Monkeybars
           component_field = component
           component_name = component
         end
-        
-        handler = "Monkeybars::#{handler_type.camelize}Handler".constantize.new(self, component_name.to_s)
-        @__view.add_handler(handler, component_field)
+        unless @__registered_handlers[java_component].member? handler_type.underscore
+          handler = "Monkeybars::#{handler_type.camelize}Handler".constantize.new(self, component_name.to_s)
+          @__view.add_handler(handler, component_field)
+          @__registered_handlers[java_component] << handler_type.underscore
+        end
       end
     end
     
