@@ -45,22 +45,20 @@ describe Monkeybars::Controller do
 end
 
 describe "Controller instantiation" do
-  before(:each) do
-    Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
-  end
-  
   it "will not create more than once instance" do
-    class TestController < Monkeybars::Controller; end
+    class SingleInstanceController < Monkeybars::Controller; end
     
-    t = TestController.instance
-    t2 = TestController.instance
+    t = SingleInstanceController.instance
+    t2 = SingleInstanceController.instance
     t.should equal(t2)
   end
 end
 
 describe Monkeybars::Controller, ' nesting' do
+  class OuterController < Monkeybars::Controller; end
+  
   it "invokes controller group's nesting#add on add_nested_controller" do
-    controller = TestController.instance
+    controller = OuterController.instance
     controller.stub! :model
     controller.stub! :transfer
     view = mock("view")
@@ -79,7 +77,7 @@ describe Monkeybars::Controller, ' nesting' do
   end
   
   it "invokes controller group's nesting#remove on remove_nested_controller" do
-    controller = TestController.instance
+    controller = OuterController.instance
     controller.stub! :model
     controller.stub! :transfer
     view = mock("view")
@@ -344,6 +342,81 @@ describe Monkeybars::Controller, "closing the controller" do
       controller.should_not_receive :unload
       view.should_receive :hide
     end
+  end
+end
+
+describe Monkeybars::Controller, "define_handler (class-level)" do
+  class MultiHandlerController < Monkeybars::Controller
+    set_view 'TestView'
+  end
+
+  it "should support multiple handlers for the same event when no explicit method is declared in the controller" do
+    callback_count = 0
+    
+    MultiHandlerController::define_handler(:test_button_action_performed) do
+      callback_count += 1
+    end
+    
+    MultiHandlerController::define_handler(:test_button_action_performed) do
+      callback_count += 1
+    end
+    
+    controller = MultiHandlerController.instance
+    controller.handle_event 'test_button', 'action_performed', :foo_event
+    callback_count.should == 2
+  end
+  
+  it "should support multiple handlers for the same event even when there is an explicit callback method declared in the controller" do
+    class MultiHandlerController < Monkeybars::Controller
+      attr_accessor :callback_count
+      def test_text_field_document_insert_update
+        @callback_count += 1
+      end
+    end
+
+    callback_count = 0    
+    MultiHandlerController::define_handler(:test_text_field_document_insert_update) do
+      callback_count += 1
+    end
+    
+    controller = MultiHandlerController.instance
+    controller.callback_count = 0
+    controller.handle_event 'test_text_field_document', 'insert_update', :foo_event
+    (callback_count + controller.callback_count).should == 2
+  end
+end
+
+describe Monkeybars::Controller, "#define_handler (instance-level)" do
+  class InstanceHandlerController < Monkeybars::Controller
+    set_view 'TestView'
+  end
+  
+  it "should support instance-registered callbacks" do
+    callback_count = 0
+    
+    controller = InstanceHandlerController.instance
+    controller.define_handler(:test_button_action_performed) do
+      callback_count += 1
+    end
+    
+    controller.handle_event('test_button', 'action_performed', :foo_event)
+    callback_count.should == 1
+  end
+
+  it "should trigger both instance and class-level callbacks for a given event" do
+    callback_count = 0
+    
+    InstanceHandlerController::define_handler(:test_button_action_performed) do
+      callback_count += 1
+    end
+    
+    controller = InstanceHandlerController.instance
+    controller.define_handler(:test_button_action_performed) do
+      callback_count += 1
+    end
+    
+    controller.handle_event 'test_button', 'action_performed', :foo_event
+    callback_count.should == 2
   end
 end
 
