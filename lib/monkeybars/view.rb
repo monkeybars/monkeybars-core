@@ -347,13 +347,18 @@ module Monkeybars
       end
     end
     
-    def add_nested_view(nested_name, nested_view, nested_view_component, model, transfer)
-      self.class.view_nestings[nested_name].select{|nesting| nesting.nests_with_add?}.each {|nesting| nesting.add(self, nested_view, nested_view_component, model, transfer)}
+    def add_nested_view(nested_name, nested_view, nested_component, model, transfer)
+      self.class.view_nestings[nested_name].select{|nesting| nesting.nests_with_add?}.each {|nesting| nesting.add(self, nested_view, nested_component, model, transfer)}
     end
-    
-    def remove_nested_view(nested_name, model, transfer)
-      self.class.view_nestings[nested_name].select{|nesting| nesting.nests_with_remove?}.each {|nesting| nesting.remove(self, model, transfer)}
+
+    def remove_nested_view(nested_name, nested_view, nested_component, model, transfer)
+      self.class.view_nestings[nested_name].select{|nesting| 
+         nesting.nests_with_remove?
+      }.each {|nesting| 
+            nesting.remove(self, nested_view, nested_component, model, transfer) 
+         }
     end
+
     
     def update(model, transfer)
       self.class.view_mappings.select{|mapping| mapping.maps_to_view?}.each {|mapping| mapping.to_view(self, model, transfer)}
