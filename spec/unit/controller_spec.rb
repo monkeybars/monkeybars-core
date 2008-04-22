@@ -44,7 +44,7 @@ describe Monkeybars::Controller do
   end
 end
 
-describe "Controller instantiation" do
+describe Monkeybars::Controller, "#instance" do
   before(:each) do
     Object.send(:remove_const, :TestController) if Object.const_defined? :TestController
   end
@@ -223,14 +223,34 @@ describe Monkeybars::Controller, "implicit handler registration" do
     class ImplicitRegisterController < Monkeybars::Controller
       set_view "ImplicitRegisterView"
       
-      def test_button_action_performed
-	
-      end
+      def test_button_action_performed; end
     end
     
     t = ImplicitRegisterController.instance
     $add_handler_called.should be_true
     t.close
+  end
+  
+  it "does not try to implicitly add methods that exist on the base Controller class" do
+    class Null
+      def method_missing(*args); end
+    end
+    
+    class EmptyController < Monkeybars::Controller
+      set_view "Null"
+      
+      def only_this_method_should_be_called; end
+      
+      def initialize
+	# The reason this is twice instead of once is that the .should_receive
+        # method adds a new instance method to the controller class so it will
+        # get picked up by initialize and passed to add_implicit_handler_for_method
+        self.should_receive(:add_implicit_handler_for_method).twice
+        super
+      end
+    end
+    
+    c = EmptyController.instance
   end
 
   it "does not add an implicit handler if an explict handler of that type was already added for that component"

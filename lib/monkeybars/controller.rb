@@ -309,7 +309,7 @@ module Monkeybars
         end
       end
 
-      methods.grep(/_/).each {|method| add_implicit_handler_for_method(method) }
+      (methods.grep(/_/) - Controller.instance_methods).each {|method| add_implicit_handler_for_method(method) }
 
       self.class.event_handler_procs.each {|method, proc| add_implicit_handler_for_method(method)}
       
@@ -459,6 +459,7 @@ module Monkeybars
       
       update_view
       show
+      return object #allow var assignment off of open, i.e. screen = SomeScreen.instance.open
     end
     
     # Stub to be overriden in sub-class.  This is where you put the code you would

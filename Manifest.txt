@@ -4,6 +4,7 @@ README.txt
 COPYING.txt
 Rakefile
 bin/monkeybars
+lib/foxtrot.jar
 lib/monkeybars.rb
 lib/monkeybars/key.rb
 lib/monkeybars/controller.rb
@@ -13,17 +14,17 @@ lib/monkeybars/task_processor.rb
 lib/monkeybars/validated_hash.rb
 lib/monkeybars/view.rb
 lib/monkeybars/view_mapping.rb
+lib/monkeybars/view_nesting.rb
 lib/monkeybars_version.rb
 skeleton/Rakefile
-skeleton/lib
-skeleton/lib/monkeybars-0.6.1.jar
-skeleton/src
+skeleton/lib/monkeybars-0.6.2.jar
 skeleton/src/manifest.rb
 skeleton/src/main.rb
 skeleton/src/application_controller.rb
 skeleton/src/application_view.rb
 skeleton/src/resolver.rb
 skeleton/tasks/monkeybars.rake
+spec/spec_helper.rb
 spec/unit/component_mixin_spec.rb
 spec/unit/controller_spec.rb
 spec/unit/inflector_spec.rb
@@ -32,6 +33,7 @@ spec/unit/view_spec.rb
 spec/unit/view_map_methods_spec.rb
 spec/unit/validated_hash_spec.rb
 spec/unit/view_mapping_spec.rb
+spec/unit/task_processor_spec.rb
 spec/unit/org/monkeybars/TestView.class
 spec/unit/org/monkeybars/TestView.form
 spec/unit/org/monkeybars/TestView.java
