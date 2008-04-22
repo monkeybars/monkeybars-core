@@ -198,6 +198,14 @@ module Monkeybars
     # would simply invoke the associated method when update or 
     # write_state was called.  Thus any assignment to view properties
     # must be done within the method (hence the 'raw').
+    #
+    # You can pass an array of handlers to disable when performing the raw mapping
+    # as the third argument, or you can handle the disabling of handlers yourself
+    # inside the raw mapping with a call to Component#disable_handlers
+    # 
+    #   raw_mapping :from_model, :to_model, [:action]
+    #
+    #
     def self.map(properties)
       mapping = Mapping.new(properties)
       view_mappings << mapping

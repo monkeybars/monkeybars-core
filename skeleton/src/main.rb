@@ -1,6 +1,6 @@
 #===============================================================================
 # Much of the platform specific code should be called before Swing is touched.
-# The userScreenMenuBar is an example of this.
+# The useScreenMenuBar is an example of this.
 require 'rbconfig'
 
 #===============================================================================
@@ -17,7 +17,7 @@ end
 # End of platform specific code
 #===============================================================================
 
-$LOAD_PATH << File.dirname(__FILE__)
+$LOAD_PATH.unshift File.dirname(__FILE__)
 Dir.glob(File.expand_path(File.dirname(__FILE__) + "/**")).each do |directory|
   $LOAD_PATH << directory unless directory =~ /\.\w+$/ #File.directory? is broken in current JRuby for dirs inside jars
 end
