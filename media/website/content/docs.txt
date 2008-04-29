@@ -1,0 +1,83 @@
+---
+title: 'Monkeybars: Documentation'
+current_page: docs
+filter:
+  - erb
+  - textile
+---
+<div id="content">
+
+		<h2>Docs</h2>
+		
+		<p>
+				<ul>
+					<li><a href="api/index.html">RDoc</a></li>
+					<li>	
+						<table border=0 style="background-color: #fff; padding: 5px;" cellspacing=0>
+						  <tr><td>
+						  <img src="http://groups.google.com/groups/img/3nb/groups_bar.gif" height=26 width=132 alt="Google Groups">
+						  </td></tr>
+						  <tr><td style="padding-left: 5px">
+						  <b>Subscribe to Monkeybars</b>
+						  </td></tr>
+						  <form action="http://groups.google.com/group/monkeybars/boxsubscribe">
+						  <tr><td style="padding-left: 5px;">
+						  Email: <input type=text name=email>
+						  <input type=submit name="sub" value="Subscribe">
+						  </td></tr>
+						</form>
+						<tr><td align=right>
+						  <a href="http://groups.google.com/group/monkeybars">Visit this group</a>
+						</td></tr>
+						</table>
+					</li>
+					<li>Join us in the #monkeybars channel on the Freenode IRC Network</li>
+					<li><a href="architecture_overview.html">An overview of how Monkeybars works</a></li>
+				</ul>
+		</p>
+		
+		<h2>Source</h2>
+		<p>
+			Monkeybars source code is hosted at <a href="http://gitorious.org/projects/monkeybars">Gitorious</a>. You can download the source using <a href="http://git.or.cz/">Git</a> by using either of the following commands.
+			<ul>
+				<li>git clone git://gitorious.org/monkeybars/mainline.git monkeybars</li>
+				<li>git clone http://git.gitorious.org/monkeybars/mainline.git monkeybars</li>
+			</ul>
+			
+			After the initial check-out, you can get new changes with the command "git pull" from your local Monkeybars directory
+		</p>
+		
+		<h2>Screencasts</h2>
+		<h3>Monkeybars 0.6 Screencasts</h3>
+		<p>Coming soon!</p>
+		<h3>Monkeybars 0.5 Screencasts</h3>
+		<p><a href="javascript:void(0)" onclick="document.getElementById('part1').style.display='block'">Part 1: High level overview</a></p>
+		<div id="part1" style="display: none;">
+			<a href="javascript:void(0)" onclick="document.getElementById('part1').style.display='none'">Hide video</a><br/>
+			If you have trouble playing this video or want a copy for offline viewing, you can download an AVI <a href="http://www.koontzfamily.org/david/videos/Monkeybars_Screencast_Part_1.avi">here</a> (15 MB)
+
+			<p id="player"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
+			<script type="text/javascript">
+				var so = new SWFObject('flvplayer.swf','player','800','600','7');
+				so.addParam("allowfullscreen","true");
+				so.addVariable("file","http://www.koontzfamily.org/david/videos/Monkeybars_Screencast_Part_1.flv");
+				so.addVariable("displayheight","600");
+				so.write('player');
+			</script>
+		</div>
+
+		<p><a href="javascript:void(0)" onclick="document.getElementById('part2').style.display='block'">Part 2: Building of a demo application</a></p>
+		<div id="part2" style="display: none;">
+			<a href="javascript:void(0)" onclick="document.getElementById('part2').style.display='none'">Hide video</a><br/>
+			If you have trouble playing this video or want a copy for offline viewing, you can download an AVI <a href="http://www.koontzfamily.org/david/videos/Monkeybars_Screencast_Part_2.avi">here</a> (120 MB)
+			
+			<p id="player2"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
+			<script type="text/javascript">
+				var so = new SWFObject('flvplayer.swf','player','800','600','7');
+				so.addParam("allowfullscreen","true");
+				so.addVariable("file","http://www.koontzfamily.org/david/videos/Monkeybars_Screencast_Part_2.flv");
+				so.addVariable("displayheight","600");
+				so.write('player2');
+			</script>
+		</div>
+</div>

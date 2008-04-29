@@ -1,0 +1,54 @@
+---
+extension: html
+filter:    erb
+---
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<title><%= @title %></title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" href="css/1.css" type="text/css" media="screen,projection" />
+</head>
+ 
+<body>
+
+<div id="wrapper">
+
+		<div id="header">
+						
+				<p>
+					<img src="images/monkeybars_logo.png" alt="Monkeybars logo" />
+					<h3>Tools enabled Swing development for Ruby</h3>
+				</p>
+				
+				<ul id="nav">
+						<li><a href="index.html" <%= 'class="active"' if 'index' == @page.current_page %>>Main</a></li>
+
+						<li><a href="http://code.google.com/p/monkeybars-lib/" <%= 'class="active"' if 'issue_tracker' == @page.current_page %>>Issue Tracker</a></li>
+
+						<li><a href="http://rubyforge.org/projects/monkeybars/" <%= 'class="active"' if 'rubyforge' == @page.current_page %>>Rubyforge Project</a></li>
+						
+						<li><a href="docs.html" <%= 'class="active"' if 'docs' == @page.current_page %>>Documentation</a></li>
+						
+						<li><a href="examples.html" <%= 'class="active"' if 'examples' == @page.current_page %>>Examples</a></li>
+						
+						<li><a href="faq.html" <%= 'class="active"' if 'faq' == @page.current_page %>>FAQ</a></li>
+						
+				</ul>
+		
+		</div>
+		
+		<%= @content %>
+		
+		<div id="footer">
+		
+								<p>Template design by <a href="http://www.sixshootermedia.com">Six Shooter Media</a>.<br />
+
+								© 2007 David Koontz, all rights reserved.</p>
+		</div>
+
+</div>
+
+
+</body>
+</html>

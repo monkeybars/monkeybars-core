@@ -1,0 +1,90 @@
+---
+title: 'Monkeybars: Architecture Overview'
+current_page: docs
+filter:
+  - erb
+  - textile
+---
+<div id="content">
+
+		<h2>Overview</h2>
+		
+		<p><b>NOTE: For specific syntax examples please see the RDoc.</b></p>
+		<p>
+			Monkeybars, at its core, is a system for dealing with common tedious programming tasks related to Swing.  Secondarily Monkeybars is an abstraction layer that decouples your logic from your view making testing far easier than in a conventional GUI application.  Monkeybars only specifies constraints for the controller and view by way of a base class, the model can be any Ruby object.
+			<ul>
+				<li>
+					Controllers are responsible for most of the app logic and are the place that event handlers are implemented. Controllers communicate with the view via the model, there is no direct interaction. Controllers act mostly like singletons in that you cannot call Controller.new on one, you must use Controller.instance instead. Controller are different from singletons in that (soon, not quite implemented yet) you can define how many instances of a particular controller can be instantiated. This is useful for commonly reused windows such as an error message box.
+				</li>
+				<li>
+					The model is any Ruby object that provides methods for storing and retrieving the necessary data. They could be a struct, or a more intelligent object that validates the integrity of its data (highly recommended).
+				</li>
+				<li>	
+					Views are responsible for defining what Java class to use when instantiating the controller and how to map data from the model into the view fields. An example of this can be seen by looking at the documentation for View#map.
+				</li>
+			</ul>
+			So let's look at an example of instantiating a MVC triad, all three work together as a (mostly) atomic whole. So, in your main file you have:
+		</p>
+		<blockquote>
+			<p>MyController.instance</p>
+		</blockquote>
+		<p>
+			Assuming there has not previously been a call to MyController.instance, it has the effect of
+			<ol>
+				<li>Instantiating the controller class</li>
+				<li>Instantiating the view class</li>
+				<li>Calling the load method of the view class</li>
+				<li>Instantiating the model class</li>
+				<li>Calling the load method of the controller class</li>
+				<li>View is updated from the model according to its mappings</li>
+			</ol>
+			
+			If the controller is subsequently closed via a call to MyController#close the effect would be
+			<ol>
+				<li>Calling the view's unload method</li>
+				<li>Calling the controller's unload method</li>
+				<li>Disposing of the Java view (freeing its resources)</li>
+				<li>Removal of the controller from Monkeybars' internal list (meaning a new object will be instantiated on the next call to Controller#instance)</li>
+			</ol>
+			It's important to note here that the controller is removed from the internal list of Controllers but the controller object is in fact not destroyed. So if you are holding on to a reference to a controller that has been closed you can bring it back by calling Controller#open. Because this can cause confusion we would suggest that you use Controller#hide/show and only call Controller#close when you really mean for that view instance to be gone for good.
+		</p>
+		<p>
+			You will notice that the controller gets data to the view by first inserting it into the model. The mappings defined in the view determine how that data propagates out to the view's fields. These mapping serve another role though, as seen by what happens when an event occurs on a view.
+			
+			<ol>
+				<li>The event is sent to the controller which determines if there is a method to handle it</li>
+				<li>If there is no handler, the event is swallowed</li>
+				<li>If there is a specific handler for the event, one that matches both the event and the component, that handler is used</li>
+				<li>If there is no specific handler for the event, the controller is checked for a general handler for all events of that type</li>
+				<li>If there is a handler, the view's data is transferred into a new model object using the mappings defined in the view and that model is then passed into the handler along with the Java GUI event object</li>
+			</ol>
+			Typically, after handling an event, the controller will call Controller#update_view which will propagate the (probably modified) model's values to the view.
+		</p>
+		<p>	
+			It is important to note that at the moment, the event handlers are operating inside the Swing event dispatch thread and as such, any actions you perform there will block the entire GUI (including repainting). We have plans to integrate the Foxtrot library soon to resolve this problem but in the meantime, if any long-term processes are to be performed as the result of an event, you must spin off a background thread and return from the event to keep the GUI responsive.
+		</p>
+		<p>That's pretty much it. Monkeybars is not a particularly complex library, it doesn't attempt to totally abstract away the underlying GUI layer or anything like that. However, if you have found places where GUI development is still way too much work, please let us know so that we can add in helpful features to future releases of Monekybars. We built this for our own needs and yours will undoubtedly differ to some degree.</p>
+		
+		<h2>Design history</h2>
+		
+		<p>
+			Monkeybars was born from the need to interface with Java without writing a lot of (or any) GUI code by hand. To this end, a design goal of Monkeybars is to hook itself into existing Java code with no extra effort needed by the designer of the GUI element. This actually turns out to be fairly easy using reflection, and once encapsulated becomes an implementation detail you can pretty much forget about (if you're interested in the particulars look at View#get_field).
+		</p>
+		
+		<p>
+			With the problem of getting at the components in a Java GUI element solved, the next issue is making all the annoying repetitive code we found ourselves writing just go away. To this end, we attempted to provide intelligent defaults for everything we could reasonably do. For example, the default close action (when you click the red X) for many editors is to close the entire application. This is fine for single screen apps, but your typical app is much larger than just one screen, so our default close action is to simply close (and thereby free the resource of) that window. Another very common bit of code is handing an event generated by a GUI control. The typical Java way to do this is to create an anonymous inner class and implement the appropriate method in that inner class.  If you wanted something a bit more cleanly separated you could implement your own class and pass it in as an event handler.  All this works out to be a lot of code for something that is conceptually pretty simple.  When X event on Y control happens, make this code here run.  So the next task was making event routing dead simple.  To this end we implemented once a generic system that can route events to methods in your controller.  So, you want to handle the mouse released event on the control okButton?  You implement ok_button_mouse_released and it magically gets called (if you want see the bulk of this implmentation look at View#add_handler and Controller#handle_event).
+		</p>
+		
+		<p>
+			With all of those problems out of the way we turned to testability and the relationship between Models, Views, Controllers and how that effected testability. One thing we found in our projects was that anytime you write a line such as this from your model
+		</p>
+			<blockquote>view.some_property.text = "Foo"</blockquote>
+			
+		<p>
+			You have just created a testing nightmare for yourself. Sure you can mock your view but then there's the problem of injecting it in to your controller in the test environment, etc. So to enforce a wee bit more separation of concerns we decided to impose a draconian restriction. Controllers have 1 and only 1 model and only through that model can they pass data to the view. Words were spoken, threats were made, nerf guns were brandished about, but in the end we couldn't come up with any good use cases for going straight to the view from the controller that wasn't part of the core framework (stuff like show/hide/close/open/update_view). By setting up a system such as this, we also were forced to confront the problem of propagating values from the model to the view. This was a rather manual process in our early attempts and now that everything was coming from the model there'd darn well better be a nice way to do it once and forget about it. Thus we developed the view mappings that allow you to define any sort of relationship between the model and the view. Model to view only, view to model only, both directions, straight copying between properties, using a method to transform the data in and out, etc.
+		</p>
+		<p>
+			That pretty much brings you up to where Monkeybars is today and how we got here. If you find any places where we've gone horribly awry or places where this design doesn't work for your app, we'd like to here from you.
+		</p>
+
+</div>

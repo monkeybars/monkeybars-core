@@ -1,0 +1,36 @@
+---
+title: 'Monkeybars: FAQ'
+current_page: faq
+filter:
+  - erb
+  - textile
+---
+<div id="content">
+
+		<h2>FAQ</h2>
+		
+		<p>
+			<ul>
+				<li><a href="#swing">Is Monkeybars usable only with Swing?</a></li>
+				<li><a href="#netbeans">Is Monkeybars usable only with Netbeans?</a></li>
+				<li><a href="#name">What's with the name Monkeybars?</a></li>
+			</ul>
+		</p>
+
+		<a name="swing"><h3>Is Monkeybars usable only with Swing?</h3></a>
+		<p>
+			At the moment, yes. However, there is very little in Monkeybars that is specific to swing (event listeners, close actions) and we would definitely like to see SWT support added. If you are interested in this, please contact us.
+		</p>
+
+		<a name="netbeans"><h3>Is Monkeybars usable only with Netbeans?</h3></a>
+		<p>
+			No, nothing in Monkeybars cares what tool you've used to create your Java classes, all the "hooking in" that Monkeybars does is via reflection.  So you can use any editor your please, we just happen to like Netbeans and thus use it in our examples. You could even ditch the editor and generate your Swing forms using something like <a href="http://www.swixml.org/">swixml</a>, Monkeybars doesn't care!
+		</p>
+
+		
+		<a name="name"><h3>What's with the name Monkeybars?</h3></a>
+		<p>
+			We wanted a name that implied some connection to Swing.  SwingSet would have been good but is already taken.  We played around with some other playground names before settling on Monkeybars.  It's sort of fitting as we're using a somewhat bizzare mix of technologies to get some really cool stuff done.
+		</p>
+
+</div>
