@@ -34,14 +34,15 @@ def generate_controller(path)
   file_name = "#{name}_controller.rb"
   name = camelize(name)
   $stdout << "Generating controller #{name}Controller in file #{file_name}\n"
-  controller = File.new(file_name, "w")
-  controller << <<-ENDL
+  File.open(file_name, "w") do |controller_file|
+  controller_file << <<-ENDL
 class #{name}Controller < ApplicationController
   set_model '#{name}Model'
   set_view '#{name}View'
   set_close_action :exit
 end
   ENDL
+  end
 end
 
 def generate_model(path)
@@ -49,12 +50,13 @@ def generate_model(path)
   file_name = "#{name}_model.rb"
   name = camelize(name)
   $stdout << "Generating model #{name}Model in file #{file_name}\n"
-  model = File.new(file_name, "w")
-  model << <<-ENDL
+  File.open(file_name, "w") do |model_file|
+  model_file << <<-ENDL
 class #{name}Model
 
 end
   ENDL
+  end
 end
 
 def generate_view(path)
@@ -62,12 +64,13 @@ def generate_view(path)
   file_name = "#{name}_view.rb"
   name = camelize(name)
   $stdout << "Generating view #{name}View in file #{file_name}\n"
-  view = File.new(file_name, "w")
-  view << <<-ENDL
+  File.open(file_name, "w") do |view_file|
+  view_file << <<-ENDL
 class #{name}View < ApplicationView
   set_java_class ''
 end
   ENDL
+  end
 end
 
 def setup_directory(path)
