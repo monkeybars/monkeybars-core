@@ -1,6 +1,6 @@
 require 'fileutils'
 
-desc "Generates one or more files in your project. Valid options are ALL (controller, view and model), CONTROLLER, VIEW, and MODEL. Specify a target 'base' i.e. generate MODEL='src/foo' would generate src/foo_model.rb"
+desc "ALL, CONTROLLER, VIEW, MODEL are valid options."
 task 'generate'
 rule(/^generate/) do |t|
   ARGV[1..-1].each do |generator_command|

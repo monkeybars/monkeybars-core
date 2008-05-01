@@ -5,6 +5,8 @@ filter:
   - erb
   - textile
 ---
+	<script type="text/javascript" src="swfobject.js"></script>
+
 <div id="content">
 
 		<h2>Docs</h2>

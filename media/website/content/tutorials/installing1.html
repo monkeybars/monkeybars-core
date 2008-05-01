@@ -7,6 +7,7 @@
 	<meta name="author" content="David Koontz">
 </head>
 <body>
+	<script type="text/javascript" src="../swfobject.js"></script>
 	<p>
 		<h1>Installing Monkeybars</h1>
 		Monkeybars is provided in three forms, a gem, a jar file and a zip of the source files.  
@@ -17,6 +18,21 @@
 		or jar file and who isn't checking out the latest code from the central source control system.
 	</p>
 	
+	<p id="open_link1"><a href="javascript:void(0)" onclick="document.getElementById('video1').style.display='block';;document.getElementById('open_link1').style.display='none'">Watch the video</a></p>
+	<p>
+		<div id="video1" style="display: none;">
+			<a href="javascript:void(0)" onclick="document.getElementById('video1').style.display='none';document.getElementById('open_link1').style.display='block'">Hide video</a><br/>
+
+			<p id="player1"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
+			<script type="text/javascript">
+				var so = new SWFObject('../flvplayer.swf','player','816','672','7');
+				so.addParam("allowfullscreen","true");
+				so.addVariable("file","http://www.koontzfamily.org/david/videos/Tutorial1.flv");
+				so.addVariable("displayheight","672");
+				so.write('player1');
+			</script>
+		</div>
+	</p>
 	<p>
 		<h1>Using the Monkeybars installer script</h1>
 		If using the gems version of Monkeybars, you will also get an installer script that can be
@@ -43,7 +59,21 @@
 		skeleton copied in.  To get started using your project please continue to the next section: 
 		<a href="installing2.html">Monkeybars project basics</a>
 	</p>
-	
+	<p id="open_link2"><a href="javascript:void(0)" onclick="document.getElementById('video2').style.display='block';;document.getElementById('open_link2').style.display='none'">Watch the video</a></p>
+	<p>
+		<div id="video2" style="display: none;">
+			<a href="javascript:void(0)" onclick="document.getElementById('video2').style.display='none';document.getElementById('open_link2').style.display='block'">Hide video</a><br/>
+
+			<p id="player2"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
+			<script type="text/javascript">
+				var so = new SWFObject('../flvplayer.swf','player','800','600','7');
+				so.addParam("allowfullscreen","true");
+				so.addVariable("file","http://www.koontzfamily.org/david/videos/Tutorial2.flv");
+				so.addVariable("displayheight","600");
+				so.write('player2');
+			</script>
+		</div>
+	</p>
 
 
 </body>

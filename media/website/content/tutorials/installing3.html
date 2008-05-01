@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Using the generator</title>
+	<meta name="author" content="David Koontz">
+</head>
+<body>
+	<script type="text/javascript" src="../swfobject.js"></script>
+	<p>
+		<h1>Monkeybars generator</h1>
+	</p>
+	<p>
+		The Monkeybars generator is used to create new files for your project. It creates files with intelligent defaults that under most conditions means that you won't need to do much editing to get your app up and running.
+	</p>
+	<p>
+		<h3>Running the generator</h3>
+		Inside your generated project you will find a tasks directory that contains monkeybars.rake.  The default Rakefile imports all the files in the tasks directory so the Monkeybars tasks are available without any additional work on your part.  Running "rake -T" shows that there is only a single task provided by Monkeybars.
+		<pre>
+  rake generate  # ALL, CONTROLLER, VIEW, MODEL are valid options.
+	  </pre>
+	</p>
+	<p>
+		Generate requires an option, the valid values for which are:
+		<ul>
+			<li>ALL - Controller, View, and Model</li>
+			<li>CONTROLLER - Just a Controller</li>
+			<li>VIEW - Just a View</li>
+			<li>MODEL - Just a Model</li>
+		</ul>
+	</p>
+	<p>
+		The generate option tells the generator what kind(s) of files to create in your project but you need to specify where you want your files to be created and what name to use.  To do this you specify a target 'base' after the generate option in this form:
+		<pre>
+  rake generate MODEL="src/foo"
+		</pre>
+		This would would generate src/foo/foo_model.rb". Most of the time you'll want to use the ALL option to generate all three files that are typically needed for a Monkeybars form. The important thing to remember with the generator is that you need to supply the relative path to where you want your files.  The generator creates a src directory for you so you'll probably generate your files using:
+		<pre>
+  rake generate ALL="src/your_name"
+		</pre>
+		This will have the effect of generating
+		<ul>
+			<li>src/your_name/your_name_controller.rb</li>
+			<li>src/your_name/your_name_view.rb</li>
+			<li>src/your_name/your_name_model.rb</li>
+		</ul>
+	</p>
+	
+	<p id="open_link1"><a href="javascript:void(0)" onclick="document.getElementById('video1').style.display='block';;document.getElementById('open_link1').style.display='none'">Watch the video</a></p>
+	<p>
+		<div id="video1" style="display: none;">
+			<a href="javascript:void(0)" onclick="document.getElementById('video1').style.display='none';document.getElementById('open_link1').style.display='block'">Hide video</a><br/>
+
+			<p id="player1"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
+			<script type="text/javascript">
+				var so = new SWFObject('../flvplayer.swf','player','800','600','7');
+				so.addParam("allowfullscreen","true");
+				so.addVariable("file","http://www.koontzfamily.org/david/videos/Tutorial3.flv");
+				so.addVariable("displayheight","600");
+				so.write('player1');
+			</script>
+		</div>
+	</p>
+	
+	<p>
+		Continue on to the next section, <a href="usage1.html">Monkeybars basic usage</a>
+	</p>
+</body>
+</html>
