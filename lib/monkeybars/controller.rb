@@ -460,7 +460,7 @@ module Monkeybars
     def open(*args)
       @@instance_lock[self.class].synchronize do
         unless @@instance_list[self.class].member? self
-          @@instance_list[self.class] << object
+          @@instance_list[self.class] << self
         end
       end
       
@@ -471,7 +471,7 @@ module Monkeybars
       
       update_view
       show
-      return object #allow var assignment off of open, i.e. screen = SomeScreen.instance.open
+      self #allow var assignment off of open, i.e. screen = SomeScreen.instance.open
     end
     
     # Stub to be overriden in sub-class.  This is where you put the code you would
