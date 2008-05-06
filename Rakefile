@@ -27,13 +27,15 @@ end
 desc "Removes the output directory"
 task :clean do
   FileUtils.remove_dir(OUTPUT_DIR) if File.directory? OUTPUT_DIR
-  FileUtils.rm("skeleton/lib/monkeybars-#{Monkeybars::VERSION}.jar", :force => true)
+  FileUtils.rm("skeleton/lib/java/monkeybars-#{Monkeybars::VERSION}.jar", :force => true)
 end
 
 task :prepare do
   Dir.mkdir(OUTPUT_DIR) unless File.directory?(OUTPUT_DIR)
   Dir.mkdir(BUILD_DIR) unless File.directory?(BUILD_DIR)
   Dir.mkdir("skeleton/lib") unless File.directory?("skeleton/lib")
+  Dir.mkdir("skeleton/lib/java") unless File.directory?("skeleton/lib/java")
+  Dir.mkdir("skeleton/lib/ruby") unless File.directory?("skeleton/lib/ruby")
 end
 
 desc "Creates monkeybars.jar file for distribution"
@@ -43,7 +45,7 @@ task :jar => [:prepare] do
     FileUtils.remove_dir('META-INF', true)
   end
   $stdout << `jar cf #{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar -C lib monkeybars.rb -C lib monkeybars -C #{BUILD_DIR} .`
-  FileUtils.cp("#{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar", "skeleton/lib/monkeybars-#{Monkeybars::VERSION}.jar")
+  FileUtils.cp("#{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar", "skeleton/lib/java/monkeybars-#{Monkeybars::VERSION}.jar")
 end
 
 desc "Creates a zip file version of the project, excluding files from exclude.lst.  **ONLY WORKS ON OSX/Linux**  Yes this sucks, no I don't want to add another dependency at the moment."

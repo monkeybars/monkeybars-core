@@ -12,8 +12,8 @@
 		<h1>Installing Monkeybars</h1>
 		Monkeybars is provided in three forms, a gem, a jar file and a zip of the source files.  
 		The preferred method of installation is using RubyGems as that provides with it an installer
-		script that will set up a basic project structure for you.  The jar file is intended for
-		integrating Monkeybars into existing Swing applications.  The source distribution is for 
+		script that will set up a basic project structure for you, including the Monkeybars jar file.  
+		The jar file is intended for integrating Monkeybars into existing Swing applications.  The source distribution is for 
 		anyone who wishes to view and make changes to the source files without expanding the gem
 		or jar file and who isn't checking out the latest code from the central source control system.
 	</p>
@@ -27,7 +27,7 @@
 			<script type="text/javascript">
 				var so = new SWFObject('../flvplayer.swf','player','816','672','7');
 				so.addParam("allowfullscreen","true");
-				so.addVariable("file","http://www.koontzfamily.org/david/videos/Tutorial1.flv");
+				so.addVariable("file","http://www.koontzfamily.org/david/videos/tutorials/installing1_a.flv");
 				so.addVariable("displayheight","672");
 				so.write('player1');
 			</script>
@@ -37,10 +37,10 @@
 		<h1>Using the Monkeybars installer script</h1>
 		If using the gems version of Monkeybars, you will also get an installer script that can be
 		run from the command line.  When run, this installer script will create a new project and 
-		install an empty application skeleton that serves as a starting point for your application.
+		install an application skeleton that serves as a starting point for your application.
 		This basic structure includes the monkeybar.jar file, a main.rb file that requires in the
 		monkeybar.jar file, a Rakefile that imports in the Monkeybars generate tasks and base classes
-		for your Controllers and Views.
+		for your controllers and views.
 	</p>
 	<p><img src="images/installing_1.png"></img></p>
 	<p>
@@ -53,11 +53,9 @@
 		</pre>	
 	</p>
 	
-	
 	<p>
 		The directory &lt;project_name&gt; will be created in the current directory and the project
-		skeleton copied in.  To get started using your project please continue to the next section: 
-		<a href="installing2.html">Monkeybars project basics</a>
+		skeleton copied in.  You can specify an absolute path also if you'd prefer.
 	</p>
 	<p id="open_link2"><a href="javascript:void(0)" onclick="document.getElementById('video2').style.display='block';;document.getElementById('open_link2').style.display='none'">Watch the video</a></p>
 	<p>
@@ -68,13 +66,14 @@
 			<script type="text/javascript">
 				var so = new SWFObject('../flvplayer.swf','player','800','600','7');
 				so.addParam("allowfullscreen","true");
-				so.addVariable("file","http://www.koontzfamily.org/david/videos/Tutorial2.flv");
+				so.addVariable("file","http://www.koontzfamily.org/david/videos/tutorials/installing1_b.flv");
 				so.addVariable("displayheight","600");
 				so.write('player2');
 			</script>
 		</div>
 	</p>
-
+	<p>To get started using your project please continue to the next section: 
+	<a href="installing2.html">Monkeybars project basics</a></p>
 
 </body>
 </html>

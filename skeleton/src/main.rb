@@ -24,4 +24,10 @@ end
 
 require 'manifest'
 
-
+begin
+  # Your app logic here, i.e. YourController.instance.open
+rescue Exception => e
+  $stderr << "Error in application:\n#{e}\n#{e.message}"
+  # Additional error handling goes here
+  java.lang.System.exit(1)
+end

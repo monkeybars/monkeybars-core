@@ -17,7 +17,7 @@ lib/monkeybars/view_mapping.rb
 lib/monkeybars/view_nesting.rb
 lib/monkeybars_version.rb
 skeleton/Rakefile
-skeleton/lib/monkeybars-0.6.2.jar
+skeleton/lib/java/monkeybars-0.6.2.jar
 skeleton/src/manifest.rb
 skeleton/src/main.rb
 skeleton/src/application_controller.rb
