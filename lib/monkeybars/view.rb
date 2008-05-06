@@ -217,11 +217,11 @@ module Monkeybars
       view_mappings << Mapping.new(:using => [to_view_method, from_view_method], :ignoring => handlers_to_ignore)
     end
     
-    # Declares a mapping between a signal and a method to process the signal.  Only
-    # signals that are declared are processed.  When the signal is recieved, the method
-    # is called with the model and the transfer as parameters.
+    # Declares a mapping between a signal and a method to process the signal.  When 
+    # the signal is received, the method is called with the model and the transfer as parameters.
+    # If a signal is sent that is not defined, an UnknownSignalError exception is raised.
     #
-    #   define_signal :error_state, :disable_go_button
+    #   define_signal :name => :error_state, :handler => :disable_go_button
     # 
     #   def disable_go_button(model, transfer)
     #     go_button.enabled = false

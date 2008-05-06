@@ -554,10 +554,30 @@ module Monkeybars
     #   model.user_name = view_model.user_name
     #   model.password = view_model.password
     def update_model(source, *properties) # :doc:
+      update_provided_model(@__model, source, *properties)
+    end
+    
+    # This method works just like Controller#update_model except that the target
+    # is not implicitly the model.  The second parameter is a target object for
+    # the properties to be propogated to.  This is useful if you have a composite
+    # model or need to updated other controllers.
+    # 
+    #   def ok_button_action_perfomed(event)
+    #     view_model, view_transfer = view_state
+    #     update_provided_model(view_model, model.user, :user_name, :password)
+    #   end
+    # 
+    # This would have the same effect as:
+    # 
+    #   view_model, view_transfer = view_state
+    #   model.user.user_name = view_model.user_name
+    #   model.user.password = view_model.password
+    def update_provided_model(source, destination, *properties) # :doc:
       properties.each do |property|
-        @__model.send("#{property}=", source.send(property))
+        destination.send("#{property}=", source.send(property))
       end
     end
+    
     
     @@model_class_for_child_controller ||= {}
     def self.model_class
@@ -604,12 +624,6 @@ module Monkeybars
     
     def sub_controllers
       @__sub_controllers ||= {}
-    end
-    
-    def update_provided_model(source, destination, *properties)
-      properties.each do |property|
-        destination.send("#{property}=", source.send(property))
-      end
     end
     
     def create_new_model
