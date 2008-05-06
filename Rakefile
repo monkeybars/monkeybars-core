@@ -60,7 +60,10 @@ task :mb_install_gem => [:jar, :gem] do
 end
 
 desc "Only used to make RSpec usable with Java Swing code. Wraps up the target of various view tests into a jar that can be require'd and thus loaded on the classpath by JRuby"
-task :spec_prepare do
+task :prepare_spec_jar do
   $stdout << `javac spec/unit/org/monkeybars/TestView.java`
   $stdout << `jar -cf spec/unit/test_files.jar -C spec/unit org`
 end
+
+desc "Builds all the required jars, then makes a shiney new gem."
+task :build_all_jars_then_gem => [:prepare_spec_jar , :clean_jar, :gem ]
