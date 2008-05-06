@@ -14,6 +14,13 @@ describe Monkeybars::View, ".nest" do
   end
 end
 
+describe Monkeybars::View, ".define_signal" do
+  class DefineSignalTest < Monkeybars::View
+    define_signal :name => :signal_name, :handler => :handler_name
+  end
+  
+  DefineSignalTest.send(:signal_mappings)[:signal_name].should == :handler_name
+end
 
 describe Monkeybars::View, "#get_field_value" do
   before(:each) do
