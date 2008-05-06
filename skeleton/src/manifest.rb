@@ -7,7 +7,7 @@ require 'resolver'
 
 case Monkeybars::Resolver.run_location
 when Monkeybars::Resolver::IN_FILE_SYSTEM
-  $CLASSPATH << File.expand_path(File.dirname(__FILE__) + '/../lib/monkeybars-0.6.1.jar')
+  $CLASSPATH << File.expand_path(File.dirname(__FILE__) + '/../lib/java/monkeybars-0.6.2.jar')
 end
 
 require 'monkeybars'
@@ -20,11 +20,11 @@ require 'application_view'
 # Add your own application-wide libraries below.  To include jars, append to
 # $CLASSPATH, or use add_to_classpath, for example:
 # 
-# $CLASSPATH << File.expand_path(File.dirname(__FILE__) + "/../lib/swing-layout-1.0.3.jar")
+# $CLASSPATH << File.expand_path(File.dirname(__FILE__) + "/../lib/java/swing-layout-1.0.3.jar")
 #
 # is equivalent to
 #
-# add_to_classpath "../lib/swing-layout-1.0.3.jar"
+# add_to_classpath "../lib/java/swing-layout-1.0.3.jar"
 
 case Monkeybars::Resolver.run_location
 when Monkeybars::Resolver::IN_FILE_SYSTEM

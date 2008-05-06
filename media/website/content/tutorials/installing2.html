@@ -34,7 +34,7 @@
 	<p>
 		<h3>resolver.rb</h3>
 		This file is a utility file, it is separated out so that manifest.rb does not become cluttered.  It adds the Resolver class 
-		which is used to determine where Monkeybars is being loaded from.  It also adds a method to object "add_to_classpath" which
+		which is used to determine where Monkeybars is being loaded from.  It also adds a method to object, "add_to_classpath", which
 		greatly enhances the readability of loading new locations onto the classpath.  This code is in not in the monkeybars jar
 		file as it is needed in order to resolve the location of the monkeybars jar file.
 	</p>
@@ -47,7 +47,7 @@
 		your resources changes, the Resolver class is used to conditionally load resources onto the classpath.
 	</p>
 	<p>
-		At the top of the file is Monkeybars specific loading code that ensures the basic components of Monkeybars is loaded. At
+		At the top of the file is Monkeybars specific loading code that ensures the basic components of Monkeybars are loaded. At
 		the bottom is a section demonstrating how to load your own resources, either by appending directly to $CLASSPATH or by using
 		the add_to_classpath helper method.  If you built your project in Netbeans using the Matisse layout system, a typical 
 		configuration for running your app from the command line might look like this:
