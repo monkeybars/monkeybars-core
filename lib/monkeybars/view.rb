@@ -10,6 +10,7 @@ require 'monkeybars/view_nesting'
 module Monkeybars
   class UndefinedControlError < Exception; end
   class InvalidSignalHandlerError < Exception; end
+  class UndefinedSignalError < Exception; end
 
   # The view is the gatekeeper to the actual Java (or sometimes non-Java) view class.
   # The view defines how data moves into and out of the view via the model.  
@@ -226,8 +227,15 @@ module Monkeybars
     #     go_button.enabled = false
     #   end
     #
-    def self.define_signal(signal, method_name)
-      signal_mappings[signal] = method_name
+    def self.define_signal(options, method_name = nil)
+      if options.kind_of? Hash
+        signal_mappings[options[:name]] = options[:handler]
+      else
+        #support two styles for now, deprecating the old (signal, method_name) style      
+        warn "The usage of define_signal(signal, method_name) has been deprecated, please use define_signal :name => :signal, :handler => :method_name"
+        signal_mappings[options] = method_name
+      end
+      
     end
     
     # Declares how nested views from their respective nested controllers are to be
@@ -366,7 +374,6 @@ module Monkeybars
             nesting.remove(self, nested_view, nested_component, model, transfer) 
          }
     end
-
     
     def update(model, transfer)
       self.class.view_mappings.select{|mapping| mapping.maps_to_view?}.each {|mapping| mapping.to_view(self, model, transfer)}
@@ -381,7 +388,9 @@ module Monkeybars
     
     def process_signal(signal, model, transfer, &block)
       handler = self.class.signal_mappings[signal]
-      unless handler.nil?
+      if handler.nil?
+        raise UndefinedSignalError, "There is no signal '#{signal}' defined"
+      else
         raise InvalidSignalHandlerError, "There is no handler method '#{handler}' on view #{self.class}" unless respond_to?(handler)
         self.send(handler, model, transfer, &block) unless handler.nil?
       end
