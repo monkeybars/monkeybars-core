@@ -127,15 +127,20 @@ describe Monkeybars::View, "#process_signal" do
     end
   end
 
+  it "invokes a UndefinedSignalError when it recieves a signal that is not declared" do
+    view = Monkeybars::View.new
+    lambda {view.process_signal(:signal_that_is_not_defined, nil, nil)}.should raise_error(Monkeybars::UndefinedSignalError)
+  end
+  
+  it "invokes a InvalidSignalHandlerError when the declared signal's handler method does not exist" do
+    view = BasicSignalHandler.new
+    lambda{view.process_signal(:signal1, nil, nil)}.should raise_error(Monkeybars::InvalidSignalHandlerError)
+  end
+  
   it "invokes the mapped method when a signal is received" do
     view = BasicSignalHandler.new
     view.should_receive(:handler)
     view.process_signal(:signal1, nil, nil)
-  end
-  
-  it "ignores signals that have not been defined" do
-    view = BasicSignalHandler.new
-    lambda {view.process_signal(:signal2, nil, nil)}.should_not raise_error(Exception)
   end
   
   it "invokes the method associated with the signal when called and passes along any block passed to it" do

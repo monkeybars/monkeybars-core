@@ -10,6 +10,7 @@ require 'monkeybars/view_nesting'
 module Monkeybars
   class UndefinedControlError < Exception; end
   class InvalidSignalHandlerError < Exception; end
+  class UndefinedSignalError < Exception; end
 
   # The view is the gatekeeper to the actual Java (or sometimes non-Java) view class.
   # The view defines how data moves into and out of the view via the model.  
@@ -381,7 +382,9 @@ module Monkeybars
     
     def process_signal(signal, model, transfer, &block)
       handler = self.class.signal_mappings[signal]
-      unless handler.nil?
+      if handler.nil?
+        raise UndefinedSignalError, "There is no signal '#{signal}' defined"
+      else
         raise InvalidSignalHandlerError, "There is no handler method '#{handler}' on view #{self.class}" unless respond_to?(handler)
         self.send(handler, model, transfer, &block) unless handler.nil?
       end
