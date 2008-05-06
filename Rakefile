@@ -36,6 +36,8 @@ task :prepare do
   Dir.mkdir("skeleton/lib") unless File.directory?("skeleton/lib")
   Dir.mkdir("skeleton/lib/java") unless File.directory?("skeleton/lib/java")
   Dir.mkdir("skeleton/lib/ruby") unless File.directory?("skeleton/lib/ruby")
+  File.open( "skeleton/lib/ruby/README.txt" , "w"){|f| 
+     f.puts( "3rd-party Ruby libs go in this dir." ) } unless File.exist?( "skeleton/lib/ruby/README.txt" )
 end
 
 desc "Creates monkeybars.jar file for distribution"
@@ -46,6 +48,8 @@ task :jar => [:prepare] do
   end
   $stdout << `jar cf #{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar -C lib monkeybars.rb -C lib monkeybars -C #{BUILD_DIR} .`
   FileUtils.cp("#{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar", "skeleton/lib/java/monkeybars-#{Monkeybars::VERSION}.jar")
+   
+  
 end
 
 desc "Creates a zip file version of the project, excluding files from exclude.lst.  **ONLY WORKS ON OSX/Linux**  Yes this sucks, no I don't want to add another dependency at the moment."
