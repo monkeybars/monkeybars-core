@@ -7,9 +7,41 @@
 	<meta name="author" content="David Koontz">
 </head>
 <body>
-	<p>
-		
-	</p>
-	
+		<script type="text/javascript" src="AC_RunActiveContent.js"></script>
+		<h1>Monkeybars at 40,000 feet</h1>
+		<p id="open_link1"><a href="javascript:void(0)" onclick="document.getElementById('video1').style.display='block';;document.getElementById('open_link1').style.display='none'">Watch the video</a></p>
+		<p>
+			<div id="video1" style="display: none;">
+				<a href="javascript:void(0)" onclick="document.getElementById('video1').style.display='none';document.getElementById('open_link1').style.display='block'">Hide video</a><br/>
+				<script language="javascript">
+					if (AC_FL_RunContent == 0) {
+						alert("This page requires AC_RunActiveContent.js.");
+					} else {
+						AC_FL_RunContent(
+							'codebase', 'http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0',
+							'width', '800',
+							'height', '600',
+							'src', 'overview',
+							'quality', 'high',
+							'pluginspage', 'http://www.macromedia.com/go/getflashplayer',
+							'align', 'middle',
+							'play', 'true',
+							'loop', 'true',
+							'scale', 'showall',
+							'wmode', 'window',
+							'devicefont', 'false',
+							'id', 'overview',
+							'bgcolor', '#000000',
+							'name', 'overview',
+							'menu', 'true',
+							'allowFullScreen', 'false',
+							'allowScriptAccess','sameDomain',
+							'movie', 'overview',
+							'salign', ''
+							); //end AC code
+					}
+				</script>
+			</div>
+		</p>
 </body>
 </html>
