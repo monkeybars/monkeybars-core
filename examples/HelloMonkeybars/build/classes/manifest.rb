@@ -7,7 +7,7 @@ require 'resolver'
 
 case Monkeybars::Resolver.run_location
 when Monkeybars::Resolver::IN_FILE_SYSTEM
-  $CLASSPATH << File.expand_path(File.dirname(__FILE__) + '/../lib/monkeybars-0.6.1.jar')
+  $CLASSPATH << File.expand_path(File.dirname(__FILE__) + '/../lib/monkeybars-0.6.2.jar')
 end
 
 require 'monkeybars'
@@ -30,7 +30,7 @@ case Monkeybars::Resolver.run_location
 when Monkeybars::Resolver::IN_FILE_SYSTEM
   # Files to be added only when running from the file system go here
   add_to_classpath "../lib/swing-layout-1.0.3.jar"
-  add_to_classpath "../lib/monkeybars-0.6.1.jar"
+  add_to_classpath "../lib/monkeybars-0.6.2.jar"
   add_to_classpath "../build/classes"
 when Monkeybars::Resolver::IN_JAR_FILE
   # Files to be added only when run
