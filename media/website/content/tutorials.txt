@@ -1,0 +1,21 @@
+---
+title: 'Monkeybars: Tutorials'
+current_page: docs
+filter:
+  - erb
+  - textile
+---
+<div id="content">
+
+		<h2>Tutorials</h2>
+		<p>
+			These tutorials are a work in progress. If there is a particular issue (installation/configuration/some part of Monkeybars) that these tutorials do not cover, please bring this up on the mailing list or on the IRC channel.
+		</p>
+		<ul>
+			<li><a href="tutorials/installing1.html">Installing: Part 1 - Getting Monkeybars, creating a new project</a></li>
+			<li><a href="tutorials/installing2.html">Installing: Part 2 - The contents of a generated Monkeybars project</a></li>
+			<li><a href="tutorials/installing3.html">Installing: Part 3 - Using the Monkeybars generator</a></li>
+			<li><a href="tutorials/netbeans.html">Configuring Netbeans</a></li>
+			<li><a href="tutorials/usage1.html">Overview of Monkeybars</a></li>
+		</ul>
+</div>

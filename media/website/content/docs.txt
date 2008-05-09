@@ -13,6 +13,7 @@ filter:
 		
 		<p>
 				<ul>
+					<li><a href="tutorials.html">Tutorials</a></li>
 					<li><a href="api/index.html">RDoc</a></li>
 					<li>	
 						<table border=0 style="background-color: #fff; padding: 5px;" cellspacing=0>
@@ -49,9 +50,7 @@ filter:
 			After the initial check-out, you can get new changes with the command "git pull" from your local Monkeybars directory
 		</p>
 		
-		<h2>Screencasts</h2>
-		<h3>Monkeybars 0.6 Screencasts</h3>
-		<p>Coming soon!</p>
+		<h2>Old Version Screencasts</h2>
 		<h3>Monkeybars 0.5 Screencasts</h3>
 		<p><a href="javascript:void(0)" onclick="document.getElementById('part1').style.display='block'">Part 1: High level overview</a></p>
 		<div id="part1" style="display: none;">

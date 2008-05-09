@@ -10,6 +10,10 @@ filter:
 		<h2>Latest News</h2>
 		
 		<p class="news">
+			5-8-08 - New <a href="tutorials.html">tutorials</a> page is up on the <a href="docs.html">docs</a> page.  This new documentation is a mix of text and screencasts.
+		</p>
+		
+		<p class="news">
 			4-28-08 - Transition to Git and new source/issue tracking in in place.  Visit the issue tracking page at Google code <a href="http://code.google.com/p/monkeybars-lib/">here</a> and visit our new repo home <a href="http://gitorious.org/projects/monkeybars">here</a>.
 		</p>
 		

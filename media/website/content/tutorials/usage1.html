@@ -8,11 +8,34 @@
 </head>
 <body>
 		<script type="text/javascript" src="AC_RunActiveContent.js"></script>
+		<script type="text/javascript" src="../swfobject.js"></script>
 		<h1>Monkeybars at 40,000 feet</h1>
+		<p>
+			Monkeybars is a JRuby library for integrating Ruby with Swing.  It could be described as MVC and the ideas of models, views, and controllers are used but is not a typical MVC framework in the vein of traditional GUI systems.  The first way in which Monkeybars diverges from most GUI systems is that it is built on the premise that the more your controller directly interacts with the other components in the application, the more coupled it becomes.
+		</p>
+		<p>	
+			Most applications have a large controller, a small or non-existant model and a small view.  But really most of your logic should be business logic, and that belongs in your model.  The controller and view should handle the application logic and view logic respectively.  So, the first thing Monkeybars does is to try and encourage a healthy separation of concerns.  This is done by disconnecting each of the components from each other so there is almost no direct interaction.  Instead, requests are routed through Monkeybars which provides a structured way to pass data back and forth.
+		</p>
+		<p>
+			Since the controller and the view do not directly interact, it is quite trivial to swap out components with a mock version.  The association between the controller, model, and view is declarative and can be overriden externally.  This means your application's testability becomes very good.
+		</p>
+		<p>
+			The controller and the view communicate via the model.  Typically the controller will trigger a change in the model as a result of an event and then trigger an update of the view.  The view is then given a the model and decides which properties to map from the model to itself.  The view remains in full control of how data goes into and out of the view's components.
+		</p>
+
 		<p id="open_link1"><a href="javascript:void(0)" onclick="document.getElementById('video1').style.display='block';;document.getElementById('open_link1').style.display='none'">Watch the video</a></p>
 		<p>
 			<div id="video1" style="display: none;">
 				<a href="javascript:void(0)" onclick="document.getElementById('video1').style.display='none';document.getElementById('open_link1').style.display='block'">Hide video</a><br/>
+				<!-- <p id="player1"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this movie.</p>
+				<script type="text/javascript">
+					var so = new SWFObject('../flvplayer.swf','player','800','600','7');
+					so.addParam("allowfullscreen","true");
+					so.addVariable("file","http://www.koontzfamily.org/david/videos/tutorials/overview.swf");
+//					so.addVariable("displayheight","600");
+					so.write('player1');
+				</script> -->
+
 				<script language="javascript">
 					if (AC_FL_RunContent == 0) {
 						alert("This page requires AC_RunActiveContent.js.");
@@ -26,7 +49,7 @@
 							'pluginspage', 'http://www.macromedia.com/go/getflashplayer',
 							'align', 'middle',
 							'play', 'true',
-							'loop', 'true',
+							'loop', 'false',
 							'scale', 'showall',
 							'wmode', 'window',
 							'devicefont', 'false',
@@ -34,14 +57,38 @@
 							'bgcolor', '#000000',
 							'name', 'overview',
 							'menu', 'true',
-							'allowFullScreen', 'false',
+							'allowFullScreen', 'true',
 							'allowScriptAccess','sameDomain',
-							'movie', 'overview',
+							'movie', 'http://www.koontzfamily.org/david/videos/tutorials/overview',
 							'salign', ''
 							); //end AC code
 					}
 				</script>
 			</div>
+		</p>
+		
+		<h1>Monkeybars at 1,000 feet</h1>
+		<p>
+			<p>Monkeybars is a library that provides a structured way of building Swing applications using JRuby.  Although Monkeybars uses the ideas of Models, Views, and Controllers, it’s usage of the terms is not the same as in traditional MVC systems.  Monkeybars uses the idea of the three discreet components to emphasize a separation of concerns that is often sorely lacking in GUI applications but attributes different roles and responsibilities to each component.</p>
+
+			<p>The core of Monkeybars' functionality comes from two classes, the Controller and the View.  These serve as base classes for the various controllers and views in your own application.  Very few assumptions are made about your model and as such there is no base class to inherit from.  Monkeybars encourages the controller, model, and view to each remain very decoupled from each other by acting as a bridge between the components.  This acts as a very simple form of dependency injection since the model and view a particular controller interacts with are not explicitly created by the controller but are simply declared there.  Substituting a model or view with a mock object is trivial.</p>
+
+			<h3>The base classes</h3>
+
+			<p>The controller’s responsibilities are to process events generated in the view and to trigger updates in the model.  Controllers are also the component that communicates outside of the controller, model, view group, to other controllers or non-monkeybars objects.  Controllers declare their interest in certain events on particular components and Monkeybars takes care of registering the appropriate event handlers and routing  the events back to the controller.  Controllers take care of your application logic, making sure users are logged in before searching, ensuring you can’t delete an entry twice, validating that a window is repositioned in its previous location when reopened and so on.</p>
+
+			<p>Views are pure Ruby files that sit in front of the actual Java form.  Views are responsible for all your view logic which includes updating the visual components that make up your interface as well as translating data into and out of your form.  The data for the view typically comes from the model.  The view takes care of your view logic which means it will do things typically done in the controller in other applications.  Things like changing the text color of a label or updating the contents of a list are view specific and shouldn’t be mixed in with decisions on weather or not to change data in the model or the actual changing of data in the model.  In this way the only object that touches Swing, (and thus is more difficult to test), is the view.</p>
+
+			<p>This leaves just one thing, the business logic.  Monkeybars has very little to say about this, other than the idea that it doesn’t belong in the controller or the view.  This is why Monkeybars makes almost no assumptions about your model, it can’t add anything useful so it tries to stay out of the way.</p>
+
+			<h3>Data transfer</h3>
+
+			<p>We’ve discussed how you might use the model to get data into the view.  But how does data get out of the view?  The answer is that the mappings that translate data from the model to the view are actually two way.  When the controller requests the state of the view, a new temporary model object is created.  Its properties are set using the mappings declared in the view but in reverse.  This temporary model object is then passed along to the controller which can decide which properties should be propagated to the permanent model.</p>
+
+			<p>When you need to transfer data to or from the view and the model is not an appropriate place to put that data, Monkeybars provides another vehicle.  The transfer is a transitory hash object that is passed along to the view along with the model when doing an update and is populated with view data and passed to the controller along with the model when the controller requests the view’s state.  Transfer values are only mapped into the model if present so they are good for data that represents view state changes that happen when a full view update is being performed.</p>
+
+			<p>When you have an update to your view that should happen in isolation, the normal view updating that triggers all the view’s mappings won’t work.  For those situations Monkeybars provides a signaling mechanism.  Views declare which signals they recognize and what method to run when that signal is received.  The signal handler in the view receives the model and the transfer, just like during a normal update.</p>
+			
 		</p>
 </body>
 </html>
