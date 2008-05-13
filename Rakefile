@@ -30,6 +30,16 @@ task :clean do
   FileUtils.rm("skeleton/lib/java/monkeybars-#{Monkeybars::VERSION}.jar", :force => true)
 end
 
+task :version_readme do
+  readme = IO.readlines( 'README.txt')
+  File.open( 'README.txt', 'w' ) { |f| 
+    f.puts "Monkeybars #{Monkeybars::VERSION}" 
+    readme.shift
+    f.puts readme.join( "\n")
+  }
+end
+
+
 task :prepare do
   Dir.mkdir(OUTPUT_DIR) unless File.directory?(OUTPUT_DIR)
   Dir.mkdir(BUILD_DIR) unless File.directory?(BUILD_DIR)
