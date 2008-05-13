@@ -189,19 +189,36 @@ describe Monkeybars::Controller, "#update_model" do
     
     t = UpdateModelController.instance
     m = UpdateModelModel.new
-    m.text = "some test data"
-    m.text2 = "some test data"
-    m.text3 = "some test data"
+    m.text = "some test data1"
+    m.text2 = "some test data2"
+    m.text3 = "some test data3"
     
     t.send(:model).text = ""
     t.send(:model).text2 = ""
     t.send(:model).text2 = ""
     t.send(:update_model, m, :text, :text3)
-    t.send(:model).text.should == "some test data"
+    t.send(:model).text.should == "some test data1"
     t.send(:model).text2.should == ""
-    t.send(:model).text3.should == "some test data"
+    t.send(:model).text3.should == "some test data3"
     t.close
   end
+end
+
+describe Monkeybars::Controller, "#update_provided_model" do
+  c = Monkeybars::Controller.instance
+  class TestUpdateProvidedModel; attr_accessor :attr1, :attr2, :attr3; end
+  
+  t1 = TestUpdateProvidedModel.new
+  t2 = TestUpdateProvidedModel.new
+  
+  t1.attr1 = 10
+  t1.attr2 = "foo"
+  t1.attr3 = (1..10)
+  
+  c.send(:update_provided_model, t1, t2, :attr1, :attr2, :attr3)
+  t2.attr1.should == 10
+  t2.attr2.should == "foo"
+  t2.attr3.should == (1..10)
 end
 
 describe Monkeybars::Controller, "implicit handler registration" do

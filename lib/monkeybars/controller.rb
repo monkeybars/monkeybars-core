@@ -554,7 +554,7 @@ module Monkeybars
     #   model.user_name = view_model.user_name
     #   model.password = view_model.password
     def update_model(source, *properties) # :doc:
-      update_provided_model(@__model, source, *properties)
+      update_provided_model(source, @__model, *properties)
     end
     
     # This method works just like Controller#update_model except that the target
@@ -577,7 +577,6 @@ module Monkeybars
         destination.send("#{property}=", source.send(property))
       end
     end
-    
     
     @@model_class_for_child_controller ||= {}
     def self.model_class
