@@ -1,3 +1,10 @@
+== 0.6.2 / 2008-05-13
+ * Changed syntax of define_signal, deprecated old version
+ * Unhandled signals now throw an UndefinedSignalError
+ * Multiple handlers can now be registered on a given Swing component
+ * Performance improvment in implicit handler registration
+ * Various bug fixes
+
 == 0.6.1 / 2008-03-30
  * Fixed several errors in the generator.
  * Improved usability of Monkeybars outside of an IDE
@@ -10,7 +17,6 @@
  * Integration of Foxtrot library for background GUI repainting
    
 == 0.5.0 / 2007-11-03
-
 * New method on Swing components, disable_handler.
   * Turns off the specified handlers for the duration of the attached block.
   * Allows you to prevent infinite loops caused by handlers re-generating events.

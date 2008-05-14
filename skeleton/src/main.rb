@@ -2,6 +2,7 @@
 # Much of the platform specific code should be called before Swing is touched.
 # The useScreenMenuBar is an example of this.
 require 'rbconfig'
+require 'java'
 
 #===============================================================================
 # Platform specific operations, feel free to remove or override any of these

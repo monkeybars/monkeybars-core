@@ -1,1 +1,1 @@
-3rd-party Ruby libs go in this dir.
+3rd party Ruby libs and unpacked gems go here.
