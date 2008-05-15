@@ -1,6 +1,6 @@
 *nbproject*
 *pkg*
 *media*
-*.hg*
+*.git*
 *.DS_Store*
 exclude.lst

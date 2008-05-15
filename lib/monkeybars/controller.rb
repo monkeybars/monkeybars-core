@@ -23,7 +23,7 @@ module Monkeybars
   # (see add_listener) as well as two special events, the pressing of the "close" button
   # of the window (see close_action), and the updating of the MVC tuple (see update_method).
   # Handlers are methods named according to a certain convention that are the recipient of events.  
-  # Handlers are named either <component_event> or just <event> if you want a global handler.  
+  # Handlers are named <component_event>.
   # No events are actually generated and sent to the controller unless a listener has been added 
   # for that component, however, component-specific handlers will automatically add a listener 
   # for that component when the class is instantiated.  Therefore a method named 
@@ -36,8 +36,6 @@ module Monkeybars
   # a component named ok_button, okButton or even OkButton and the listener
   # would be added correctly.  If you have a nested component such as text_field.document
   # then you will need to use an explicit add_listener registration.
-  # 
-  # Global handlers cannot be declared in this fashion, you must use add_listener explicitly.
   # 
   # Handler methods can optionally take one parameter which is the event generated
   # by Swing.  This would look like
