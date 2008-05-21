@@ -18,11 +18,6 @@ end
 # End of platform specific code
 #===============================================================================
 
-$LOAD_PATH.unshift File.dirname(__FILE__)
-Dir.glob(File.expand_path(File.dirname(__FILE__) + "/**")).each do |directory|
-  $LOAD_PATH << directory unless directory =~ /\.\w+$/ #File.directory? is broken in current JRuby for dirs inside jars
-end
-
 require 'manifest'
 
 begin

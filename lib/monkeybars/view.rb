@@ -355,11 +355,19 @@ module Monkeybars
     
     # Attempts to find a member variable in the underlying @main_view_component
     # object if one is set, otherwise falls back to default method_missing implementation.
+    #
+    # Also, detect if the user is trying to set a new value for a given instance
+    # variable in the form.  If so, the field will be updated to refer to the provided
+    # value.  The passed in argument MUST BE A JAVA OBJECT or this call will fail.
     def method_missing(method, *args, &block)
-      begin
-        return get_field_value(method)
-      rescue NameError
-        super
+      if match = /(.*)=$/.match(method.to_s)
+        get_field(match[1]).set_value(Java.ruby_to_java(@main_view_component), Java.ruby_to_java(args[0]))
+      else
+        begin
+          return get_field_value(method)
+        rescue NameError
+          super
+        end
       end
     end
     
@@ -450,7 +458,7 @@ module Monkeybars
     end
     
     def dispose
-      @main_view_component.dispose
+      @main_view_component.dispose if @main_view_component.respond_to? :dispose
     end
     
     private

@@ -4,7 +4,7 @@ require 'monkeybars/controller'
 require 'spec/unit/test_files.jar'
 
 class TestingView < Monkeybars::View
-  set_java_class 'org.monkeybars.TestView'  
+  set_java_class 'org.monkeybars.TestView'
 end
 
 describe Monkeybars::View, ".nest" do
@@ -52,11 +52,35 @@ describe Monkeybars::View, "#get_field_value" do
 end
 
 describe Monkeybars::View, "#get_field" do
+  after(:each) do
+    #Make swing threads go away so test can exit
+    @view.instance_variable_get("@main_view_component").dispose
+  end
+  
   it "uses cached reference to a field if it is available" do
-    view = TestingView.new
-    view.instance_variable_get(:@__field_references)[:test_label] = "test data that replaces actual field"
-    view.send(:get_field, :test_label).should == "test data that replaces actual field"
-    view.instance_variable_get("@main_view_component").dispose
+    @view = TestingView.new
+    @view.instance_variable_get(:@__field_references)[:test_label] = "test data instead of an actual field"
+    @view.send(:get_field, :test_label).should == "test data instead of an actual field"
+  end
+  
+  it "allows field references to be updated when called with =" do
+    class ReplaceComponentView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+      
+      def replace_test_button
+        self.test_button = javax.swing.JButton.new("New button text")
+      end
+      
+      def test_button_text
+	test_button.text
+      end
+    end
+    
+    @view = ReplaceComponentView.new
+    puts "@main_view_component: #{@view.instance_variable_get("@main_view_component")}"
+    @view.replace_test_button
+    @view.test_button_text.should == "New button text"
+    
   end
 end
 

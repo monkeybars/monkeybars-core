@@ -15,6 +15,8 @@ PROJ.version = Monkeybars::VERSION
 PROJ.summary = 
 PROJ.rubyforge.name = 'monkeybars'
 PROJ.spec.opts << '--color'
+PROJ.ruby_opts = []
+PROJ.libs << File.expand_path(File.dirname(__FILE__) + "/lib")
 
 require 'fileutils'
 require 'spec/rake/spectask'
@@ -24,12 +26,6 @@ BUILD_DIR = "#{OUTPUT_DIR}/bin"
 SKELETON_DIR = "skeleton"
 
 task :default => 'spec'
-desc "Run all specs"
-Spec::Rake::SpecTask.new do |t|
-  t.libs << File.expand_path(File.dirname(__FILE__) + "/lib")
-  t.spec_files = FileList['spec/unit/**/*_spec.rb']
-  t.spec_opts = ['--color']
-end
 
 desc "Removes the output directory"
 task :clean do
