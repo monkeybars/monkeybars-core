@@ -29,6 +29,13 @@ require 'application_view'
 # is equivalent to
 #
 # add_to_classpath "../lib/java/swing-layout-1.0.3.jar"
+#
+# There is also a helper for adding to your load path and avoiding issues with file: being
+# appended to the load path (useful for JRuby libs that need your jar directory on
+# the load path).
+#
+# add_to_load_path "../lib/java"
+#
 
 case Monkeybars::Resolver.run_location
 when Monkeybars::Resolver::IN_FILE_SYSTEM
