@@ -155,9 +155,9 @@ module Monkeybars
       begin
         instance_eval("view.#{@view_property} = transfer[#{@transfer_property.inspect}]")
       rescue NoMethodError
-        raise InvalidMappingError, "Either transfer[#{@transfer_property}] or self.#{@view_property} in #{view.class} is not valid."
+        raise InvalidMappingError, "Either transfer[#{@transfer_property.inspect}] or self.#{@view_property} in #{view.class} is not valid."
       rescue TypeError => e
-        raise InvalidMappingError, "Invalid types when assigning from transfer[#{@transfer_property}] to self.#{@view_property}, #{e.message} in #{view.class}"
+        raise InvalidMappingError, "Invalid types when assigning from transfer[#{@transfer_property.inspect}] to self.#{@view_property}, #{e.message} in #{view.class}"
       end
     end
     
@@ -175,9 +175,9 @@ module Monkeybars
       begin
         instance_eval("transfer[#{@transfer_property.inspect}] = view.#{@view_property}")
       rescue NoMethodError
-        raise InvalidMappingError, "Either transfer[#{@transfer_property}] or self.#{@view_property} in #{view.class} is not valid."
+        raise InvalidMappingError, "Either transfer[#{@transfer_property.inspect}] or self.#{@view_property} in #{view.class} is not valid."
       rescue TypeError => e
-        raise InvalidMappingError, "Invalid types when assigning from transfer[#{@transfer_property}] to self.#{@view_property}, #{e.message} in #{view.class}"
+        raise InvalidMappingError, "Invalid types when assigning from transfer[#{@transfer_property.inspect}] to self.#{@view_property}, #{e.message} in #{view.class}"
       end
     end
     
