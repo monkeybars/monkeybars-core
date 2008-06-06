@@ -483,7 +483,7 @@ module HandlerContainer
   # All handlers are re-added to the component afterwards.
   #
   #   some_text_field.disable_handlers(:action, :key) do
-  #     # some code that we don't want to trigger action and key handlers for
+  #     # some code that we don't want to trigger action listener methods or key listener methods for
   #   end
   #
   def disable_handlers(*types)
