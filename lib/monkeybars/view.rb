@@ -450,7 +450,7 @@ module Monkeybars
           
           field.accessible = true
         else
-          field = method(field_name)
+          field = @main_view_component.method(field_name)
         end
         @__field_references[field_name] = field
       end
