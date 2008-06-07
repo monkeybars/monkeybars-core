@@ -459,11 +459,12 @@ module Monkeybars
       
       if closed?
         load(*args) 
+        update_view
         @closed = false
       end
       
-      update_view
       show
+      
       self #allow var assignment off of open, i.e. screen = SomeScreen.instance.open
     end
     
@@ -523,7 +524,8 @@ module Monkeybars
     #
     def view_state # :doc:
       unless self.class.model_class.nil?
-        model = create_new_model 
+        model = create_new_model
+        transfer = {}
         @__view.write_state(model, transfer)
         return model, transfer
       else
