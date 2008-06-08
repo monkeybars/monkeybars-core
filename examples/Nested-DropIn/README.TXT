@@ -11,3 +11,5 @@ Rawr is needed to build this project.
 
 If viewing this project as a Netbeans project, one can see how a design preview
 for fairly static nested views is done.
+
+-Logan Barnett
