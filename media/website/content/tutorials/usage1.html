@@ -27,12 +27,13 @@
 		<p>
 			<div id="video1" style="display: none;">
 				<a href="javascript:void(0)" onclick="document.getElementById('video1').style.display='none';document.getElementById('open_link1').style.display='block'">Hide video</a><br/>
-				<!-- <p id="player1"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this movie.</p>
+
+				<!-- <p id="player1"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
 				<script type="text/javascript">
 					var so = new SWFObject('../flvplayer.swf','player','800','600','7');
 					so.addParam("allowfullscreen","true");
-					so.addVariable("file","http://www.koontzfamily.org/david/videos/tutorials/overview.swf");
-//					so.addVariable("displayheight","600");
+					so.addVariable("file","http://www.koontzfamily.org/david/videos/tutorials/overview.flv");
+					so.addVariable("displayheight","600");
 					so.write('player1');
 				</script> -->
 
@@ -89,6 +90,10 @@
 
 			<p>When you have an update to your view that should happen in isolation, the normal view updating that triggers all the view’s mappings won’t work.  For those situations Monkeybars provides a signaling mechanism.  Views declare which signals they recognize and what method to run when that signal is received.  The signal handler in the view receives the model and the transfer, just like during a normal update.</p>
 			
+		</p>
+
+		<p>
+			Continue on to part 2: <a href="usage2.html">building 'Hello World'</a> or take a look at our <a href="../examples.html">example applications</a>.
 		</p>
 </body>
 </html>

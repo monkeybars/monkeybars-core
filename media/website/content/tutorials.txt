@@ -16,6 +16,7 @@ filter:
 			<li><a href="tutorials/installing2.html">Installing: Part 2 - The contents of a generated Monkeybars project</a></li>
 			<li><a href="tutorials/installing3.html">Installing: Part 3 - Using the Monkeybars generator</a></li>
 			<li><a href="tutorials/netbeans.html">Configuring Netbeans</a></li>
-			<li><a href="tutorials/usage1.html">Overview of Monkeybars</a></li>
+			<li><a href="tutorials/usage1.html">Usage: Part 1 - Overview of Monkeybars</a></li>
+			<li><a href="tutorials/usage2.html">Usage: Part 2 - Hello World</a></li>
 		</ul>
 </div>
