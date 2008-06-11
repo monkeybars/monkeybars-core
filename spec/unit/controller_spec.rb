@@ -145,13 +145,13 @@ end
 
 describe Monkeybars::Controller, "#view_state" do
   
-  it "returns the view's state as a model and a transfer hash" do  
-    class ViewStateModel
+  it "returns the view's state as a ViewState object" do  
+    class ReturnsViewStateModel
       attr_accessor :text
       def initialize; @text= ""; end
     end
     
-    class ViewStateView < Monkeybars::View
+    class ReturnsViewStateView < Monkeybars::View
       set_java_class "org.monkeybars.TestView"
       map :view => "testTextField.text", :model => :text
       map :view => "testTextField.columns", :transfer => :text_columns
@@ -161,23 +161,50 @@ describe Monkeybars::Controller, "#view_state" do
       end
     end
     
-    class ViewStateController < Monkeybars::Controller
-      set_view "ViewStateView"
-      set_model "ViewStateModel"
+    class ReturnsViewStateController < Monkeybars::Controller
+      set_view "ReturnsViewStateView"
+      set_model "ReturnsViewStateModel"
     end
     
-    t = ViewStateController.instance
+    t = ReturnsViewStateController.instance
     
-    view_state, transfer = t.send(:view_state)
-    view_state.text.should == "A text field"
-    transfer[:text_columns].should == 10
-    t.instance_variable_get("@__view").testTextField.text = "test data"
-    t.instance_variable_get("@__view").testTextField.columns = 20
-    view_state, transfer = t.send(:view_state)
-    view_state.text.should == "test data"
-    transfer[:text_columns].should == 20
+    view_state = t.send(:view_state)
+    view_state.class.should == Monkeybars::ViewState
+    view_state.model.text.should == "A text field"
+    view_state.transfer[:text_columns].should == 10
     
     t.close
+  end
+  
+  it "memoizes the value of the view state" do
+    class MemoizesViewStateModel
+      attr_accessor :text
+      def initialize; @text= ""; end
+    end
+    
+    class MemoizesViewStateView < Monkeybars::View
+      set_java_class "org.monkeybars.TestView"
+      map :view => "testTextField.text", :model => :text
+      map :view => "testTextField.columns", :transfer => :text_columns
+      
+      def load
+	testTextField.columns = 10
+      end
+    end
+    
+    class MemoizesViewStateController < Monkeybars::Controller
+      set_view "MemoizesViewStateView"
+      set_model "MemoizesViewStateModel"
+    end
+    
+    t = MemoizesViewStateController.instance
+    view_state = t.send(:view_state)
+    view_state.should be_equal(t.send(:view_state))
+    
+    t.instance_variable_get("@__view").testTextField.text = "test data"
+    t.instance_variable_get("@__view").testTextField.columns = 20
+    
+    view_state.should be_equal(t.send(:view_state))
   end
 end
 
@@ -266,6 +293,7 @@ describe Monkeybars::Controller, "implicit handler registration" do
     end
     
     c = EmptyController.instance
+    raise "This spec is not implemented properly"
   end
 
   it "does not add an implicit handler if an explict handler of that type was already added for that component"
