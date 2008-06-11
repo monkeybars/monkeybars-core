@@ -104,7 +104,7 @@ describe Monkeybars::Controller, "#handle_event" do
       add_listener :type => :action, :components => ["testButton"]
       add_listener :type => :document, :components => ["testTextField.document"]
       
-      def test_button_action_performed(event)
+      def test_button_action_performed
         $test_button_action_performed = true
       end
     end
@@ -120,8 +120,30 @@ describe Monkeybars::Controller, "#handle_event" do
     
     t.close
   end
-  
-  it "should call a global event handler if no specific component handler is defined"
+
+  it "clears the memoized view state after all handlers have been run" do
+    class MemoizationTestModel
+      attr_accessor :foo, :bar
+      def initialize
+	@foo = 47
+        @bar = "Test data"
+      end
+    end
+    class ClearMemoizedController < Monkeybars::Controller
+      set_model "MemoizationTestModel"
+      set_view "TestView"
+      
+      def test_button_action_performed; end
+    end
+    
+    controller = ClearMemoizedController.instance
+    view_state = controller.send(:view_state)
+    controller.send(:instance_variable_get, "@__view_state").should_not be_nil
+    view_state.model.foo.should == 47
+    view_state.model.bar.should == "Test data"
+    controller.send(:handle_event, :test_button, :action_performed, "fake event")
+    controller.send(:instance_variable_get, "@__view_state").should be_nil
+  end
 end
 
 describe Monkeybars::Controller, "#add_handler_for" do
