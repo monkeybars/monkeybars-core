@@ -10,7 +10,7 @@ class ListController < ApplicationController
           "Anus Magillicutty",
           "Monster A Go Go",
           "Ballistic: Ecks vs. Sever",
-          "Santa Claus Conquers the Martians",
+          "Santa Clause Conquers the Martians",
           "From Justin to Kelly",
           "An Alan Smithee Film: Burn Hollywood Burn",
           "Batman & Robin"].freeze

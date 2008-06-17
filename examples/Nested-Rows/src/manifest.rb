@@ -1,13 +1,41 @@
+require 'java'
+
+# Load subdirectories in src onto the load path
+Dir.glob(File.expand_path(File.dirname(__FILE__) + "/**")).each do |directory|
+  $LOAD_PATH << directory unless directory =~ /\.\w+$/ #File.directory? is broken in current JRuby for dirs inside jars
+end
+
 #===============================================================================
 # Monkeybars requires, this pulls in the requisite libraries needed for
 # Monkeybars to operate.
 
-require 'java'
+
+class File
+  class_eval do
+    class << self
+      alias_method :new_expand_path, :expand_path
+    end
+  end
+
+  def File.is_jnlp_url?(path)
+    path =~ /^http/i
+  end
+
+  def File.expand_path fname, dir_string=nil
+    if is_jnlp_url?(fname)
+      _ = fname.split( 'jar!/').last
+       "./#{_}"
+    else
+      new_expand_path( fname, dir_string )
+    end
+  end
+end
+
 require 'resolver'
 
 case Monkeybars::Resolver.run_location
 when Monkeybars::Resolver::IN_FILE_SYSTEM
-  $CLASSPATH << File.expand_path(File.dirname(__FILE__) + '/../lib/monkeybars-0.6.1.jar')
+  add_to_classpath "../lib/java/monkeybars-0.6.2.jar"
 end
 
 require 'monkeybars'
@@ -22,16 +50,21 @@ require 'application_view'
 # 
 # $CLASSPATH << File.expand_path(File.dirname(__FILE__) + "/../lib/swing-layout-1.0.3.jar")
 #
-# is equivalent to
+# or
 #
 # add_to_classpath "../lib/swing-layout-1.0.3.jar"
 
+require 'rubygems'
+
 case Monkeybars::Resolver.run_location
 when Monkeybars::Resolver::IN_FILE_SYSTEM
-  # Files to be added only when running from the file system go here
+  add_to_classpath "../lib/java/jruby-complete.jar"
+  add_to_classpath "../lib/java/swing-layout-1.0.3.jar"
+  add_to_classpath "../lib/java/monkeybars-0.6.2.jar"
+  add_to_classpath "../build/classes"
+  $LOAD_PATH << File.expand_path(File.dirname(__FILE__) + "/../lib/java")
 when Monkeybars::Resolver::IN_JAR_FILE
-  # Files to be added only when run from inside a jar file
+  $LOAD_PATH << File.expand_path(File.dirname(__FILE__) + "/../../lib/java").gsub("file:", "")
 end
 
-$LOAD_PATH << 'user'
-$LOAD_PATH << 'sorted_users'
+$LOAD_PATH << File.expand_path(File.dirname(__FILE__) + "/../lib/ruby")

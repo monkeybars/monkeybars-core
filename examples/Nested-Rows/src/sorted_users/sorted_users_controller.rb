@@ -37,6 +37,7 @@ class SortedUsersController < ApplicationController
     # uncomment to see how the sort turned out
     #puts "sorted models:\n#{@user_controllers.map {|controller| controller.send(:model).inspect}.join("\n")}"
     
+    #clear out the current users. We're not killing the controllers, just unhooking them.
     remove_all_users
     
     @user_controllers.each do |user_controller|
@@ -46,7 +47,6 @@ class SortedUsersController < ApplicationController
   end
   
   def remove_all_users
-    signal :remove_all_users
     @nested_user_controllers.each do |user_controller|
       remove_nested_controller(:users, user_controller)
     end
