@@ -616,7 +616,7 @@ module Monkeybars
       begin
         component = @__view.get_field_value(component_name)
       rescue UndefinedControlError
-        # swallow, handlers for controls that don't exist is allowed
+        # swallow, handler format methos for controls that don't exist is allowed
       else
         component.methods.each do |method|
           listener_match = /add(.*)Listener/.match(method)
