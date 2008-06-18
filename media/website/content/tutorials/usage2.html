@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Monkeybars: Hello World</title>
+	<meta name="author" content="David Koontz">
+</head>
+<body>
+		<script type="text/javascript" src="../swfobject.js"></script>
+		<h1>The Hello World app</h1>
+		<p>
+			The simplest application that demonstrates most of the concepts in Monkeybars is a simple form with a label and a button.  
+			When the button is clicked, the label's text changes. This is what our finished application will look like.
+			<p><img src="images/HelloWorld.png"/></p>
+			To get this working we need to do the following:
+			<ul>
+				<li>
+					<a href="javascript:void(0)" onclick="document.getElementById('video1').style.display='block';">Create the Monkeybars application using the command line tool</a>
+					<p>
+						<div id="video1" style="display: none;">
+							<a href="javascript:void(0)" onclick="document.getElementById('video1').style.display='none';document.getElementById('open_link1').style.display='block'">Hide video</a><br/>
+
+							<p id="player1"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
+							<script type="text/javascript">
+								var so = new SWFObject('../flvplayer.swf','player','800','600','7');
+								so.addParam("allowfullscreen","true");
+								so.addVariable("file","http://www.koontzfamily.org/david/videos/tutorials/HelloWorld1.flv");
+								so.addVariable("displayheight","600");
+								so.write('player1');
+							</script>
+						</div>
+					</p>
+				</li>
+				
+				<li>
+					<a href="javascript:void(0)" onclick="document.getElementById('video2').style.display='block';">Create our Controller, Model, and View</a>
+					<p>
+						<div id="video2" style="display: none;">
+							<a href="javascript:void(0)" onclick="document.getElementById('video2').style.display='none';document.getElementById('open_link1').style.display='block'">Hide video</a><br/>
+
+							<p id="player2"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
+							<script type="text/javascript">
+								var so = new SWFObject('../flvplayer.swf','player','800','600','7');
+								so.addParam("allowfullscreen","true");
+								so.addVariable("file","http://www.koontzfamily.org/david/videos/tutorials/HelloWorld2.flv");
+								so.addVariable("displayheight","600");
+								so.write('player2');
+							</script>
+						</div>
+					</p>
+				</li>
+				
+				<li>
+					<a href="javascript:void(0)" onclick="document.getElementById('video3').style.display='block';">Build the Form, in this example we'll use Netbeans (and Rawr), but you could use any tool</a>
+					<p>
+						<div id="video3" style="display: none;">
+							<a href="javascript:void(0)" onclick="document.getElementById('video3').style.display='none';document.getElementById('open_link1').style.display='block'">Hide video</a><br/>
+
+							<p id="player3"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
+							<script type="text/javascript">
+								var so = new SWFObject('../flvplayer.swf','player','800','600','7');
+								so.addParam("allowfullscreen","true");
+								so.addVariable("file","http://www.koontzfamily.org/david/videos/tutorials/HelloWorld3.flv");
+								so.addVariable("displayheight","600");
+								so.write('player3');
+							</script>
+						</div>
+					</p>
+				</li>
+				
+				<li>
+					<a href="javascript:void(0)" onclick="document.getElementById('video4').style.display='block';">Set up the model to have the correct data, in this case just the message for the label</a>
+				</li>
+				<li>
+					<a href="javascript:void(0)" onclick="document.getElementById('video4').style.display='block';">Set up the view to translate model properties to view component properties</a>
+					<p>
+						<div id="video4" style="display: none;">
+							<a href="javascript:void(0)" onclick="document.getElementById('video4').style.display='none';document.getElementById('open_link1').style.display='block'">Hide video</a><br/>
+
+							<p id="player4"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
+							<script type="text/javascript">
+								var so = new SWFObject('../flvplayer.swf','player','800','600','7');
+								so.addParam("allowfullscreen","true");
+								so.addVariable("file","http://www.koontzfamily.org/david/videos/tutorials/HelloWorld4.flv");
+								so.addVariable("displayheight","600");
+								so.write('player4');
+							</script>
+						</div>
+					</p>
+				</li>
+				
+				<li>
+					<a href="javascript:void(0)" onclick="document.getElementById('video5').style.display='block';">Tell the controller that we're interested in events on the button</a>
+				</li>
+				<li>
+					<a href="javascript:void(0)" onclick="document.getElementById('video5').style.display='block';">Handle the click event, changing the model's message and telling the view to update</a>
+					<p>
+						<div id="video5" style="display: none;">
+							<a href="javascript:void(0)" onclick="document.getElementById('video5').style.display='none';document.getElementById('open_link1').style.display='block'">Hide video</a><br/>
+
+							<p id="player5"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
+							<script type="text/javascript">
+								var so = new SWFObject('../flvplayer.swf','player','800','600','7');
+								so.addParam("allowfullscreen","true");
+								so.addVariable("file","http://www.koontzfamily.org/david/videos/tutorials/HelloWorld5.flv");
+								so.addVariable("displayheight","600");
+								so.write('player5');
+							</script>
+						</div>
+					</p>
+				</li>
+				
+				<li>
+					<a href="javascript:void(0)" onclick="document.getElementById('video6').style.display='block';">Tell the main.rb file to launch the controller</a>
+					<p>
+						<div id="video6" style="display: none;">
+							<a href="javascript:void(0)" onclick="document.getElementById('video6').style.display='none';document.getElementById('open_link1').style.display='block'">Hide video</a><br/>
+
+							<p id="player6"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
+							<script type="text/javascript">
+								var so = new SWFObject('../flvplayer.swf','player','800','600','7');
+								so.addParam("allowfullscreen","true");
+								so.addVariable("file","http://www.koontzfamily.org/david/videos/tutorials/HelloWorld6.flv");
+								so.addVariable("displayheight","600");
+								so.write('player6');
+							</script>
+						</div>
+					</p>
+				</li>
+				
+				<li>
+					<a href="javascript:void(0)" onclick="document.getElementById('video7').style.display='block';">Optional - Bundle up the application using Rawr</a>
+					<p>
+						<div id="video7" style="display: none;">
+							<a href="javascript:void(0)" onclick="document.getElementById('video7').style.display='none';document.getElementById('open_link1').style.display='block'">Hide video</a><br/>
+
+							<p id="player7"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
+							<script type="text/javascript">
+								var so = new SWFObject('../flvplayer.swf','player','800','600','7');
+								so.addParam("allowfullscreen","true");
+								so.addVariable("file","http://www.koontzfamily.org/david/videos/tutorials/HelloWorld7.flv");
+								so.addVariable("displayheight","600");
+								so.write('player7');
+							</script>
+						</div>
+					</p>
+				</li>
+			</ul>
+		</p>
+		<p>
+			<a href="hello_world.zip">Download the completed project.</a>  This zip includes the Netbeans project which you can open with Netbeans 6.1 or later.  
+			This zip does not include the packaged files built via Rawr but you can regenerate them using "rake rawr:jar", 
+			"rake rawr:bundle:app" or "rake rawr:bundle:exe".
+		</p>
+</body>
+</html>

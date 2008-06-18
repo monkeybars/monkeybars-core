@@ -97,7 +97,7 @@ module Monkeybars
     
     public
     # Declares what class to instantiate when creating the view.  Any listeners
-    # set on the controller are added to this class as well as the setting of the
+    # set on the component are added to this class as well as the setting of the
     # close action that is defined in the controller.
     def self.set_java_class(java_class)
       include_class java_class
@@ -412,9 +412,9 @@ module Monkeybars
     def unload; end
 
     # Uses get_field to retrieve the value of a particular field, this is typically
-    # a control on a Java form. Used internally by method missing to enable:
+    # a component on a Java form. Used internally by method missing to enable:
     #
-    #   someControl.method
+    #   some_component.method
     def get_field_value(field_name)
       if "java_window" == field_name.to_s
         @main_view_component
@@ -446,11 +446,11 @@ module Monkeybars
             end
             break unless field.nil?
           end
-          raise UndefinedControlError, "There is no control named #{field_name} on view #{@main_view_component.class}" if field.nil?
+          raise UndefinedControlError, "There is no component named #{field_name} on view #{@main_view_component.class}" if field.nil?
           
           field.accessible = true
         else
-          field = method(field_name)
+          field = @main_view_component.method(field_name)
         end
         @__field_references[field_name] = field
       end
@@ -483,7 +483,7 @@ module HandlerContainer
   # All handlers are re-added to the component afterwards.
   #
   #   some_text_field.disable_handlers(:action, :key) do
-  #     # some code that we don't want to trigger action and key handlers for
+  #     # some code that we don't want to trigger action listener methods or key listener methods for
   #   end
   #
   def disable_handlers(*types)

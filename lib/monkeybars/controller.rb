@@ -52,8 +52,9 @@ module Monkeybars
   #   def button_action_performed
   #     repaint_while do
   #       sleep(20) # the gui is still responsive while we're in here sleeping
-  #       some_component.text = "done sleeping!"
   #     end
+  #     model.text = "done sleeping!"
+  #     update_view
   #   end
   # ==========
   #
@@ -71,7 +72,7 @@ module Monkeybars
   #     close_action :exit
   # 
   #     def ok_button_mouse_released
-  #       puts "The user's name is: #{view_state.user_name}"
+  #       puts "The user's name is: #{view_state.model.user_name}"
   #     end
   #   end
   #
@@ -297,6 +298,7 @@ module Monkeybars
       @__registered_handlers = Hash.new{|h,k| h[k] = []}
       @__event_handler_procs = Hash.new{|h,k| h[k] = []}
       @__nested_controllers = {}
+      @__view_state = nil
       
       unless self.class.handlers.empty?
         if @__view.nil?
@@ -459,11 +461,12 @@ module Monkeybars
       
       if closed?
         load(*args) 
+        update_view
         @closed = false
       end
       
-      update_view
       show
+      
       self #allow var assignment off of open, i.e. screen = SomeScreen.instance.open
     end
     
@@ -487,6 +490,7 @@ module Monkeybars
       end
       
       callbacks.each{ |proc| 0 == proc.arity ? proc.call : proc.call(event) }
+      clear_view_state
     end
     
     private
@@ -504,31 +508,45 @@ module Monkeybars
       @__transfer      
     end
     
-    # Returns an array containing a model and a transfer hash of the view's current
-    # contents as defined by the view's mappings.  This is for use in event handlers.
-    # The contents of the model and transfer are *not* the same as the contents of
-    # the model and transfer in the controller, if you wish to propogate the values
-    # from the temporary model into the actual model, you must do this yourself.  A
-    # helper method #update_model is provided to make this easier. In an 
-    # event handler this method is thread safe as Swing is single threaded and blocks
-    # any modification to the GUI while the handler is being proccessed.  Each time 
-    # this method is called the view mappings are called, so if you want to use 
-    # several model or transfer properties you should save off the return values 
-    # into a local variable.
-    #
+    # Returns a ViewState object which contains a model and a transfer hash of the 
+    # view's current contents as defined by the view's mappings.  This is for use in 
+    # event handlers. The contents of the model and transfer are *not* the same as 
+    # the contents of the model and transfer in the controller, if you wish to 
+    # propogate the values from the view state's model into the actual model, you 
+    # must do this yourself.  A helper method #update_model is provided to make this 
+    # easier. In an event handler this method is thread safe as Swing is single threaded 
+    # and blocks any modification to the GUI while the handler is being proccessed.  
+    # 
+    # The view state object has two properties, model and transfer.
+    # 
     #   def ok_button_action_performed
-    #     view_model, view_transfer = view_state
-    #     # do various things with view_model or view_transfer here
+    #     if view_state.transfer[:foo] == :bar
+    #       model.baz = view_state.model.baz
+    #     end
     #   end
-    #
+    # 
+    # Any subsequent call to view_state will return the same object, that is, this
+    # method is memoized internally.  At the end of each event (after all handlers
+    # have been called) the memoized view state is cleared.  If you call view_state
+    # outside of an event handler it is important that you clear the view state 
+    # yourself by calling clear_view_state.
     def view_state # :doc:
+      return @__view_state unless @__view_state.nil?
       unless self.class.model_class.nil?
-        model = create_new_model 
+        model = create_new_model
+        transfer = {}
         @__view.write_state(model, transfer)
-        return model, transfer
+        @__view_state = ViewState.new(model, transfer)
       else
         nil
       end
+    end
+    
+    # Resets memoized view_state value. This is called automatically after each
+    # event so it would only need to be called if view_state is used outside
+    # of an event handler.
+    def clear_view_state # :doc:
+      @__view_state = nil
     end
     
     # This method is almost always used from within an event handler to propogate
@@ -536,16 +554,14 @@ module Monkeybars
     # (typically from view_state). The list of properties defines what is modified 
     # on the model.
     # 
-    #   def ok_button_action_perfomed(event)
-    #     view_model, view_transfer = view_state
-    #     update_model(view_model, :user_name, :password)
+    #   def ok_button_action_perfomed
+    #     update_model(view_state.model, :user_name, :password)
     #   end
     # 
     # This would have the same effect as:
     # 
-    #   view_model, view_transfer = view_state
-    #   model.user_name = view_model.user_name
-    #   model.password = view_model.password
+    #   model.user_name = view_state.model.user_name
+    #   model.password = view_state.model.password
     def update_model(source, *properties) # :doc:
       update_provided_model(source, @__model, *properties)
     end
@@ -555,16 +571,14 @@ module Monkeybars
     # the properties to be propogated to.  This is useful if you have a composite
     # model or need to updated other controllers.
     # 
-    #   def ok_button_action_perfomed(event)
-    #     view_model, view_transfer = view_state
-    #     update_provided_model(view_model, model.user, :user_name, :password)
+    #   def ok_button_action_perfomed
+    #     update_provided_model(view_state.model, model.user, :user_name, :password)
     #   end
     # 
     # This would have the same effect as:
     # 
-    #   view_model, view_transfer = view_state
-    #   model.user.user_name = view_model.user_name
-    #   model.user.password = view_model.password
+    #   model.user.user_name = view_state.model.user_name
+    #   model.user.password = view_state.model.password
     def update_provided_model(source, destination, *properties) # :doc:
       properties.each do |property|
         destination.send("#{property}=", source.send(property))
@@ -602,7 +616,7 @@ module Monkeybars
       begin
         component = @__view.get_field_value(component_name)
       rescue UndefinedControlError
-        # swallow, handlers for controls that don't exist is allowed
+        # swallow, handler format methos for controls that don't exist is allowed
       else
         component.methods.each do |method|
           listener_match = /add(.*)Listener/.match(method)
@@ -685,6 +699,34 @@ module Monkeybars
   
   class InvalidCloseAction < Exception; end
 
+  # A formal object representing the view's model and transfer state.  This used to be 
+  # an array so we emulate the array methods that are in common usage.
+  class ViewState
+    attr_reader :model, :transfer
+    
+    def initialize(model, transfer)
+      @model, @transfer = model, transfer
+    end
+    
+    def [](index)
+      case index
+      when 0
+        @model
+      when 1
+        @transfer
+      else
+        nil
+      end
+    end
+    
+    def first
+      @model
+    end
+    
+    def last
+      @transfer
+    end
+  end
 end
 
 
