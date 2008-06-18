@@ -8,3 +8,5 @@ skeleton/lib/monkeybars*
 doc/*
 media/website/output/*
 build.xml
+build/*
+manifest.mf

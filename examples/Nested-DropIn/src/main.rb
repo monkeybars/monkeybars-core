@@ -1,3 +1,4 @@
+require 'java'
 #===============================================================================
 # Much of the platform specific code should be called before Swing is touched.
 # The useScreenMenuBar is an example of this.
