@@ -17,7 +17,6 @@ end
 require 'monkeybars'
 require 'application_controller'
 require 'application_view'
-require 'global_error_handler'
 
 # End of Monkeybars requires
 #===============================================================================
