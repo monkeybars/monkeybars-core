@@ -495,27 +495,43 @@ module Monkeybars
     
     private
     
-    # Returns the model object.  This is the object that is read by the view
-    # when processing view mappings.
-    def model # :doc:
+    # Returns the model object.  This is the object that is passed to the view
+    # when update_view is called.  This model is *not* the same model that you
+    # get from #view_state.  Values that you want to propogate from the 
+    # #view_state model to this model can be done using #update_model.
+    def model #:doc:
       @__model
     end
     
     # Returns the transfer object which is a transient hash passed to the view
-    # whenever update_view is called.  The transfer is cleared after each call
-    # to update_view.
-    def transfer # :doc:
+    # whenever #update_view is called.  The transfer is cleared after each call 
+    # to #update_view.  The transfer is used to pass data to and
+    # from the view that is not part of your model.  For example, if you had
+    # a model that was an ActiveRecord object you would probably not want to
+    # put things like the currently selected item into your model.  That data
+    # could instead be passed as a value in the transfer.
+    # 
+    #   transfer[:selected_framework] = "monkeybars"
+    #   
+    # Then in your view, you could use that transfer value to select the correct
+    # value out of a list.
+    # 
+    #   map :view => "framework_list.selected_item", :transfer => :selected_framework
+    #   
+    # See View#map for more details on the options for your mapping.
+    def transfer #:doc:
       @__transfer      
     end
     
     # Returns a ViewState object which contains a model and a transfer hash of the 
     # view's current contents as defined by the view's mappings.  This is for use in 
     # event handlers. The contents of the model and transfer are *not* the same as 
-    # the contents of the model and transfer in the controller, if you wish to 
-    # propogate the values from the view state's model into the actual model, you 
-    # must do this yourself.  A helper method #update_model is provided to make this 
-    # easier. In an event handler this method is thread safe as Swing is single threaded 
-    # and blocks any modification to the GUI while the handler is being proccessed.  
+    # the contents of the model and transfer in the controller, they are new objects
+    # created when view_state was called.  If you wish to propogate the values from the 
+    # view state's model into the actual model, you must do this yourself.  A 
+    # helper method #update_model is provided to make this easier. In an event 
+    # handler this method is thread safe as Swing is single threaded and blocks 
+    # any modification to the GUI while the handler is being proccessed.  
     # 
     # The view state object has two properties, model and transfer.
     # 

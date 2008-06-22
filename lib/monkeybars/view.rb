@@ -147,7 +147,7 @@ module Monkeybars
     # and the normal mapping will take place.  If you want to disable the copying
     # of data in one direction you can pass nil as the method parameter.
     #
-    #   map :view => :foo, :method => :bar, :using => [:from_model, :to_model]
+    #   map :view => :foo, :model => :bar, :using => [:from_model, :to_model]
     #
     # would mean self.foo = from_model() when called by update and
     # model.bar = to_model() when called by write_state.

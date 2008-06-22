@@ -45,7 +45,7 @@ module Monkeybars
 
   module Handlers
     # TODO: add bean types like vetoable change, property change, etc.
-    BEAN_TYPES = []
+    BEAN_TYPES = ["PropertyChange"]
     AWT_TYPES = ["Action","Adjustment","AWTEvent","Component","Container","Focus",
              "HierarchyBounds","Hierarchy","InputMethod","Item","Key","Mouse",
              "MouseMotion","MouseWheel","Text", "WindowFocus","Window","WindowState"]       
@@ -59,7 +59,7 @@ module Monkeybars
   end
 end
 
-{"java.awt.event" => Monkeybars::Handlers::AWT_TYPES, "javax.swing.event" => Monkeybars::Handlers::SWING_TYPES}.each do |java_package, types|
+{"java.awt.event" => Monkeybars::Handlers::AWT_TYPES, "javax.swing.event" => Monkeybars::Handlers::SWING_TYPES, "java.beans" => Monkeybars::Handlers::BEAN_TYPES}.each do |java_package, types|
   types.each do |type|
     eval <<-ENDL
       module Monkeybars
