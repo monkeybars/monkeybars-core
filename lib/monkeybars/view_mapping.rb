@@ -141,7 +141,7 @@ module Monkeybars
   class BasicPropertyMapping < Mapping
     def model_to_view(view, model)
       begin
-        instance_eval("view.#{@view_property} = model.#{@model_property}")
+        instance_eval("view.#{@view_property} = model.#{@model_property}", __FILE__, __LINE__)
       rescue NoMethodError
         raise InvalidMappingError, "Either model.#{@model_property} or self.#{@view_property} in #{view.class} is not valid."
       rescue TypeError => e
@@ -153,7 +153,7 @@ module Monkeybars
     
     def transfer_to_view(view, transfer)
       begin
-        instance_eval("view.#{@view_property} = transfer[#{@transfer_property.inspect}]")
+        instance_eval("view.#{@view_property} = transfer[#{@transfer_property.inspect}]", __FILE__, __LINE__)
       rescue NoMethodError
         raise InvalidMappingError, "Either transfer[#{@transfer_property.inspect}] or self.#{@view_property} in #{view.class} is not valid."
       rescue TypeError => e
@@ -163,7 +163,7 @@ module Monkeybars
     
     def model_from_view(view, model)
       begin
-        instance_eval("model.#{@model_property} = view.#{@view_property}")
+        instance_eval("model.#{@model_property} = view.#{@view_property}", __FILE__, __LINE__)
       rescue NoMethodError
         raise InvalidMappingError, "Either model.#{@model_property} or self.#{@view_property} in #{view.class} is not valid."
       rescue TypeError => e
@@ -173,7 +173,7 @@ module Monkeybars
     
     def transfer_from_view(view, transfer)
       begin
-        instance_eval("transfer[#{@transfer_property.inspect}] = view.#{@view_property}")
+        instance_eval("transfer[#{@transfer_property.inspect}] = view.#{@view_property}", __FILE__, __LINE__)
       rescue NoMethodError
         raise InvalidMappingError, "Either transfer[#{@transfer_property.inspect}] or self.#{@view_property} in #{view.class} is not valid."
       rescue TypeError => e
@@ -221,58 +221,58 @@ module Monkeybars
     
     def model_to_view(view, model)
       if using_translation?
-        model_data = instance_eval("model.#{@model_property}")
+        model_data = instance_eval("model.#{@model_property}", __FILE__, __LINE__)
         unless @to_view_translation.has_key? model_data
           raise Monkeybars::TranslationError.new("The key #{model_data.inspect} for model #{model.class} does not exist #{@to_view_translation.inspect}") 
         end
         
-        instance_eval("view.#{@view_property} = @to_view_translation[model_data]")
+        instance_eval("view.#{@view_property} = @to_view_translation[model_data]", __FILE__, __LINE__)
       elsif :default == @to_view_method
         super
       else
-        instance_eval("view.#{@view_property} = view.method(@to_view_method).call(model.#{@model_property})")
+        instance_eval("view.#{@view_property} = view.method(@to_view_method).call(model.#{@model_property})", __FILE__, __LINE__)
       end
     end
     
     def transfer_to_view(view, transfer)
       if using_translation?
-        transfer_data = instance_eval("transfer[#{@transfer_property.inspect}]")
+        transfer_data = instance_eval("transfer[#{@transfer_property.inspect}]", __FILE__, __LINE__)
         unless @to_view_translation.has_key? transfer_data
           raise Monkeybars::TranslationError.new("The key #{transfer_data.inspect} for transfer does not exist #{@to_view_translation.inspect}")
         end
-        instance_eval("view.#{@view_property} = @to_view_translation[transfer_data]")
+        instance_eval("view.#{@view_property} = @to_view_translation[transfer_data]", __FILE__, __LINE__)
       elsif :default == @to_view_method
         super
       else
-        instance_eval("view.#{@view_property} = view.method(@to_view_method).call(transfer[#{@transfer_property.inspect}])")
+        instance_eval("view.#{@view_property} = view.method(@to_view_method).call(transfer[#{@transfer_property.inspect}])", __FILE__, __LINE__)
       end
     end
     
     def model_from_view(view, model)
       if using_translation?
-        view_data = instance_eval("view.#{@view_property}")
+        view_data = instance_eval("view.#{@view_property}", __FILE__, __LINE__)
         unless @from_view_translation.has_key? view_data
           raise Monkeybars::TranslationError.new("The key #{view_data.inspect} for view #{view.class} does not exist #{@from_view_translation.inspect}")
         end
-        instance_eval("model.#{@model_property} = @from_view_translation[view_data]")
+        instance_eval("model.#{@model_property} = @from_view_translation[view_data]", __FILE__, __LINE__)
       elsif :default == @from_view_method
         super
       else
-        instance_eval("model.#{@model_property} = view.method(@from_view_method).call(view.#{@view_property})")
+        instance_eval("model.#{@model_property} = view.method(@from_view_method).call(view.#{@view_property})", __FILE__, __LINE__)
       end
     end
     
     def transfer_from_view(view, transfer)
       if using_translation?
-        view_data = instance_eval("view.#{@view_property}")
+        view_data = instance_eval("view.#{@view_property}", __FILE__, __LINE__)
         unless @from_view_translation.has_key? view_data
           raise Monkeybars::TranslationError.new("The key #{view_data.inspect} for view #{view.class} does not exist #{@from_view_translation.inspect}")
         end
-        instance_eval("transfer[#{@transfer_property.inspect}] = @from_view_translation[view_data]")
+        instance_eval("transfer[#{@transfer_property.inspect}] = @from_view_translation[view_data]", __FILE__, __LINE__)
       elsif :default == @from_view_method
         super
       else
-        instance_eval("transfer[#{@transfer_property.inspect}] = view.method(@from_view_method).call(view.#{@view_property})")
+        instance_eval("transfer[#{@transfer_property.inspect}] = view.method(@from_view_method).call(view.#{@view_property})", __FILE__, __LINE__)
       end
     end
   end
