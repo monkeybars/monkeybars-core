@@ -43,7 +43,7 @@ def show_error_dialog_and_exit(exception, thread=nil)
   javax.swing.JOptionPane.show_message_dialog(nil, message, title, javax.swing.JOptionPane::DEFAULT_OPTION)
   java.lang.System.exit(0)
 end
-GlobalErrorHandler.handler {|exception, thread| show_error_dialog_and_exit(exception, thread) }
+GlobalErrorHandler.on_error {|exception, thread| show_error_dialog_and_exit(exception, thread) }
 
 begin
   # Your application code goes here
