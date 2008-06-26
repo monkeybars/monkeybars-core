@@ -59,7 +59,7 @@ task :jar => [:prepare, :update_version_readme] do
     $stdout << `jar xvf ../../lib/foxtrot.jar`
     FileUtils.remove_dir('META-INF', true)
   end
-  $stdout << `jar cf #{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar -C lib monkeybars.rb -C lib monkeybars -C #{BUILD_DIR} .`
+  $stdout << `jar cf #{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar -C lib monkeybars.rb -C lib monkeybars    -C lib util   -C #{BUILD_DIR} .`
   FileUtils.cp("#{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar", "skeleton/lib/java/monkeybars-#{Monkeybars::VERSION}.jar")
 end
 

@@ -17,7 +17,7 @@ lib/monkeybars/view_mapping.rb
 lib/monkeybars/view_nesting.rb
 lib/monkeybars_version.rb
 skeleton/Rakefile
-skeleton/lib/java/monkeybars-0.6.2.jar
+skeleton/lib/java/monkeybars-0.6.4.jar
 skeleton/lib/ruby/README.txt
 skeleton/src/application_controller.rb
 skeleton/src/application_view.rb
@@ -51,3 +51,8 @@ tasks/setup.rb
 tasks/spec.rake
 tasks/svn.rake
 tasks/test.rake
+lib/util/rspec/application_user.rb
+lib/util/rspec/application_steps.rb
+lib/util/rspec/user.rb
+lib/util/rspec/monkeybars_steps.rb
+
