@@ -223,7 +223,7 @@ module Monkeybars
       if using_translation?
         model_data = instance_eval("model.#{@model_property}", __FILE__, __LINE__)
         unless @to_view_translation.has_key? model_data
-          raise Monkeybars::TranslationError.new("The key #{model_data.inspect} for model #{model.class} does not exist #{@to_view_translation.inspect}") 
+          raise TranslationError, "The key #{model_data.inspect} for model #{model.class} does not exist #{@to_view_translation.inspect}"
         end
         
         instance_eval("view.#{@view_property} = @to_view_translation[model_data]", __FILE__, __LINE__)
@@ -232,13 +232,15 @@ module Monkeybars
       else
         instance_eval("view.#{@view_property} = view.method(@to_view_method).call(model.#{@model_property})", __FILE__, __LINE__)
       end
+    rescue NameError => e
+      raise InvalidMappingError, "Either view.#{@view_property} or view.#{@to_view_method}(#{@model_property}) is not valid.\nOriginal error: #{e}\n#{e.message}"
     end
     
     def transfer_to_view(view, transfer)
       if using_translation?
         transfer_data = instance_eval("transfer[#{@transfer_property.inspect}]", __FILE__, __LINE__)
         unless @to_view_translation.has_key? transfer_data
-          raise Monkeybars::TranslationError.new("The key #{transfer_data.inspect} for transfer does not exist #{@to_view_translation.inspect}")
+          raise TranslationError, "The key #{transfer_data.inspect} for transfer does not exist #{@to_view_translation.inspect}"
         end
         instance_eval("view.#{@view_property} = @to_view_translation[transfer_data]", __FILE__, __LINE__)
       elsif :default == @to_view_method
@@ -246,13 +248,15 @@ module Monkeybars
       else
         instance_eval("view.#{@view_property} = view.method(@to_view_method).call(transfer[#{@transfer_property.inspect}])", __FILE__, __LINE__)
       end
+    rescue NameError => e
+      raise InvalidMappingError, "Either view.#{@view_property} or view.#{@to_view_method}(#{@transfer_property}) is not valid.\nOriginal error: #{e}\n#{e.message}"
     end
     
     def model_from_view(view, model)
       if using_translation?
         view_data = instance_eval("view.#{@view_property}", __FILE__, __LINE__)
         unless @from_view_translation.has_key? view_data
-          raise Monkeybars::TranslationError.new("The key #{view_data.inspect} for view #{view.class} does not exist #{@from_view_translation.inspect}")
+          raise TranslationError, "The key #{view_data.inspect} for view #{view.class} does not exist #{@from_view_translation.inspect}"
         end
         instance_eval("model.#{@model_property} = @from_view_translation[view_data]", __FILE__, __LINE__)
       elsif :default == @from_view_method
@@ -260,13 +264,15 @@ module Monkeybars
       else
         instance_eval("model.#{@model_property} = view.method(@from_view_method).call(view.#{@view_property})", __FILE__, __LINE__)
       end
+    rescue NameError => e
+      raise InvalidMappingError, "Either model.#{@model_property} or view.#{@from_view_method}(#{@view_property}) is not valid.\nOriginal error: #{e}\n#{e.message}"
     end
     
     def transfer_from_view(view, transfer)
       if using_translation?
         view_data = instance_eval("view.#{@view_property}", __FILE__, __LINE__)
         unless @from_view_translation.has_key? view_data
-          raise Monkeybars::TranslationError.new("The key #{view_data.inspect} for view #{view.class} does not exist #{@from_view_translation.inspect}")
+          raise TranslationError, "The key #{view_data.inspect} for view #{view.class} does not exist #{@from_view_translation.inspect}"
         end
         instance_eval("transfer[#{@transfer_property.inspect}] = @from_view_translation[view_data]", __FILE__, __LINE__)
       elsif :default == @from_view_method
@@ -275,6 +281,8 @@ module Monkeybars
         instance_eval("transfer[#{@transfer_property.inspect}] = view.method(@from_view_method).call(view.#{@view_property})", __FILE__, __LINE__)
       end
     end
+  rescue NameError => e
+    raise InvalidMappingError, "Either transfer[#{@transfer_property}] or view.#{@from_view_method}(#{@view_property}) is not valid.\nOriginal error: #{e}\n#{e.message}"
   end
   
   module HashMappingValidation
