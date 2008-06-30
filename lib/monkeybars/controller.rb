@@ -462,6 +462,7 @@ module Monkeybars
       if closed?
         load(*args) 
         update_view
+        clear_view_state
         @closed = false
       end
       
@@ -547,6 +548,7 @@ module Monkeybars
     # outside of an event handler it is important that you clear the view state 
     # yourself by calling clear_view_state.
     def view_state # :doc:
+      puts "view_state called from #{caller}"
       return @__view_state unless @__view_state.nil?
       unless self.class.model_class.nil?
         model = create_new_model
