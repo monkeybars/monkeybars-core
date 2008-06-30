@@ -1,5 +1,4 @@
 require 'spec'
-STDERR.puts( " Go grab 'application_user'" ) if ENV['JAMES_SCA_JDEV_MACHINE']
 $:.unshift(File.dirname(__FILE__))
 require 'application_user'
 

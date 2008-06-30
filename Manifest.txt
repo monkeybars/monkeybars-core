@@ -52,7 +52,6 @@ tasks/spec.rake
 tasks/svn.rake
 tasks/test.rake
 lib/util/rspec/application_user.rb
-lib/util/rspec/application_steps.rb
 lib/util/rspec/user.rb
 lib/util/rspec/monkeybars_steps.rb
 
