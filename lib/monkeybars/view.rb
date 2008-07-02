@@ -441,7 +441,11 @@ module Monkeybars
           
           field.accessible = true
         else
+          begin
           field = @main_view_component.method(field_name)
+          rescue NameError, NoMethodError
+            raise UndefinedControlError, "There is no component named #{field_name} on view #{@main_view_component.class}"
+          end
         end
         @__field_references[field_name] = field
       end
