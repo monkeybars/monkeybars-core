@@ -54,8 +54,6 @@ require 'application_view'
 #
 # add_to_classpath "../lib/swing-layout-1.0.3.jar"
 
-require 'rubygems'
-
 case Monkeybars::Resolver.run_location
 when Monkeybars::Resolver::IN_FILE_SYSTEM
   add_to_classpath "../lib/java/jruby-complete.jar"
