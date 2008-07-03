@@ -10,3 +10,4 @@ media/website/output/*
 build.xml
 build/*
 manifest.mf
+skeleton/lib/java/monkeybars-0.6.4.jar

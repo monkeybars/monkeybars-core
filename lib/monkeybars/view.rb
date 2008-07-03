@@ -200,12 +200,8 @@ module Monkeybars
     # write_state was called.  Thus any assignment to view properties
     # must be done within the method (hence the 'raw').
     #
-    # You can pass an array of handlers to disable when performing the raw mapping
-    # as the third argument, or you can handle the disabling of handlers yourself
-    # inside the raw mapping with a call to Component#disable_handlers
-    # 
-    #   raw_mapping :from_model, :to_model, [:action]
-    #
+    # To disable handlers in a raw mapping, call Component#disable_handlers
+    # inside your mapping method
     #
     def self.map(properties)
       mapping = Mapping.new(properties)
@@ -280,11 +276,6 @@ module Monkeybars
       @@is_a_java_class = !self.class.instance_java_class.nil? && self.class.instance_java_class.ancestors.member?(java.lang.Object)
       if @@is_a_java_class
         @main_view_component = self.class.instance_java_class.new
-#        fields = self.class.instance_java_class.java_class.declared_fields
-#        fields.each do |declared_field|
-#          field = get_field_value(declared_field.name)
-#          field.name = declared_field.name if field.kind_of?(java.awt.Component)
-#        end
       end
       
       load
@@ -450,7 +441,11 @@ module Monkeybars
           
           field.accessible = true
         else
+          begin
           field = @main_view_component.method(field_name)
+          rescue NameError, NoMethodError
+            raise UndefinedControlError, "There is no component named #{field_name} on view #{@main_view_component.class}"
+          end
         end
         @__field_references[field_name] = field
       end
@@ -479,7 +474,7 @@ end
 
 
 module HandlerContainer
-  # Removes the handlers associated with a control for the duration of the block.
+  # Removes the handlers associated with a component for the duration of the block.
   # All handlers are re-added to the component afterwards.
   #
   #   some_text_field.disable_handlers(:action, :key) do
@@ -490,7 +485,13 @@ module HandlerContainer
     types.map! { |t| t.camelize }
     listeners = {}
     types.each do |type|  
-      listener_class = Monkeybars::Handlers::AWT_TYPES.member?(type) ? instance_eval("java.awt.event.#{type}Listener", __FILE__, __LINE__) : instance_eval("javax.swing.event.#{type}Listener", __FILE__, __LINE__)
+      listener_class = if Monkeybars::Handlers::AWT_TYPES.member?(type)
+        instance_eval("java.awt.event.#{type}Listener", __FILE__, __LINE__)
+      elsif Monkeybars::Handlers::SWING_TYPES.member?(type)
+        instance_eval("javax.swing.event.#{type}Listener", __FILE__, __LINE__)
+      elsif Monkeybars::Handlers::BEAN_TYPES.member?(type)
+        instance_eval("java.beans.#{type}Listener", __FILE__, __LINE__)
+      end
       listeners[type] = self.get_listeners(listener_class.java_class)
       listeners[type].each do |listener|
         self.send("remove#{type}Listener", listener)
