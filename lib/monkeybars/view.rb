@@ -1,17 +1,15 @@
 include_class javax.swing.JComponent
 include_class javax.swing.KeyStroke
 
-require "monkeybars/inflector"
+require 'monkeybars/exceptions'
+require 'monkeybars/inflector'
 require 'monkeybars/validated_hash'
 require 'monkeybars/view_mapping'
 require 'monkeybars/task_processor'
 require 'monkeybars/view_nesting'
+require "monkeybars/event_handler_registration_and_dispatch_mixin"
 
 module Monkeybars
-  class UndefinedControlError < Exception; end
-  class InvalidSignalHandlerError < Exception; end
-  class UndefinedSignalError < Exception; end
-
   # The view is the gatekeeper to the actual Java (or sometimes non-Java) view class.
   # The view defines how data moves into and out of the view via the model.  
   #
@@ -61,6 +59,7 @@ module Monkeybars
   # as visisble?, hide, and dispose
   class View
     include TaskProcessor
+    include EventHandlerRegistrationAndDispatchMixin
  
     module CloseActions #:nodoc:
       DO_NOTHING = javax::swing::WindowConstants::DO_NOTHING_ON_CLOSE
@@ -278,6 +277,7 @@ module Monkeybars
         @main_view_component = self.class.instance_java_class.new
       end
       
+      setup_implicit_and_explicit_event_handlers
       load
     end
 
