@@ -63,7 +63,7 @@ module Monkeybars
         handlers << details
       end
 
-          # define_handler takes a component/event name and a block to be called when that
+      # define_handler takes a component/event name and a block to be called when that
       # event is generated for that component.  This can be used in place of a method
       # declaration for that component/event pair.
       #
@@ -134,16 +134,39 @@ module Monkeybars
     # define_handler :ok_button_action_performed { puts "action performed on 'ok button'" }
     # 
     # define_handler :ok_button_action_performed, :cancel_button_action_performed { puts "action performed on a button" }
+    #
+    # If you are defining a handler that requires aliasing, define handler can also be passed a hash of method => component mappings
+    # mixed in with the methods to apply the handler to.
+    # 
+    # define_handler :text_field_insert_update => "text_field.document" { puts "you typed something" }
+    # 
+    # define_handler :text_field_insert_update => "text_field.document", :text_field_remove_update => "text_field.document" { puts "you typed or deleted something" }
+    #
+    # These mappings can also be mixed in with regular methods.  It is suggested that you put
+    # all of your hash items at the end of the argument list so they are wrapped up into an
+    # implicit Hash object although this is not strictly necessary.
+    # 
+    # define_handler :ok_button_action_performed, :text_field_insert_update => "text_field.document" { puts "you did ... something" }
+    #    
     def define_handler(*actions, &block)
+      # define_handler :foo_action_performed => :foo_document_action_performed,  { handle event here }
       actions.each do |action| 
-        @__event_handler_procs[action.to_sym] << block
-        add_implicit_handler_for_method(action)
+        if action.kind_of? Hash
+          # handle a hash with multiple mappings, e.g.
+          # define_handler :text_field_insert_update => "text_field.document", :text_field2_insert_update => "text_field2.document { ... handler code here ... }
+          action.each do |method, component|
+            @__event_handler_procs[method.to_sym] << block
+            add_implicit_handler_for_method(method, component)
+          end
+        else
+          @__event_handler_procs[action.to_sym] << block
+          add_implicit_handler_for_method(action)
+        end
       end
     end
 
     # Specific handlers get precedence over general handlers, that is button_mouse_released
-    # gets called before mouse_released. A component's name field must be defined in order
-    # for the name_event_type style handlers to work.
+    # gets called before mouse_released.
     def handle_event(component_name, event_name, event) #:nodoc:
       return if event.nil?
 
@@ -164,8 +187,9 @@ module Monkeybars
       callbacks + self.class.event_handler_procs[method] + @__event_handler_procs[method]
     end
 
-    def add_implicit_handler_for_method(method)
+    def add_implicit_handler_for_method(method, component_to_alias = nil)
       component_match = nil
+      
       Monkeybars::Handlers::ALL_EVENT_NAMES.each do |event|
         component_match = Regexp.new("(.*)_(#{event})").match(method.to_s)
         break unless component_match.nil?
@@ -173,8 +197,13 @@ module Monkeybars
 
       return if component_match.nil?
       component_name, event_name = component_match[1], component_match[2]
+      
       begin
-        component = @__event_handler_view_target.instance_eval(component_name)
+        if component_to_alias.nil?
+          component = @__event_handler_view_target.instance_eval(component_name)
+        else
+          component = @__event_handler_view_target.instance_eval(component_to_alias)
+        end
       rescue NameError
       rescue Monkeybars::UndefinedControlError
         # swallow, handler style methods for controls that don't exist is allowed
@@ -183,7 +212,11 @@ module Monkeybars
           listener_match = /add(.*)Listener/.match(method)
           next if listener_match.nil?
           if Monkeybars::Handlers::EVENT_NAMES_BY_TYPE[listener_match[1]].member? event_name
-            add_handler_for listener_match[1], component_name, component
+            if component_to_alias.nil?
+              add_handler_for listener_match[1], component_name, component
+            else
+              add_handler_for listener_match[1], [component_name, component_to_alias], component
+            end
           end
         end
       end
