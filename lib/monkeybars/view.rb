@@ -396,7 +396,10 @@ module Monkeybars
     end
     
     # Stub to be overriden in sub-class.  This is where you put the code you would
-    # normally put in initialize, it will be called whenever a new class is instantiated
+    # normally put in initialize.  Load will be called whenever a new class is instantiated
+    # which happens when the Controller's instance method is called on a non-instantiated
+    # controller.  Thus this method will always be called before the Controller's
+    # load method (which is called during Controlller#open).
     def load; end
     
     # Stub to be overriden in sub-class.  This is called whenever the view is closed.

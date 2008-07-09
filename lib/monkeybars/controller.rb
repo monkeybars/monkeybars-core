@@ -210,8 +210,8 @@ module Monkeybars
     end
     
     def initialize
-      @__view = create_new_view unless self.class.view_class.nil?
       @__model = create_new_model unless self.class.model_class.nil?
+      @__view = create_new_view unless self.class.view_class.nil?
       @__transfer = {}
       @__nested_controllers = {}
       @__view_state = nil
