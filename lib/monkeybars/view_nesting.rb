@@ -1,6 +1,4 @@
-module Monkeybars
-  class InvalidNestingError < Exception; end
-  
+module Monkeybars  
   class Nesting
     class << self
       alias_method :__new__, :new

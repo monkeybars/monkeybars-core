@@ -337,10 +337,23 @@ module Monkeybars
       if "global" == component
         raise "Global handler declarations are not yet supported"
       elsif "java_window" == component
-        @main_view_component.send("add#{handler.type.camelize}Listener", handler)
+        begin
+          @main_view_component.send("add#{handler.type.camelize}Listener", handler)
+        rescue NameError
+          raise InvalidHandlerError, "There is no listener of type #{handler.type} on #{@main_view_component}"
+        end
       else
-        object = instance_eval(component, __FILE__, __LINE__)
-        object.send("add#{handler.type.camelize}Listener", handler)
+        begin
+          object = instance_eval(component, __FILE__, __LINE__)
+        rescue NameError
+          raise UndefinedControlError, "Cannot add #{handler.type} handler to #{component} on #{self}, the component could not be found"
+        end
+        
+        begin        
+          object.send("add#{handler.type.camelize}Listener", handler)
+        rescue NameError
+          raise InvalidHandlerError, "There is no listener of type #{handler.type} on #{component}"
+        end
       end
     end
     

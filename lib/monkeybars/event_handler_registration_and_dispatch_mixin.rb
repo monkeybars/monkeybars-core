@@ -226,7 +226,7 @@ module Monkeybars
       components = ["global"] if components.nil?
       components = [components] unless components.respond_to? :each
       components.each do |component|
-        # handle :components => {"text_area.document" => "text_area"}
+        # handle aliases :components => {"text_area.document" => "text_area"}
         if component.kind_of? Array
           component_field = component[0]
           component_name = component[1]

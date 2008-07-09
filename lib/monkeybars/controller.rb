@@ -560,8 +560,6 @@ module Monkeybars
       end
     end
   end
-  
-  class InvalidCloseAction < Exception; end
 
   # A formal object representing the view's model and transfer state.  This used to be 
   # an array so we emulate the array methods that are in common usage.

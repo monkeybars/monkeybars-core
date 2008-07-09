@@ -1,8 +1,6 @@
 require 'monkeybars/validated_hash'
 
 module Monkeybars
-  class InvalidMappingError < Exception; end
-  class TranslationError < Exception; end
   # This is an internal class used only by Monkeybars::View
   #
   # A Mapping records the relationship between the fields of a model or
