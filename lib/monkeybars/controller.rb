@@ -112,9 +112,7 @@ module Monkeybars
     #
     def self.create_instance
       @@instance_lock[self.class].synchronize do
-        controllers = @@instance_list[self]
-        controllers << __new__
-        controllers.last
+        __new__
       end
     end
     

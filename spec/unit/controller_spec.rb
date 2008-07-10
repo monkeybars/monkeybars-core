@@ -50,6 +50,14 @@ describe "Controller instantiation" do
     t2 = SingleInstanceController.instance
     t.should equal(t2)
   end
+  
+  it "puts only one instance in the listance list per create_instance call" do
+    class MultipleInstanceController < Monkeybars::Controller; end
+    
+    Monkeybars::Controller.send(:class_variable_get, :@@instance_list)[MultipleInstanceController].size.should be_zero
+    MultipleInstanceController.create_instance
+    Monkeybars::Controller.send(:class_variable_get, :@@instance_list)[MultipleInstanceController].size.should == 1
+  end
 end
 
 describe Monkeybars::Controller, ' nesting' do
