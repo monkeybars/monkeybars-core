@@ -253,7 +253,12 @@ module Monkeybars
     public
     # Calls the method that was set using Controller.set_update_method.  If no method has been set defined, this call is ignored.
     def update
-      self.class.send(:class_variable_get, :@@update_method).call if self.class.class_variables.member?("@@update_method_name")
+      def update
+        if self.class.class_variables.member?("@@update_method_name")
+          method_name = self.class.send(:class_variable_get, :@@update_method_name) 
+          send(method_name)
+        end
+      end
     end
 
     # Triggers updating of the view based on the mapping and the current contents
