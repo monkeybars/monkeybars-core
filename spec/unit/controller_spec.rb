@@ -54,9 +54,15 @@ describe "Controller instantiation" do
   it "puts only one instance in the listance list per create_instance call" do
     class MultipleInstanceController < Monkeybars::Controller; end
     
+    #ensure initial value is zero
     Monkeybars::Controller.send(:class_variable_get, :@@instance_list)[MultipleInstanceController].size.should be_zero
-    MultipleInstanceController.create_instance
-    Monkeybars::Controller.send(:class_variable_get, :@@instance_list)[MultipleInstanceController].size.should == 1
+    
+    begin
+      instance = MultipleInstanceController.create_instance
+      Monkeybars::Controller.send(:class_variable_get, :@@instance_list)[MultipleInstanceController].size.should == 1
+    ensure
+      MultipleInstanceController.destroy_instance instance
+    end
   end
 end
 
