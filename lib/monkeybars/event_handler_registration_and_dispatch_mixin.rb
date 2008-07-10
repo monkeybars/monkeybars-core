@@ -215,7 +215,7 @@ module Monkeybars
             if component_to_alias.nil?
               add_handler_for listener_match[1], component_name, component
             else
-              add_handler_for listener_match[1], {component_name => component_to_alias}, component
+              add_handler_for listener_match[1], {component_to_alias => component_name}, component
             end
           end
         end
@@ -228,8 +228,8 @@ module Monkeybars
       components.each do |component|
         # handle aliases :components => {"text_area.document" => "text_area"}
         if component.kind_of? Hash
-          component_name = component.keys[0]
-          component_field = component.values[0]
+          component_name = component.values[0]
+          component_field = component.keys[0]
         else
           component_name = component
           component_field = component
