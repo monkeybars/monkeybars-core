@@ -87,8 +87,8 @@ end
 describe Monkeybars::View, "#add_handler" do
   it "can resolve nested components" do
     view = TestingView.new
-    lambda {view.add_handler(Monkeybars::DocumentHandler.new(self, :document), "testTextField.some_made_up_name")}.should raise_error(NoMethodError)
-    lambda {view.add_handler(Monkeybars::DocumentHandler.new(self, :document), "testTextField.document")}.should_not raise_error(NoMethodError)
+    lambda {view.add_handler(Monkeybars::DocumentHandler.new(self, :document), "testTextField.some_made_up_name")}.should raise_error(Monkeybars::UndefinedControlError)
+    lambda {view.add_handler(Monkeybars::DocumentHandler.new(self, :document), "testTextField.document")}.should_not raise_error(Monkeybars::UndefinedControlError)
     
     view.instance_variable_get("@main_view_component").dispose
   end

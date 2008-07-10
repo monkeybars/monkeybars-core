@@ -150,7 +150,7 @@ module Monkeybars
     #    
     def define_handler(*actions, &block)
       # define_handler :foo_action_performed => :foo_document_action_performed,  { handle event here }
-      actions.each do |action| 
+      actions.each do |action|
         if action.kind_of? Hash
           # handle a hash with multiple mappings, e.g.
           # define_handler :text_field_insert_update => "text_field.document", :text_field2_insert_update => "text_field2.document { ... handler code here ... }
@@ -194,7 +194,7 @@ module Monkeybars
         component_match = Regexp.new("(.*)_(#{event})").match(method.to_s)
         break unless component_match.nil?
       end
-
+      
       return if component_match.nil?
       component_name, event_name = component_match[1], component_match[2]
       
@@ -204,8 +204,8 @@ module Monkeybars
         else
           component = @__event_handler_view_target.instance_eval(component_to_alias)
         end
-      rescue NameError
-      rescue Monkeybars::UndefinedControlError
+      rescue NameError => e
+      rescue Monkeybars::UndefinedControlError => e
         # swallow, handler style methods for controls that don't exist is allowed
       else
         component.methods.each do |method|
@@ -215,7 +215,7 @@ module Monkeybars
             if component_to_alias.nil?
               add_handler_for listener_match[1], component_name, component
             else
-              add_handler_for listener_match[1], [component_name, component_to_alias], component
+              add_handler_for listener_match[1], {component_name => component_to_alias}, component
             end
           end
         end
@@ -224,15 +224,15 @@ module Monkeybars
 
     def add_handler_for(handler_type, components, java_component)
       components = ["global"] if components.nil?
-      components = [components] unless components.respond_to? :each
+      components = [components] unless components.kind_of? Array
       components.each do |component|
         # handle aliases :components => {"text_area.document" => "text_area"}
-        if component.kind_of? Array
-          component_field = component[0]
-          component_name = component[1]
+        if component.kind_of? Hash
+          component_name = component.keys[0]
+          component_field = component.values[0]
         else
-          component_field = component
           component_name = component
+          component_field = component
         end
         unless @__registered_handlers[java_component].member? handler_type.underscore
           handler = "Monkeybars::#{handler_type.camelize}Handler".constantize.new(self, component_name.to_s)
