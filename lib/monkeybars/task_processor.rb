@@ -15,6 +15,15 @@ module Monkeybars
       Worker.post(runner)
     end
     
+    def on_edt(&task)
+      if javax.swing.SwingUtilities.isEventDispatchThread
+        javax.swing.SwingUtilities.invoke_later Runnable.new(task)
+      else
+        javax.swing.SwingUtilities.invoke_and_wait Runnable.new(task)
+      end
+      
+    end
+    
     class Runner < Job
       def initialize(&proc)
         @proc = proc
@@ -22,6 +31,17 @@ module Monkeybars
     
       def run
         @proc.call
+      end
+    end
+    
+    class Runnable
+      include Java::java::lang::Runnable
+      def initialize(explicit_block=nil, &block)
+	@block = explicit_block || block
+      end
+      
+      def run
+	@block.call
       end
     end
   end
