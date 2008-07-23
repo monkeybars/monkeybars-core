@@ -1,10 +1,12 @@
 # Monkeybars shouldn't force RSpec. Consider conditional RSpec require/include
 require 'spec'
+require 'monkeybars/inflector'
+require 'monkeybars/task_processor'
 
 module Monkeybars
   module Performer
     class User
-      
+      include Monkeybars::TaskProcessor
       include Spec::Matchers
       
       def initialize(controller_context)
@@ -111,7 +113,7 @@ module Monkeybars
         sleep 1
       end
 
-      private
+    private
 
       
       def send_key_events(component, text)
