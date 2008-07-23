@@ -306,6 +306,18 @@ module Monkeybars
       end
     end
     
+    # This method is called when Controller#load has completed (usually during Controller#open)
+    # but before the view is shown.  This method is meant to be overriden in views that
+    # need control over how their mappings are initially run.  By overriding this method
+    # you could use disable_handlers to disable certain handlers during the
+    # initial mapping process or perform some actions after the mappings complete.
+    #
+    # When overriding on_first_update, you must at some point make a call to
+    # super or the View#update method in order for your view's mappings to be invoked.
+    def on_first_update(model, transfer)
+      update(model, transfer)
+    end
+    
     def visible?
       return @main_view_component.visible
     end
@@ -417,7 +429,7 @@ module Monkeybars
     
     # Stub to be overriden in sub-class.  This is called whenever the view is closed.
     def unload; end
-
+    
     # Uses get_field to retrieve the value of a particular field, this is typically
     # a component on a Java form. Used internally by method missing to enable:
     #

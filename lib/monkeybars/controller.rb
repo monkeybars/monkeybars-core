@@ -352,7 +352,7 @@ module Monkeybars
       
       if closed?
         load(*args) 
-        update_view
+        @__view.on_first_update(model, transfer)
         clear_view_state
         @closed = false
       end
