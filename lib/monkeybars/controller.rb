@@ -142,8 +142,8 @@ module Monkeybars
     # class being instantiated.  It is not a requirement that you have a model,
     # Monkeybars will operate without one as long as you do not attempt to use
     # methods that interact with the model.
-    def self.set_model(model)
-      self.model_class = model
+    def self.set_model(model=nil, &block)
+      self.model_class = [model,block]
     end
 
     # Declares a method to be called whenever the controller's update method is called.
@@ -208,7 +208,9 @@ module Monkeybars
     end
     
     def initialize
+      @model_has_block = false
       @__model = create_new_model unless self.class.model_class.nil?
+      instance_eval(&self.class.model_class.last) if @model_has_block
       @__view = create_new_view unless self.class.view_class.nil?
       @__transfer = {}
       @__nested_controllers = {}
@@ -437,7 +439,7 @@ module Monkeybars
     # yourself by calling clear_view_state.
     def view_state # :doc:
       return @__view_state unless @__view_state.nil?
-      unless self.class.model_class.nil?
+      unless self.class.model_class.first.nil?
         model = create_new_model
         transfer = {}
         @__view.write_state(model, transfer)
@@ -524,10 +526,16 @@ module Monkeybars
     
     def create_new_model
       begin
-        self.class.model_class.constantize.new
+        unless self.class.model_class.first.nil?
+          @model_has_block = true unless self.class.model_class.last.nil?
+          instance = self.class.model_class.first.constantize.new
+          return instance
+        else
+          return self.class.model_class.last.call
+        end
       rescue NameError
-        require self.class.model_class.underscore
-        self.class.model_class.constantize.new
+        require self.class.model_class.first.underscore
+        self.class.model_class.first.constantize.new
       end
     end
     

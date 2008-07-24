@@ -22,7 +22,34 @@ describe Monkeybars::Controller do
     ExternalModelSetTestController.set_model "EmptyTestModel"
     
     ExternalModelSetTestController.send(:view_class).should == "EmptyTestView"
-    ExternalModelSetTestController.send(:model_class).should == "EmptyTestModel"
+    ExternalModelSetTestController.send(:model_class).should == ["EmptyTestModel", nil]
+  end
+  
+  it "allows the model to be set via a block" do
+    class TestBlockInitializeModel
+      def initialize(string)
+        @some_string = string
+      end
+    end
+    class ExternalModelInitializationController < Monkeybars::Controller
+      set_model {TestBlockInitializeModel.new("hello")}
+    end
+    ExternalModelInitializationController.instance.send(:model).should be_an_instance_of(TestBlockInitializeModel)
+  end
+  
+  it "allows a block to be passed with set_model to be instance eval'ed" do
+    class TestModel
+      attr_accessor :some_value
+      def initialize
+        @some_value = 0
+      end
+    end
+    class ExternalBlockEvalController < Monkeybars::Controller
+      set_model "TestModel" do 
+        model.some_value = 5
+      end
+    end
+    ExternalBlockEvalController.instance.send(:model).some_value.should == 5
   end
   
   it "allows the model and view to be overriden externally" do
@@ -38,7 +65,7 @@ describe Monkeybars::Controller do
     ExternalModelOverrideTestController.set_model "ExternalOverrideTestModel"
     
     ExternalModelOverrideTestController.send(:view_class).should == "ExternalOverrideTestView"
-    ExternalModelOverrideTestController.send(:model_class).should == "ExternalOverrideTestModel"
+    ExternalModelOverrideTestController.send(:model_class).should == ["ExternalOverrideTestModel", nil]
   end
 end
 
