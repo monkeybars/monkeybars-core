@@ -134,8 +134,8 @@ module Monkeybars
     # The file my_view.rb will be auto-required before attempting to instantiate
     # the MyView class.
     #
-    def self.set_view(view)
-      self.view_class = view
+    def self.set_view(view=nil, &block)
+      self.view_class = [view, block]
     end
 
     # See set_view.  The declared model class is also auto-required prior to the
@@ -210,7 +210,6 @@ module Monkeybars
     def initialize
       @model_has_block = false
       @__model = create_new_model unless self.class.model_class.nil?
-      instance_eval(&self.class.model_class.last) if @model_has_block
       @__view = create_new_view unless self.class.view_class.nil?
       @__transfer = {}
       @__nested_controllers = {}
@@ -526,25 +525,47 @@ module Monkeybars
     
     def create_new_model
       begin
-        unless self.class.model_class.first.nil?
-          @model_has_block = true unless self.class.model_class.last.nil?
-          instance = self.class.model_class.first.constantize.new
-          return instance
+        if self.class.model_class.first.nil?
+          self.class.model_class.last.call
         else
-          return self.class.model_class.last.call
+          instance = self.class.model_class.first.constantize.new
+          unless self.class.model_class.last.nil?
+            self.class.model_class.last[instance]
+            instance.instance_eval(&self.class.model_class.last)
+          end
+          instance
         end
       rescue NameError
         require self.class.model_class.first.underscore
-        self.class.model_class.first.constantize.new
+        instance = self.class.model_class.first.constantize.new
+        unless self.class.model_class.last.nil?
+          self.class.model_class.last[instance]
+          instance.instance_eval(&self.class.model_class.last)
+        end
+        instance
       end
     end
     
     def create_new_view
       begin
-        self.class.view_class.constantize.new
+        if self.class.view_class.first.nil?
+          self.class.view_class.last.call
+        else
+         instance = self.class.view_class.first.constantize.new
+         unless self.class.view_class.last.nil?
+           self.class.view_class.last[instance]
+           instance.instance_eval(&self.class.view_class.last)
+         end
+         instance
+        end
       rescue NameError
-        require self.class.view_class.underscore
-        self.class.view_class.constantize.new
+        require self.class.view_class.first.underscore
+        instance = self.class.view_class.first.constantize.new
+        unless self.class.view_class.last.nil?
+          self.class.view_class.last[instance]
+          instance.instance_eval(&self.class.view_class.last)
+        end
+        instance
       end
     end
 
