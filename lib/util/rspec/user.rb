@@ -1,10 +1,12 @@
 # Monkeybars shouldn't force RSpec. Consider conditional RSpec require/include
 require 'spec'
+require 'monkeybars/inflector'
+require 'monkeybars/task_processor'
 
 module Monkeybars
   module Performer
     class User
-      
+      include Monkeybars::TaskProcessor
       include Spec::Matchers
       
       def initialize(controller_context)
@@ -14,7 +16,9 @@ module Monkeybars
       #TODO: Events should execute in a seperate thread, such that blocking calls won't block the tests. Maybe an option?
       def clicks(component_name)
         view = @controller_context.instance_variable_get :@__view
-        view.send(component_name).do_click
+        on_edt do
+          view.send(component_name).do_click
+        end
         sleep 1
       end
 
@@ -111,7 +115,7 @@ module Monkeybars
         sleep 1
       end
 
-      private
+    private
 
       
       def send_key_events(component, text)

@@ -71,6 +71,26 @@ describe Monkeybars::Controller do
     ExternalModelOverrideTestController.send(:view_class).should == ["ExternalOverrideTestView", nil]
     ExternalModelOverrideTestController.send(:model_class).should == ["ExternalOverrideTestModel", nil]
   end
+  
+  it "updates the correct instance on Controller#update" do
+    class MultipleInstanceUpdateController < Monkeybars::Controller
+      set_update_method :tick
+      
+      def tick
+        object_id
+      end
+    end
+    
+    begin
+      instance1 = MultipleInstanceUpdateController.create_instance
+      instance2 = MultipleInstanceUpdateController.create_instance
+
+      instance1.update.should_not == instance2.update
+    ensure
+      MultipleInstanceUpdateController.destroy_instance instance1
+      MultipleInstanceUpdateController.destroy_instance instance2
+    end
+  end
 end
 
 describe "Controller instantiation" do
@@ -85,9 +105,15 @@ describe "Controller instantiation" do
   it "puts only one instance in the listance list per create_instance call" do
     class MultipleInstanceController < Monkeybars::Controller; end
     
+    #ensure initial value is zero
     Monkeybars::Controller.send(:class_variable_get, :@@instance_list)[MultipleInstanceController].size.should be_zero
-    MultipleInstanceController.create_instance
-    Monkeybars::Controller.send(:class_variable_get, :@@instance_list)[MultipleInstanceController].size.should == 1
+    
+    begin
+      instance = MultipleInstanceController.create_instance
+      Monkeybars::Controller.send(:class_variable_get, :@@instance_list)[MultipleInstanceController].size.should == 1
+    ensure
+      MultipleInstanceController.destroy_instance instance
+    end
   end
 end
 

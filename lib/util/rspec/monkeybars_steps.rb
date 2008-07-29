@@ -3,10 +3,11 @@ $:.unshift(File.dirname(__FILE__))
 require 'application_user'
 
 steps_for :monkeybars do
-  Given "the user is at the $main window" do |main_window|
-    #@user = ApplicationUser.new Module.const_get("#{main_window.capitalize}Controller").instance
-    MainController.instance.open
-    @user = ApplicationUser.new MainController.instance
+  Given "the user is at the $main window" do |main_window_name|
+    require "#{main_window_name}_controller"
+    main_window_class = "#{main_window_name.capitalize}Controller".constantize
+    @user = ApplicationUser.new(main_window_class.instance)
+    main_window_class.instance.open
   end
 
   When "the user clicks the '$button_name' button" do |button_name|

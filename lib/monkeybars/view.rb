@@ -451,7 +451,10 @@ module Monkeybars
     # Uses reflection to pull a private field out of the Java objects.  In cases where
     # no Java object is being used, the view object itself is referenced. A field
     # is not the same as the object it refers to, you only need this method if you
-    # want to change what a view field references.
+    # want to change what a view field references using the set_value method.
+    #
+    # field = get_field("my_button")
+    # field.set_value(Java.ruby_to_java(@main_view_component), Java.ruby_to_java(my_new_button))
     def get_field(field_name)
       field_name = field_name.to_sym
       field = @__field_references[field_name]
