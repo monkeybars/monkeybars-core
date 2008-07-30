@@ -45,8 +45,14 @@ namespace :spec do
 
 end  # namespace :spec
 
+task :kill_jvm do
+  require 'java'
+  java.lang.System.exit(0)
+end
+
+
 desc 'Alias to spec:run'
-task :spec => 'spec:run'
+task :spec => ['spec:run', :kill_jvm]
 
 task :clobber => 'spec:clobber_rcov' if HAVE_RCOV
 
