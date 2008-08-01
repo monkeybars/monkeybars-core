@@ -272,8 +272,8 @@ module Monkeybars
     def initialize
       @__field_references = {}
       
-      @@is_a_java_class = !self.class.instance_java_class.nil? && self.class.instance_java_class.ancestors.member?(java.lang.Object)
-      if @@is_a_java_class
+      @is_java_class = !self.class.instance_java_class.nil? && self.class.instance_java_class.ancestors.member?(java.lang.Object)
+      if @is_java_class
         @main_view_component = self.class.instance_java_class.new
       end
       
@@ -439,7 +439,7 @@ module Monkeybars
         @main_view_component
       else
         field_name = field_name.to_sym
-        if @@is_a_java_class
+        if @is_java_class
           field_object = get_field(field_name)
           Java.java_to_ruby(field_object.value(Java.ruby_to_java(@main_view_component)))
         else
@@ -460,7 +460,7 @@ module Monkeybars
       field = @__field_references[field_name]
       
       if field.nil?
-        if @@is_a_java_class
+        if @is_java_class
           [field_name.to_s, field_name.camelize, field_name.camelize(false), field_name.underscore].uniq.each do |name|
             begin
               field = self.class.instance_java_class.java_class.declared_field(name)
