@@ -274,7 +274,7 @@ module Monkeybars
       
       @is_java_class = !self.class.instance_java_class.nil? && self.class.instance_java_class.ancestors.member?(java.lang.Object)
       if @is_java_class
-        @main_view_component = self.class.instance_java_class.new
+        @main_view_component = create_main_view_component
       end
       
       setup_implicit_and_explicit_event_handlers
@@ -487,7 +487,12 @@ module Monkeybars
       @main_view_component.dispose if @main_view_component.respond_to? :dispose
     end
     
-    private
+  private
+    # Creates and returns the main view component to be assigned to @main_view_component.
+    # Override this when a non-default constructor is needed.
+    def create_main_view_component
+      self.class.instance_java_class.new
+    end
     # Retrieves all the components on the main view. This will work even if
     # @main_view_component is not a Java object as long as it implements
     # a components method.
