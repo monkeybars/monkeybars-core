@@ -7,6 +7,7 @@ require 'monkeybars/validated_hash'
 require 'monkeybars/view_mapping'
 require 'monkeybars/task_processor'
 require 'monkeybars/view_nesting'
+require 'monkeybars/view_positioning'
 require "monkeybars/event_handler_registration_and_dispatch_mixin"
 
 module Monkeybars
@@ -60,6 +61,9 @@ module Monkeybars
   class View
     include TaskProcessor
     include EventHandlerRegistrationAndDispatchMixin
+    include Positioning
+
+
  
     module CloseActions #:nodoc:
       DO_NOTHING = javax::swing::WindowConstants::DO_NOTHING_ON_CLOSE
