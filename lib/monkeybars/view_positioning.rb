@@ -1,6 +1,6 @@
 module Monkeybars
   class View
-    module Position
+    module Positioning
 
       include_class Java::java.awt.Toolkit
 
