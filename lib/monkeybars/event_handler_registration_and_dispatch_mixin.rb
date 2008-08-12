@@ -112,7 +112,13 @@ module Monkeybars
             if component.kind_of? Array
               component = component.first
             end
-            add_handler_for handler[:type], handler[:components], @__event_handler_view_target.instance_eval(component.to_s, __FILE__, __LINE__)
+            begin
+              resolved_component = @__event_handler_view_target.instance_eval(component.to_s, __FILE__, __LINE__)
+            rescue NoMethodError => e
+              raise InvalidHandlerError, "Could not find component: #{component} on view #{@__event_handler_view_target}\nOriginal exception: #{e.message}"
+            end
+            
+            add_handler_for handler[:type], handler[:components], resolved_component
           end
         end
       end
@@ -129,7 +135,7 @@ module Monkeybars
     # useful when the application has nested controllers and event handling needs to be different
     # for each instance of a controller class.
     #
-    # define_handler can accept either a single even or a list of events to apply the block to:
+    # define_handler can accept either a single event or a list of events to apply the block to:
     # 
     # define_handler :ok_button_action_performed { puts "action performed on 'ok button'" }
     # 
