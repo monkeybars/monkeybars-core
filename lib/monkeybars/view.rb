@@ -7,6 +7,7 @@ require 'monkeybars/validated_hash'
 require 'monkeybars/view_mapping'
 require 'monkeybars/task_processor'
 require 'monkeybars/view_nesting'
+require 'monkeybars/view_positioning'
 require "monkeybars/event_handler_registration_and_dispatch_mixin"
 
 module Monkeybars
@@ -60,6 +61,9 @@ module Monkeybars
   class View
     include TaskProcessor
     include EventHandlerRegistrationAndDispatchMixin
+    include Positioning
+
+
  
     module CloseActions #:nodoc:
       DO_NOTHING = javax::swing::WindowConstants::DO_NOTHING_ON_CLOSE
@@ -256,6 +260,9 @@ module Monkeybars
     #   end
     #   
     #   def remove_user(nested_view, nested_component, model, transfer)
+    #     # nested_view is the Ruby view object
+    #     # nested_component is the Java form, aka @main_view_component
+    #     
     #     user_panel.remove nested_component
     #     # lots of code to re-order previous components
     #   end
@@ -387,11 +394,11 @@ module Monkeybars
       end
     end
     
-    def add_nested_view(nested_name, nested_view, nested_component, model, transfer)
+    def add_nested_view(nested_name, nested_view, nested_component, model, transfer) #:nodoc:
       self.class.view_nestings[nested_name].select{|nesting| nesting.nests_with_add?}.each {|nesting| nesting.add(self, nested_view, nested_component, model, transfer)}
     end
 
-    def remove_nested_view(nested_name, nested_view, nested_component, model, transfer)
+    def remove_nested_view(nested_name, nested_view, nested_component, model, transfer) #:nodoc:
       self.class.view_nestings[nested_name].select{|nesting| 
          nesting.nests_with_remove?
       }.each {|nesting| 
