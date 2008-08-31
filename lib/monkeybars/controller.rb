@@ -553,10 +553,7 @@ module Monkeybars
          end
          instance
         end
-      rescue NameError => e
-        puts "name error:"
-        puts e
-        puts e.backtrace
+      rescue NameError
         require self.class.view_class.first.underscore
         instance = self.class.view_class.first.constantize.new
         unless self.class.view_class.last.nil?
