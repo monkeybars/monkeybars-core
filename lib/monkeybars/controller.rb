@@ -257,7 +257,6 @@ module Monkeybars
     # of the model and the transfer
     def update_view
       @__view.update(model, transfer)
-      @__nested_controllers.values.each {|controller_group| controller_group.each {|controller| controller.update_view}}
     end
     
     # Sends a signal to the view.  The view will process the signal (if it is

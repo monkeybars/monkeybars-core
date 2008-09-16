@@ -60,3 +60,9 @@ end
 class Symbol
   include Monkeybars::Inflector
 end
+
+class Class
+  def constantize
+    self
+  end
+end
