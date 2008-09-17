@@ -63,8 +63,6 @@ module Monkeybars
     include EventHandlerRegistrationAndDispatchMixin
     include Positioning
 
-
- 
     module CloseActions #:nodoc:
       DO_NOTHING = javax::swing::WindowConstants::DO_NOTHING_ON_CLOSE
       DISPOSE = javax::swing::WindowConstants::DISPOSE_ON_CLOSE
@@ -492,6 +490,20 @@ module Monkeybars
     
     def dispose
       @main_view_component.dispose if @main_view_component.respond_to? :dispose
+    end
+    
+    def get_field_names
+      fields = []
+      if @is_java_class
+        klass = self.class.instance_java_class.java_class
+        while(klass.name !~ /^java[x]?\./)
+          fields << klass.declared_fields
+          klass = klass.superclass
+        end
+        fields.flatten.map! {|field| field.name }
+      else
+        @main_view_component.send(:instance_variables).map! {|name| name.sub('@', '')}
+      end
     end
     
   private
