@@ -93,7 +93,7 @@ module Monkeybars
     # controller is created but in the near future a configurable limit will be
     # available so that you can create n instances of a controller.
     def self.instance
-      @@instance_lock[self.class].synchronize do
+      @@instance_lock[self].synchronize do
         controller = @@instance_list[self]
         unless controller.empty?
           controller.last
