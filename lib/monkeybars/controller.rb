@@ -105,26 +105,13 @@ module Monkeybars
     
     # Always returns a new instance of the controller. 
     # 
-    #   controller = MyController.create_instance
-    #   
-    # Controllers created this way must be destroyed using
-    # Monkeybars::Controller#destroy_instance.
+    #   controller1 = MyController.create_instance
+    #   controller2 = MyController.create_instance
+    #   ...
+    #   controller32 = MyController.create_instance
     #
     def self.create_instance
-      @@instance_lock[self.class].synchronize do
-        __new__
-      end
-    end
-    
-    # Destroys the instance of the controller passed in.
-    # 
-    #    MyController.destroy_instance(controller)
-    # 
-    def self.destroy_instance(controller)
-      @@instance_lock[self.class].synchronize do
-        controllers = @@instance_list[self]
-        controllers.delete controller
-      end
+      new
     end
     
     # Declares the view class (as a symbol) to use when instantiating the controller.
@@ -204,6 +191,7 @@ module Monkeybars
     def self.__new__
       object = new
       @@instance_list[self] << object
+      @@instance_list[self].uniq!
       object
     end
     
@@ -213,7 +201,6 @@ module Monkeybars
       instance_eval(&self.class.model_class.last) if @model_has_block
       @__view = create_new_view unless self.class.view_class.nil?
       @__transfer = {}
-      @__nested_controllers = {}
       @__view_state = nil
       setup_implicit_and_explicit_event_handlers
       
@@ -282,8 +269,6 @@ module Monkeybars
     # See also Monkeybars::Controller#remove_nested_controller
     #
     def add_nested_controller(name, sub_controller)
-      @__nested_controllers[name] ||= []
-      @__nested_controllers[name] << sub_controller
       nested_view = sub_controller.instance_variable_get(:@__view)
       @__view.add_nested_view(name, nested_view, nested_view.instance_variable_get(:@main_view_component), model, transfer)
     end
@@ -301,7 +286,6 @@ module Monkeybars
     # See also Monkeybars::Controller#add_nested_controller
     #
     def remove_nested_controller(name, sub_controller)
-      @__nested_controllers[name].delete sub_controller
       nested_view = sub_controller.instance_variable_get(:@__view)
       @__view.remove_nested_view(name, nested_view, nested_view.instance_variable_get(:@main_view_component), model, transfer)
     end
