@@ -77,15 +77,10 @@ describe Monkeybars::Controller do
       end
     end
     
-    begin
-      instance1 = MultipleInstanceUpdateController.create_instance
-      instance2 = MultipleInstanceUpdateController.create_instance
+    instance1 = MultipleInstanceUpdateController.create_instance
+    instance2 = MultipleInstanceUpdateController.create_instance
 
-      instance1.update.should_not == instance2.update
-    ensure
-      MultipleInstanceUpdateController.destroy_instance instance1
-      MultipleInstanceUpdateController.destroy_instance instance2
-    end
+    instance1.update.should_not == instance2.update
   end
 end
 
@@ -98,18 +93,13 @@ describe "Controller instantiation" do
     t.should equal(t2)
   end
   
-  it "puts only one instance in the listance list per create_instance call" do
+  it "leaves the instance list alone when created using create_instance" do
     class MultipleInstanceController < Monkeybars::Controller; end
     
     #ensure initial value is zero
     Monkeybars::Controller.send(:class_variable_get, :@@instance_list)[MultipleInstanceController].size.should be_zero
-    
-    begin
-      instance = MultipleInstanceController.create_instance
-      Monkeybars::Controller.send(:class_variable_get, :@@instance_list)[MultipleInstanceController].size.should == 1
-    ensure
-      MultipleInstanceController.destroy_instance instance
-    end
+    MultipleInstanceController.create_instance
+    Monkeybars::Controller.send(:class_variable_get, :@@instance_list)[MultipleInstanceController].size.should be_zero
   end
 end
 

@@ -137,6 +137,12 @@ module Monkeybars
   end
   
   class BasicPropertyMapping < Mapping
+    def to_s
+      model_or_transfer_key = model_mapping? ? ':model' : ':transfer'
+      model_or_transfer_property = model_mapping? ? @model_property : @transfer_property
+      ":view => #{@view_property.inspect}, #{model_or_transfer_key} => #{model_or_transfer_property.inspect}"
+    end
+    
     def model_to_view(view, model)
       begin
         instance_eval("view.#{@view_property} = model.#{@model_property}", __FILE__, __LINE__)
@@ -146,6 +152,8 @@ module Monkeybars
         raise InvalidMappingError, "Invalid types when assigning from model.#{@model_property} to self.#{@view_property}, #{e.message} in #{view.class}"
       rescue Monkeybars::UndefinedControlError
         raise InvalidMappingError, "The view property #{@view_property} was not found on view #{view.class}"
+      rescue SyntaxError, Exception => e
+        raise InvalidMappingError, "Error while trying to map for #{view.class}: #{to_s}\n#{e.class} - #{e}"
       end
     end
     
@@ -155,7 +163,9 @@ module Monkeybars
       rescue NoMethodError
         raise InvalidMappingError, "Either transfer[#{@transfer_property.inspect}] or self.#{@view_property} in #{view.class} is not valid."
       rescue TypeError => e
-        raise InvalidMappingError, "Invalid types when assigning from transfer[#{@transfer_property.inspect}] to self.#{@view_property}, #{e.message} in #{view.class}"
+        raise InvalidMappingError, "Invalid types when assigning from transfer[#{@transfer_property.inspect}] to self.#{@view_property}, #{e.class}: #{e.message} in #{view.class}"
+      rescue SyntaxError, Exception => e
+        raise InvalidMappingError, "Error while trying to map for #{view.class}: #{to_s}\n#{e.class} - #{e}"
       end
     end
     
@@ -166,6 +176,8 @@ module Monkeybars
         raise InvalidMappingError, "Either model.#{@model_property} or self.#{@view_property} in #{view.class} is not valid."
       rescue TypeError => e
         raise InvalidMappingError, "Invalid types when assigning from model.#{@model_property} to self.#{@view_property}, #{e.message} in #{view.class}"
+      rescue SyntaxError, Exception => e
+        raise InvalidMappingError, "Error while trying to map for #{view.class}: #{to_s}\n#{e.class} - #{e}"
       end
     end
     
@@ -176,6 +188,8 @@ module Monkeybars
         raise InvalidMappingError, "Either transfer[#{@transfer_property.inspect}] or self.#{@view_property} in #{view.class} is not valid."
       rescue TypeError => e
         raise InvalidMappingError, "Invalid types when assigning from transfer[#{@transfer_property.inspect}] to self.#{@view_property}, #{e.message} in #{view.class}"
+      rescue SyntaxError, Exception => e
+        raise InvalidMappingError, "Error while trying to map for #{view.class}: #{to_s}\n#{e.class} - #{e}"
       end
     end
     
@@ -213,6 +227,12 @@ module Monkeybars
       end
     end
     
+    def to_s
+      using_key = using_translation? ? ':using_translation' : ':using'
+      using_value = using_translation? ? @data_translation_hash.inspect : "[#{@to_view_method.inspect}, #{@from_view_method.inspect}]"
+      super << " #{using_key} => #{using_value}"
+    end
+    
     def using_translation?
       !@data_translation_hash.nil?
     end
@@ -232,6 +252,8 @@ module Monkeybars
       end
     rescue NameError => e
       raise InvalidMappingError, "Either view.#{@view_property} or view.#{@to_view_method}(#{@model_property}) is not valid.\nOriginal error: #{e}\n#{e.message}"
+    rescue SyntaxError, Exception => e
+      raise InvalidMappingError, "Error while trying to map for #{view.class}: #{to_s}\n#{e.class} - #{e}"
     end
     
     def transfer_to_view(view, transfer)
@@ -248,6 +270,8 @@ module Monkeybars
       end
     rescue NameError => e
       raise InvalidMappingError, "Either view.#{@view_property} or view.#{@to_view_method}(#{@transfer_property}) is not valid.\nOriginal error: #{e}\n#{e.message}"
+    rescue SyntaxError, Exception => e
+      raise InvalidMappingError, "Error while trying to map for #{view.class}: #{to_s}\n#{e.class} - #{e}"
     end
     
     def model_from_view(view, model)
@@ -264,6 +288,8 @@ module Monkeybars
       end
     rescue NameError => e
       raise InvalidMappingError, "Either model.#{@model_property} or view.#{@from_view_method}(#{@view_property}) is not valid.\nOriginal error: #{e}\n#{e.message}"
+    rescue SyntaxError, Exception => e
+      raise InvalidMappingError, "Error while trying to map for #{view.class}: #{to_s}\n#{e.class} - #{e}"
     end
     
     def transfer_from_view(view, transfer)
@@ -278,10 +304,13 @@ module Monkeybars
       else
         instance_eval("transfer[#{@transfer_property.inspect}] = view.method(@from_view_method).call(view.#{@view_property})", __FILE__, __LINE__)
       end
+    rescue NameError => e
+      raise InvalidMappingError, "Either transfer[#{@transfer_property}] or view.#{@from_view_method}(#{@view_property}) is not valid.\nOriginal error: #{e}\n#{e.message}"
+    rescue SyntaxError, Exception => e
+      raise InvalidMappingError, "Error while trying to map for #{view.class}: #{to_s}\n#{e.class} - #{e}"
     end
-  rescue NameError => e
-    raise InvalidMappingError, "Either transfer[#{@transfer_property}] or view.#{@from_view_method}(#{@view_property}) is not valid.\nOriginal error: #{e}\n#{e.message}"
   end
+  
   
   module HashMappingValidation
     def properties_only?

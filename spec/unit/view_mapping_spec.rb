@@ -7,83 +7,127 @@ require 'monkeybars/view_mapping'
 TEST_DATA = "bazz"
 
 describe Monkeybars::Mapping, "instantiation" do
+  it "shows a useful error for parsing errors for basic model mapping" do
+    class BasicModelMapParsingErrorView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+      map :view => 'foo', :model => ')343d.a'
+    end
+    #remove the assertion to see the error
+    mock_model = mock("Mock Model")
+    lambda {BasicModelMapParsingErrorView.new.update(mock_model, {})}.should raise_error(Monkeybars::InvalidMappingError)
+    lambda {BasicModelMapParsingErrorView.new.write_state(mock_model, {})}.should raise_error(Monkeybars::InvalidMappingError)
+  end
+  
+  it "shows a useful error for parsing errors for basic transfer mapping" do
+    class BasicTransferMapParsingErrorView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+      map :view => ')343d.a', :transfer => 'foo'
+    end
+    #remove the assertion to see the error
+    mock_model = mock("Mock Model")
+    lambda {BasicTransferMapParsingErrorView.new.update(mock_model, {'foo' => nil})}.should raise_error(Monkeybars::InvalidMappingError)
+    lambda {BasicTransferMapParsingErrorView.new.write_state(mock_model, {'foo' => nil})}.should raise_error(Monkeybars::InvalidMappingError)
+  end
+  
+  it "shows a useful error for parsing errors for method model mapping" do
+    class MethodModelMapParsingErrorView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+      map :view => 'foo', :model => ')343d.a', :using => [:foo, :bar]
+    end
+    #remove the assertion to see the error
+    mock_model = mock("Mock Model")
+    lambda {MethodModelMapParsingErrorView.new.update(mock_model, {})}.should raise_error(Monkeybars::InvalidMappingError)
+    lambda {MethodModelMapParsingErrorView.new.write_state(mock_model, {})}.should raise_error(Monkeybars::InvalidMappingError)
+  end
+  
+  it "shows a useful error for parsing errors for method transfer mapping" do
+    class MethodTransferMapParsingErrorView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+      map :view => ')343d.a', :model => 'foo', :using => [:foo, :bar]
+    end
+    #remove the assertion to see the error
+    mock_model = mock("Mock Model")
+    lambda {MethodTransferMapParsingErrorView.new.update(mock_model, {})}.should raise_error(Monkeybars::InvalidMappingError)
+    lambda {MethodTransferMapParsingErrorView.new.write_state(mock_model, {})}.should raise_error(Monkeybars::InvalidMappingError)
+  end
+  
   it "only accepts :view, :model, :tranfer, :using , :translate_using and :ignoring as parameter keys" do
-      lambda{Monkeybars::Mapping.new(:view => '', :model => '', :using => '', :ignoring => '')}.should_not raise_error(InvalidHashKeyError)
-      lambda{Monkeybars::Mapping.new(:view => '', :transfer => '', :using => '', :ignoring => '')}.should_not raise_error(InvalidHashKeyError)
-      lambda{Monkeybars::Mapping.new(:view => '', :transfer => '', :translate_using => '', :ignoring => '')}.should_not raise_error(InvalidHashKeyError)
-      lambda{Monkeybars::Mapping.new(:foo => '', :bar => '', :baz => '')}.should raise_error(InvalidHashKeyError)  
-    end
-    
-    it "raises an InvalidMappingError when no parameters are given" do
-      lambda {Monkeybars::Mapping.new()}.should raise_error(Monkeybars::InvalidMappingError)
-    end
-    
-    it "raises an InvalidMappingError when only one side of the mapping is given" do
-      lambda {Monkeybars::Mapping.new(:view => "")}.should raise_error(Monkeybars::InvalidMappingError)
-      lambda {Monkeybars::Mapping.new(:model => "")}.should raise_error(Monkeybars::InvalidMappingError)
-      lambda {Monkeybars::Mapping.new(:transfer => "")}.should raise_error(Monkeybars::InvalidMappingError)
-    end
-    
-    it "raises an InvalidMappingError when both a model and transfer parameters are given" do
-      lambda {Monkeybars::Mapping.new(:model => '', :transfer => '')}.should raise_error(Monkeybars::InvalidMappingError)
-    end
-    
-    it "raises an InvalidMappingError when both a :using and :translate_using parameters are given" do
-      lambda {Monkeybars::Mapping.new(:view => '', :model => '', :using => '', :translate_using => '')}.should raise_error(Monkeybars::InvalidMappingError)
-    end
-    
-    it "creates a PropertyMapping object when a view and model are given" do
-      Monkeybars::Mapping.new(:view => "", :model => "").class.should == Monkeybars::PropertyMapping
-    end
-    
-    it "creates a PropertyMapping object when a view and transfer are given" do
-      Monkeybars::Mapping.new(:view => "", :transfer => "").class.should == Monkeybars::PropertyMapping
-    end
-    
-    it "identifies a mapping as model when a model parameter is given" do
-      Monkeybars::Mapping.new(:view => "", :model => "").model_mapping?.should == true
-    end
-    
-    it "identifies a mapping as transfer when a transfer parameter is given" do
-      Monkeybars::Mapping.new(:view => "", :transfer => "").transfer_mapping?.should == true
-    end
-    
-    it "sets the mapping direction to DIRECTION_BOTH when only properties are given" do
-      Monkeybars::Mapping.new(:view => "", :model => "").send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_BOTH
-      Monkeybars::Mapping.new(:view => "", :transfer => "").send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_BOTH
-    end
-    
-    it "creates a MethodMapping object when one or two methods are provided" do
-      Monkeybars::Mapping.new(:view => "", :transfer => "", :using => "").class.should == Monkeybars::MethodMapping
-      Monkeybars::Mapping.new(:view => "", :transfer => "", :using => ["",""]).class.should == Monkeybars::MethodMapping
-    end
-    
-    it "creates a MethodMapping object when :translate_using is provided" do
-      Monkeybars::Mapping.new(:view => "", :transfer => "", :translate_using => {}).class.should == Monkeybars::MethodMapping
-    end
-    
-    it "sets the mapping direction to DIRECTION_TO_VIEW when the first (or only one) method is provided" do
-      Monkeybars::Mapping.new(:view => "", :transfer => "", :using => "").send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_TO_VIEW
-      Monkeybars::Mapping.new(:view => "", :transfer => "", :using => ["", nil]).send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_TO_VIEW
-      Monkeybars::Mapping.new(:using => "").send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_TO_VIEW
-      Monkeybars::Mapping.new(:using => ["", nil]).send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_TO_VIEW
-    end
-    
-    it "sets the mapping direction to DIRECTION_FROM_VIEW when the second method is provided" do
-      Monkeybars::Mapping.new(:view => "", :transfer => "", :using => [nil, ""]).send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_FROM_VIEW
-      Monkeybars::Mapping.new(:using => [nil, ""]).send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_FROM_VIEW
-    end
-    
-    it "sets the mapping direction to DIRECTION_BOTH when two methods are provided" do
-      Monkeybars::Mapping.new(:view => "", :transfer => "", :using => ["", ""]).send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_BOTH
-      Monkeybars::Mapping.new(:using => ["", ""]).send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_BOTH
-    end
-    
-    it "creates a RawMapping object when only one or two methods are provided" do
-      Monkeybars::Mapping.new(:using => "").class.should == Monkeybars::RawMapping
-      Monkeybars::Mapping.new(:using => [nil, ""]).class.should == Monkeybars::RawMapping
-      Monkeybars::Mapping.new(:using => ["", ""]).class.should == Monkeybars::RawMapping  
-    end
+    lambda{Monkeybars::Mapping.new(:view => '', :model => '', :using => '', :ignoring => '')}.should_not raise_error(InvalidHashKeyError)
+    lambda{Monkeybars::Mapping.new(:view => '', :transfer => '', :using => '', :ignoring => '')}.should_not raise_error(InvalidHashKeyError)
+    lambda{Monkeybars::Mapping.new(:view => '', :transfer => '', :translate_using => '', :ignoring => '')}.should_not raise_error(InvalidHashKeyError)
+    lambda{Monkeybars::Mapping.new(:foo => '', :bar => '', :baz => '')}.should raise_error(InvalidHashKeyError)  
+  end
+
+  it "raises an InvalidMappingError when no parameters are given" do
+    lambda {Monkeybars::Mapping.new()}.should raise_error(Monkeybars::InvalidMappingError)
+  end
+
+  it "raises an InvalidMappingError when only one side of the mapping is given" do
+    lambda {Monkeybars::Mapping.new(:view => "")}.should raise_error(Monkeybars::InvalidMappingError)
+    lambda {Monkeybars::Mapping.new(:model => "")}.should raise_error(Monkeybars::InvalidMappingError)
+    lambda {Monkeybars::Mapping.new(:transfer => "")}.should raise_error(Monkeybars::InvalidMappingError)
+  end
+
+  it "raises an InvalidMappingError when both a model and transfer parameters are given" do
+    lambda {Monkeybars::Mapping.new(:model => '', :transfer => '')}.should raise_error(Monkeybars::InvalidMappingError)
+  end
+
+  it "raises an InvalidMappingError when both a :using and :translate_using parameters are given" do
+    lambda {Monkeybars::Mapping.new(:view => '', :model => '', :using => '', :translate_using => '')}.should raise_error(Monkeybars::InvalidMappingError)
+  end
+
+  it "creates a PropertyMapping object when a view and model are given" do
+    Monkeybars::Mapping.new(:view => "", :model => "").class.should == Monkeybars::PropertyMapping
+  end
+
+  it "creates a PropertyMapping object when a view and transfer are given" do
+    Monkeybars::Mapping.new(:view => "", :transfer => "").class.should == Monkeybars::PropertyMapping
+  end
+
+  it "identifies a mapping as model when a model parameter is given" do
+    Monkeybars::Mapping.new(:view => "", :model => "").model_mapping?.should == true
+  end
+
+  it "identifies a mapping as transfer when a transfer parameter is given" do
+    Monkeybars::Mapping.new(:view => "", :transfer => "").transfer_mapping?.should == true
+  end
+
+  it "sets the mapping direction to DIRECTION_BOTH when only properties are given" do
+    Monkeybars::Mapping.new(:view => "", :model => "").send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_BOTH
+    Monkeybars::Mapping.new(:view => "", :transfer => "").send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_BOTH
+  end
+
+  it "creates a MethodMapping object when one or two methods are provided" do
+    Monkeybars::Mapping.new(:view => "", :transfer => "", :using => "").class.should == Monkeybars::MethodMapping
+    Monkeybars::Mapping.new(:view => "", :transfer => "", :using => ["",""]).class.should == Monkeybars::MethodMapping
+  end
+
+  it "creates a MethodMapping object when :translate_using is provided" do
+    Monkeybars::Mapping.new(:view => "", :transfer => "", :translate_using => {}).class.should == Monkeybars::MethodMapping
+  end
+
+  it "sets the mapping direction to DIRECTION_TO_VIEW when the first (or only one) method is provided" do
+    Monkeybars::Mapping.new(:view => "", :transfer => "", :using => "").send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_TO_VIEW
+    Monkeybars::Mapping.new(:view => "", :transfer => "", :using => ["", nil]).send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_TO_VIEW
+    Monkeybars::Mapping.new(:using => "").send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_TO_VIEW
+    Monkeybars::Mapping.new(:using => ["", nil]).send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_TO_VIEW
+  end
+
+  it "sets the mapping direction to DIRECTION_FROM_VIEW when the second method is provided" do
+    Monkeybars::Mapping.new(:view => "", :transfer => "", :using => [nil, ""]).send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_FROM_VIEW
+    Monkeybars::Mapping.new(:using => [nil, ""]).send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_FROM_VIEW
+  end
+
+  it "sets the mapping direction to DIRECTION_BOTH when two methods are provided" do
+    Monkeybars::Mapping.new(:view => "", :transfer => "", :using => ["", ""]).send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_BOTH
+    Monkeybars::Mapping.new(:using => ["", ""]).send(:instance_variable_get, "@direction").should == Monkeybars::Mapping::DIRECTION_BOTH
+  end
+
+  it "creates a RawMapping object when only one or two methods are provided" do
+    Monkeybars::Mapping.new(:using => "").class.should == Monkeybars::RawMapping
+    Monkeybars::Mapping.new(:using => [nil, ""]).class.should == Monkeybars::RawMapping
+    Monkeybars::Mapping.new(:using => ["", ""]).class.should == Monkeybars::RawMapping  
+  end
 end
 
 describe "Monkeybars::Mapping's transfer of data to the view" do
