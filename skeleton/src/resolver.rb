@@ -5,7 +5,7 @@ module Monkeybars
     
     # Returns a const value indicating if the currently executing code is being run from the file system or from within a jar file.
     def self.run_location
-      if __FILE__ =~ /\.jar\!/
+      if File.expand_path(__FILE__) =~ /\.jar\!/
         :in_jar_file 
       else
         :in_file_system
