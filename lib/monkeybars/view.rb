@@ -101,9 +101,19 @@ module Monkeybars
     # set on the component are added to this class as well as the setting of the
     # close action that is defined in the controller.
     def self.set_java_class(java_class)
-      include_class java_class
-      class_name = /.*?\.?(\w+)$/.match(java_class)[1]
-      self.instance_java_class = const_get(class_name)
+      # We're allowing two options: The existing "Give me a string", and
+      # passing a constant (which is new behavior).
+      # In a view class, the develoepr can simply give the name of a defined class
+      # to use, in which case this code does not need to try to load anything.
+      if java_class.is_a?(String)
+        include_class java_class
+        class_name = /.*?\.?(\w+)$/.match(java_class)[1]
+        self.instance_java_class = const_get(class_name)
+      elsif  java_class.is_a?(Class)
+        self.instance_java_class = java_class
+      else
+        raise "Setting the view class requires either a string naming the class to load, or an actual class constant. set_java_class was given #{java_class.inspect}."
+      end
     end
     
     # Declares a mapping between the properties of the view and either the model's 
@@ -280,6 +290,8 @@ module Monkeybars
       @is_java_class = !self.class.instance_java_class.nil? && self.class.instance_java_class.ancestors.member?(java.lang.Object)
       if @is_java_class
         @main_view_component = create_main_view_component
+      else
+        warn "Cannot set @main_view_component in initialize."
       end
       
       setup_implicit_and_explicit_event_handlers
@@ -572,3 +584,5 @@ Component = java.awt.Component
 class Component
   include HandlerContainer
 end
+
+
