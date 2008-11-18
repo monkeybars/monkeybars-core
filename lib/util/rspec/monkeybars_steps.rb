@@ -2,9 +2,9 @@ require 'spec'
 $:.unshift(File.dirname(__FILE__))
 require 'application_user'
 
-steps_for :monkeybars do
+# steps_for :monkeybars do
   Given "the user is at the $main window" do |main_window_name|
-    require "#{main_window_name}_controller"
+    require "#{main_window_name.downcase}_controller"
     main_window_class = "#{main_window_name.capitalize}Controller".constantize
     @user = ApplicationUser.new(main_window_class.instance)
     main_window_class.instance.open
@@ -49,10 +49,18 @@ steps_for :monkeybars do
     @user.sees :window => window_name.gsub(' ', '')
   end
 
+  # Cucumber complained that this step matched another step; cucumber
+  # does not distinguish Then and When.
+  #Then "the user is at the '$window_name' window" do |window_name|
+  #  warn "STEP: Then the user is at the '$window_name' window"
+  #  @user.sees :window => window_name.gsub(' ', '')
+  #end
+
+
   Then "the user sees the '$panel_name' panel" do |panel_name|
     @user.sees :panel => panel_name.gsub(' ', '')
   end  
-  
+
   When "the user clicks the '$tab_name' tab on the '$tabbed_pane' pane" do |tab_name, tabbed_pane|
     pane_name = tabbed_pane.gsub(' ', '_') +  "_tabbed_pane"
     pane_name.underscore
@@ -69,7 +77,6 @@ steps_for :monkeybars do
   end
 
   Then "the user exits the application" do
-    #TODO: Find out what's lingering.
     @user.exits
   end
-end
+# end
