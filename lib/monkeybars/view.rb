@@ -101,7 +101,6 @@ module Monkeybars
     # set on the component are added to this class as well as the setting of the
     # close action that is defined in the controller.
     def self.set_java_class(java_class)
-      # JGB
       # We're allowing two options: The existing "Give me a string", and
       # passing a constant (which is new behavior).
       # In a view class, the develoepr can simply give the name of a defined class
