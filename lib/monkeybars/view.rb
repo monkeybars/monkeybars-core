@@ -290,8 +290,6 @@ module Monkeybars
       @is_java_class = !self.class.instance_java_class.nil? && self.class.instance_java_class.ancestors.member?(java.lang.Object)
       if @is_java_class
         @main_view_component = create_main_view_component
-      else
-        warn "Cannot set @main_view_component in initialize."
       end
       
       setup_implicit_and_explicit_event_handlers
