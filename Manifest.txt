@@ -9,7 +9,7 @@ lib/monkeybars.rb
 lib/monkeybars/controller.rb
 lib/monkeybars/debug.rb
 lib/monkeybars/event_handler.rb
-lib/monkeybars/event_handler_registartion_and_dispatch_mixin.rb
+lib/monkeybars/event_handler_registration_and_dispatch_mixin.rb
 lib/monkeybars/exceptions.rb
 lib/monkeybars/global_error_handler.rb
 lib/monkeybars/inflector.rb
