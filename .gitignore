@@ -4,7 +4,7 @@ nbproject
 pkg
 .LCK*
 test_files.jar
-skeleton/lib/monkeybars*
+skeleton/lib/java/monkeybars*
 doc/*
 media/website/output/*
 build.xml

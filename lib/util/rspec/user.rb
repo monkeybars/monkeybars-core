@@ -17,7 +17,13 @@ module Monkeybars
       def clicks(component_name)
         view = @controller_context.instance_variable_get :@__view
         on_edt do
-          view.send(component_name).do_click
+          begin
+            view.send(component_name).do_click
+          rescue => e
+            puts e
+            puts e.backtrace
+            raise
+          end
         end
         sleep 1
       end
@@ -28,29 +34,38 @@ module Monkeybars
           window = get_window window_name
           window.should_not be_visible
         end
-        sleep 1
+        #sleep 1
       end
 
       def sees(args)
-        view = @controller_context.instance_variable_get :@__view
-        if !(args[:in].nil? || args[:value].nil?)
-          view.instance_eval(args[:in]).should == args[:value]
-        elsif !args[:window].nil?
-          window_name = args[:window]
-          window = get_window window_name
-          window.should be_visible #unless args[:visibility_override]
-        elsif !args[:panel].nil?
-          panel_name = args[:panel]
-          panel = get_window panel_name
-          panel.should be_visible
-        elsif !args[:table].nil?
-          row = args[:row].to_i
-          column = args[:column].to_i
-          view = @controller_context.instance_variable_get :@__view
-          table_component = view.send args[:table].gsub(' ','_')
-          table_component.getModel.getValueAt(row, column).to_s.should == args[:data]
+        on_edt do
+          begin
+            view = @controller_context.instance_variable_get :@__view
+            warn "view is nil for user sees!!!!!!!!!!!!!!!!!!!" if view.nil?
+            if !(args[:in].nil? || args[:value].nil?)
+              view.instance_eval(args[:in]).should == args[:value]
+            elsif !args[:window].nil?
+              window_name = args[:window]
+              window = get_window window_name
+              window.should be_visible #unless args[:visibility_override]
+            elsif !args[:panel].nil?
+              panel_name = args[:panel]
+              panel = get_window panel_name
+              panel.should be_visible
+            elsif !args[:table].nil?
+              row = args[:row].to_i
+              column = args[:column].to_i
+              view = @controller_context.instance_variable_get :@__view
+              table_component = view.send args[:table].gsub(' ','_')
+              table_component.getModel.getValueAt(row, column).to_s.should == args[:data]
+            end
+          rescue => e
+            puts e
+            puts e.backtrace
+            raise
+          end
         end
-        sleep 1
+        #sleep 1
       end
 
       def closes(arg)
@@ -59,7 +74,7 @@ module Monkeybars
         else
           get_controller(arg[:window]).close
         end
-        sleep 1
+        #sleep 1
       end
 
       def exits
@@ -112,7 +127,7 @@ module Monkeybars
 
         component.transfer_focus
         #push_robot_key text
-        sleep 1
+        #sleep 1
       end
 
     private

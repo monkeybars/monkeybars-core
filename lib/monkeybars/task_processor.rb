@@ -16,12 +16,11 @@ module Monkeybars
     end
     
     def on_edt(&task)
-      if javax.swing.SwingUtilities.isEventDispatchThread
+      if javax.swing.SwingUtilities.event_dispatch_thread?
         javax.swing.SwingUtilities.invoke_later Runnable.new(task)
       else
         javax.swing.SwingUtilities.invoke_and_wait Runnable.new(task)
       end
-      
     end
     
     class Runner < Job
@@ -37,11 +36,11 @@ module Monkeybars
     class Runnable
       include Java::java::lang::Runnable
       def initialize(explicit_block=nil, &block)
-	@block = explicit_block || block
+        @block = explicit_block || block
       end
       
       def run
-	@block.call
+      	@block.call
       end
     end
   end

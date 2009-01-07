@@ -456,7 +456,8 @@ module Monkeybars
         field_name = field_name.to_sym
         if @is_java_class
           field_object = get_field(field_name)
-          Java.java_to_ruby(field_object.value(Java.ruby_to_java(@main_view_component)))
+          #Java.java_to_ruby(field_object.value(Java.ruby_to_java(@main_view_component)))
+          field_object.value(@main_view_component.java_object)
         else
           get_field(field_name).call
         end

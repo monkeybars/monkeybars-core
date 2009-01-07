@@ -10,8 +10,8 @@ require 'application_user'
     main_window_class.instance.open
   end
 
-  When "the user clicks the '$button_name' button" do |button_name|
-    @user.clicks "#{button_name.downcase.gsub(' ', '_')}_button"
+  When "the user clicks the '$button_name' $object" do |button_name, object|
+    @user.clicks "#{button_name.downcase.gsub(' ', '_')}_#{object.gsub(' ', '_')}"
   end
 
   When "the user types the $subject '$text' in the $component" do |subject, text, component|
@@ -47,6 +47,10 @@ require 'application_user'
 
   Then "the user sees the '$window_name' window" do |window_name|
     @user.sees :window => window_name.gsub(' ', '')
+  end
+
+  Then "the user cannot see the '$window_name' window" do |window_name|
+    @user.cannot_see :window => window_name.gsub(' ', '')
   end
 
   # Cucumber complained that this step matched another step; cucumber

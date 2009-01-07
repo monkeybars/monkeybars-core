@@ -1,5 +1,5 @@
 module Monkeybars
-  VERSION = "0.6.5"
+  VERSION = "1.0.0"
   
   def self.version
     VERSION

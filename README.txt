@@ -1,4 +1,4 @@
-Monkeybars 0.6.5
+Monkeybars 1.0.0
 http://www.monkeybars.org
 
 == DESCRIPTION:

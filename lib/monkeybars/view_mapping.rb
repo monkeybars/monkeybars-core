@@ -289,7 +289,7 @@ module Monkeybars
     rescue NameError => e
       raise InvalidMappingError, "Either model.#{@model_property} or view.#{@from_view_method}(#{@view_property}) is not valid.\nOriginal error: #{e}\n#{e.message}"
     rescue SyntaxError, Exception => e
-      raise InvalidMappingError, "Error while trying to map for #{view.class}: #{to_s}\n#{e.class} - #{e}"
+      raise InvalidMappingError, "Error while trying to map for #{view.class}: #{to_s}\n#{e.class} - #{e}", e.backtrace
     end
     
     def transfer_from_view(view, transfer)
