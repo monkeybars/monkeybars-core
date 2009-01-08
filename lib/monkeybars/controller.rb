@@ -129,6 +129,42 @@ module Monkeybars
     # class being instantiated.  It is not a requirement that you have a model,
     # Monkeybars will operate without one as long as you do not attempt to use
     # methods that interact with the model.
+    #
+    # The set_model method may be used in 3 different ways.
+    #
+    # The first and most common use is to pass the name of the model class as
+    # a string. Internally the controller instantiates this class and makes it
+    # available to the controller via a private method #model. Note that this
+    # form of set_model does not allow passing any parameters to the model
+    # class; the model must implement a zero-argument constructor.
+    #  class FooController < ApplicationController
+    #    set_model 'FooModel'
+    #    set_view 'FooView'
+    #    set_close_action :exit
+    #  end
+    #
+    # The second format passes a block to set_model. The block is executed via
+    # #instance_eval with the result assigned as the model. The model constructor
+    # may take parameters.
+    #  class FooController < ApplicationController
+    #    set_model { FooModel.new("arg1", "arg2", "arg3") }
+    #    set_view 'FooView'
+    #    set_close_action :exit
+    #  end
+    # 
+    # The third format takes both a string with the model class name _and_ a block
+    # for the purpose of setting initial values. No parameters may be passed
+    # to the constructor in this format; it does allow immediate use of any
+    # declared accessors.
+    #  class FooModel
+    #    attr_accessor :some_value
+    #  end
+    #  class FooController < Monkeybars::Controller
+    #    set_model "FooModel" do 
+    #      model.some_value = 5
+    #    end
+    #  end
+    #
     def self.set_model(model=nil, &block)
       self.model_class = [model,block]
     end
