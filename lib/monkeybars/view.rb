@@ -278,7 +278,12 @@ module Monkeybars
     # Method nesting calls the methods in :using (in the same way that :using works for mapping) during
     # add and remove (Monkeybars::Controller#add_nested_controller and Monkeybars::Controller#remove_nested_controller).
     # Both methods are passed in the view, the view's main view component, the mode, and the transfer, respectively.
-    # 
+    #
+    # New users using Netbeans will need to know that the GroupLayout (aka FreeDesign) is a picky layout that demands
+    # constraints while adding components. By default, all containers use GroupLayout in Netbeans's GUI builder. If you're
+    # not sure what all this means, just start off with a BoxLayout (which is not picky). If your layout needs constraints,
+    # you will need to pass them in with your Method Nesting. Some layouts even need @main_view_component#revalidate to be
+    # called. In short, be aware of Swing's quirks.
     def self.nest(properties)
       view_nestings[properties[:sub_view]] ||= []
       view_nestings[properties[:sub_view]] << Nesting.new(properties)
