@@ -16,7 +16,8 @@ PROJ.summary =
 PROJ.rubyforge.name = 'monkeybars'
 PROJ.spec.opts << '--color'
 PROJ.ruby_opts = []
-PROJ.libs << File.expand_path(File.dirname(__FILE__) + "/lib")
+PROJ.libs << "lib"
+PROJ.rdoc.remote_dir = "api"
 
 require 'fileutils'
 require 'spec/rake/spectask'

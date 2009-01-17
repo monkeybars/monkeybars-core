@@ -42,7 +42,7 @@ namespace :doc do
     config = YAML.load(
         File.read(File.expand_path('~/.rubyforge/user-config.yml'))
     )
-
+    
     host = "#{config['username']}@rubyforge.org"
     remote_dir = "/var/www/gforge-projects/#{PROJ.rubyforge.name}/"
     remote_dir << PROJ.rdoc.remote_dir if PROJ.rdoc.remote_dir

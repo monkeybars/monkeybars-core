@@ -12,7 +12,6 @@ namespace :gem do
     s.email = PROJ.email
     s.homepage = Array(PROJ.url).first
     s.rubyforge_project = PROJ.rubyforge.name
-
     s.description = PROJ.description
 
     PROJ.gem.dependencies.each do |dep|
