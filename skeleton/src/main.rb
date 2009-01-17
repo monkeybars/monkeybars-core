@@ -17,7 +17,7 @@ end
 
 # End of platform specific code
 #===============================================================================
-
+$LOAD_PATH << File.expand_path(File.dirname(__FILE__))
 require 'manifest'
 
 # Set up global error handling so that it is consistantly logged or outputed
