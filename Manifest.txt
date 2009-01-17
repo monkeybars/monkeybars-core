@@ -22,7 +22,7 @@ lib/monkeybars/view_nesting.rb
 lib/monkeybars/view_positioning.rb
 lib/monkeybars_version.rb
 skeleton/Rakefile
-skeleton/lib/java/monkeybars-1.0.0.jar
+skeleton/lib/java/monkeybars-1.0.1.jar
 skeleton/lib/ruby/README.txt
 skeleton/src/application_controller.rb
 skeleton/src/application_view.rb
