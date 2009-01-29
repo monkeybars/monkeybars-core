@@ -12,7 +12,7 @@
 #
 
 
-desc 'Upload files to rubyforge server'
+desc 'Upload files to rubyforge server. Must have ENV['RUBYFORGE_NAME'] set.'
 task 'upload' do
   Dir.chdir('output') do
     cmd = "scp -r * #{ENV['RUBYFORGE_NAME']}@rubyforge.org:/var/www/gforge-projects/monkeybars"
