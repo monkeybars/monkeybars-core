@@ -8,11 +8,19 @@ filter:
 <div id="sidebar">
 
 		<h2>Latest News</h2>
+	
+	<p class="news">
+	    1-27-08 - A "Kenai project":http://kenai.com/projects/monkeybars has been started for Monkeybars .  The "wiki":http://kenai.com/projects/monkeybars/pages/Home is rapidly building up.
+		</p>
+		
+		<p class="news">
+			1-17-08 - "Monkeybars 1.0.1":http://rubyforge.org/frs/?group_id=4073&release_id=30517 has been released. 
+		</p>
 		
 		<p class="news">
 			5-8-08 - New <a href="tutorials.html">tutorials</a> page is up on the <a href="docs.html">docs</a> page.  This new documentation is a mix of text and screencasts.
 		</p>
-		
+	
 		<p class="news">
 			4-28-08 - Transition to Git and new source/issue tracking in in place.  Visit the issue tracking page at Google code <a href="http://code.google.com/p/monkeybars-lib/">here</a> and visit our new repo home <a href="http://gitorious.org/projects/monkeybars">here</a>.
 		</p>
