@@ -442,7 +442,7 @@ module Monkeybars
     # 
     #   def ok_button_action_performed
     #     if view_state.transfer[:foo] == :bar
-    #       model.baz = view_state.model.baz
+    #       model.baz = view_model.baz
     #     end
     #   end
     # 
@@ -453,16 +453,12 @@ module Monkeybars
     # yourself by calling clear_view_state.
     def view_state # :doc:
       return @__view_state unless @__view_state.nil?
-      unless self.class.model_class.first.nil?
-        model = create_new_model
-        transfer = {}
-        @__view.write_state(model, transfer)
-        @__view_state = ViewState.new(model, transfer)
-      else
-        nil
-      end
+      model = self.class.model_class.nil? ? nil : create_new_model
+      transfer = {}
+      @__view.write_state(model, transfer)
+      @__view_state = ViewState.new(model, transfer)
     end
-    
+
     # Equivalent to view_state.model
     def view_model # :doc:
       view_state.model

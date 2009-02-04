@@ -51,6 +51,19 @@ describe Monkeybars::Controller do
     end
     ExternalBlockEvalController.instance.send(:model).some_value.should == 5
   end
+
+  it "gives back a non nil view state if set_model was only given a block" do
+    class TestBlockInitializeModel
+      def initialize(string)
+        @some_string = string
+      end
+    end
+    class ExternalModelViewStateController < Monkeybars::Controller
+      set_model {TestBlockInitializeModel.new("hello")}
+      set_view 'RealFormTestView'
+    end
+    ExternalModelViewStateController.instance.send(:view_state).should_not be_nil
+  end
   
   it "allows the model and view to be overriden externally" do
     class ExternalOverrideTestView; end
