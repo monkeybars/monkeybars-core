@@ -10,10 +10,13 @@ filter:
 <div id="content">
 
 		<h2>Docs</h2>
+    <p>Aside from the <a href="api/index.html">API rdoc files</a>, there is a "wiki":http://kenai.com/projects/monkeybars/pages/Home that is part of the Monkeybars Kenai project.</p>
 		
 		<p>
 				<ul>
 					<li><a href="tutorials.html">Tutorials</a></li>
+           <li> "IBM developerWorks article on intro Monkeybars.":http://www.ibm.com/developerworks/library/j-monkeybars/index.html (Based on Monkeybars v 0.6.4, but essentially accurate) </li>
+            <li>See also the "Resources":http://kenai.com/projects/monkeybars/pages/Resources page on the wiki </li>
 					<li><a href="api/index.html">RDoc</a></li>
 					<li>	
 						<table border=0 style="background-color: #fff; padding: 5px;" cellspacing=0>
