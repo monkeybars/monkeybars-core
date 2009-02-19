@@ -483,7 +483,7 @@ module Monkeybars
       field = @__field_references[field_name]
 
       if field.nil?
-        if @is_java_class
+        if @is_pure_java_class 
           [field_name.to_s, field_name.camelize, field_name.camelize(false), field_name.underscore].uniq.each do |name|
             begin
               field = self.class.instance_java_class.java_class.declared_field(name)
