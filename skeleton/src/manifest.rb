@@ -2,8 +2,19 @@ $LOAD_PATH.clear #ensure load path is cleared so system gems and libraries are n
 # Load current and subdirectories in src onto the load path
 $LOAD_PATH << File.dirname(__FILE__)
 Dir.glob(File.expand_path(File.dirname(__FILE__) + "/**/*")).each do |directory|
-  $LOAD_PATH << directory unless directory =~ /\.\w+$/ #File.directory? is broken in current JRuby for dirs inside jars
+  # File.directory? is broken in current JRuby for dirs inside jars
+  # http://jira.codehaus.org/browse/JRUBY-2289
+  $LOAD_PATH << directory unless directory =~ /\.\w+$/
 end
+# Some JRuby $LOAD_PATH path bugs to check if you're having trouble:
+# http://jira.codehaus.org/browse/JRUBY-2518 - Dir.glob and Dir[] doesn't work
+#                                              for starting in a dir in a jar
+#                                              (such as Active-Record migrations)
+# http://jira.codehaus.org/browse/JRUBY-3247 - Compiled Ruby classes produce
+#                                              word substitutes for characters
+#                                              like - and . (to minus and dot).
+#                                              This is problematic with gems
+#                                              like ActiveSupport and Prawn
 
 #===============================================================================
 # Monkeybars requires, this pulls in the requisite libraries needed for
