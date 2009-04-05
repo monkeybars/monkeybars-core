@@ -12,7 +12,7 @@ require 'resolver'
 
 case Monkeybars::Resolver.run_location
 when Monkeybars::Resolver::IN_FILE_SYSTEM
-  add_to_classpath '../lib/java/monkeybars-1.0.1.jar'
+  add_to_classpath '../lib/java/monkeybars-1.0.2.jar'
 end
 
 require 'monkeybars'
