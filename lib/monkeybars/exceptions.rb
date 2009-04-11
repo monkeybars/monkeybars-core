@@ -1,5 +1,5 @@
 module Monkeybars
-  class UndefinedControlError < RuntimeError; end
+  class UndefinedComponentError < RuntimeError; end
   class InvalidSignalHandlerError < RuntimeError; end
   class UndefinedSignalError < RuntimeError; end
   class InvalidCloseAction < RuntimeError; end

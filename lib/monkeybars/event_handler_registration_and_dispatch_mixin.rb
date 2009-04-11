@@ -211,7 +211,7 @@ module Monkeybars
           component = @__event_handler_view_target.instance_eval(component_to_alias)
         end
       rescue NameError => e
-      rescue Monkeybars::UndefinedControlError => e
+      rescue Monkeybars::UndefinedComponentError => e
         # swallow, handler style methods for controls that don't exist is allowed
       else
         component.methods.each do |method|

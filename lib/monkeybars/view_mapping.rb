@@ -150,7 +150,7 @@ module Monkeybars
         raise InvalidMappingError, "Either model.#{@model_property} or self.#{@view_property} in #{view.class} is not valid."
       rescue TypeError => e
         raise InvalidMappingError, "Invalid types when assigning from model.#{@model_property} to self.#{@view_property}, #{e.message} in #{view.class}"
-      rescue Monkeybars::UndefinedControlError
+      rescue Monkeybars::UndefinedComponentError
         raise InvalidMappingError, "The view property #{@view_property} was not found on view #{view.class}"
       rescue SyntaxError, Exception => e
         raise InvalidMappingError, "Error while trying to map for #{view.class}: #{to_s}\n#{e.class} - #{e}"

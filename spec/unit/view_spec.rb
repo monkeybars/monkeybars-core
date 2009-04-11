@@ -15,11 +15,31 @@ describe Monkeybars::View, ".nest" do
 end
 
 describe Monkeybars::View, ".define_signal" do
-  class DefineSignalTest < Monkeybars::View
-    define_signal :name => :signal_name, :handler => :handler_name
+  begin
+    class DefineSignalTest < Monkeybars::View
+      define_signal :name => :signal_name, :handler => :handler_name
+    end
+  rescue => e
+    puts "unexpected error in DefineSignalTest"
+    puts e
+    puts e.backtrace
   end
-  
-  DefineSignalTest.send(:signal_mappings)[:signal_name].should == :handler_name
+
+  it "produces a handler name from a signal name (REWRITE: Implementation)" do
+    DefineSignalTest.send(:signal_mappings)[:signal_name].should == :handler_name
+  end
+
+  it "does not raise an error when only :name and :handler are given options" do
+    lambda {DefineSignalTest.define_signal :name => :test_name, :handler => :test_handler}.should_not raise_error(InvalidSignalError)
+  end
+
+  it "raises an error when anything other than both :name and :handler are given options" do
+    lambda {DefineSignalTest.define_signal :name => :test_name, :handler => :test_handler, :other => :other_test}.should raise_error(InvalidSignalError)
+    lambda {DefineSignalTest.define_signal :name => :test_name}.should raise_error(InvalidSignalError)
+    lambda {DefineSignalTest.define_signal :name => :test_handler}.should raise_error(InvalidSignalError)
+    lambda {DefineSignalTest.define_signal :handler => :test_handler}.should raise_error(InvalidSignalError)
+    lambda {DefineSignalTest.define_signal Hash.new}.should raise_error(InvalidSignalError)
+  end
 end
 
 describe Monkeybars::View, "#get_field_value" do

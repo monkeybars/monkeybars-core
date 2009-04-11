@@ -236,6 +236,13 @@ module Monkeybars
     #
     def self.define_signal(options, method_name = nil)
       if options.kind_of? Hash
+        begin
+          options.validate_only :name, :handler
+          options.validate_all  :name, :handler
+          #raise InvalidHashKeyError if options.keys.size > 2 # There is no validate for
+        rescue InvalidHashKeyError
+          raise InvalidSignalError, ":signal and :handler must be provided for define_signal. Options provided: #{options.inspect}"
+        end
         signal_mappings[options[:name]] = options[:handler]
       else
         #support two styles for now, deprecating the old (signal, method_name) style      
@@ -381,7 +388,7 @@ module Monkeybars
         begin
           object = instance_eval(component, __FILE__, __LINE__)
         rescue NameError
-          raise UndefinedControlError, "Cannot add #{handler.type} handler to #{component} on #{self}, the component could not be found"
+          raise UndefinedComponentError, "Cannot add #{handler.type} handler to #{component} on #{self}, the component could not be found"
         end
 
         begin        
@@ -491,14 +498,14 @@ module Monkeybars
             end
             break unless field.nil?
           end
-          raise UndefinedControlError, "There is no component named #{field_name} on view #{@main_view_component.class}" if field.nil?
+          raise UndefinedComponentError, "There is no component named #{field_name} on view #{@main_view_component.class}" if field.nil?
 
           field.accessible = true
         else
           begin
             field = @main_view_component.method(field_name)
           rescue NameError, NoMethodError
-            raise UndefinedControlError, "There is no component named #{field_name} on view #{@main_view_component.class}"
+            raise UndefinedComponentError, "There is no component named #{field_name} on view #{@main_view_component.class}"
           end
         end
         @__field_references[field_name] = field
@@ -553,6 +560,8 @@ module Monkeybars
   end
 
 end
+
+class InvalidSignalError < Exception; end
 
 
 module HandlerContainer
