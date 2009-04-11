@@ -70,32 +70,32 @@ module Monkeybars
       HIDE = javax::swing::WindowConstants::HIDE_ON_CLOSE
       METHOD = :method
     end
-    
+
     private
     @@view_nestings_for_child_view ||= {}
     def self.view_nestings
       @@view_nestings_for_child_view[self] ||= {}
     end
-    
+
     @@view_mappings_for_child_view ||= {}   
     def self.view_mappings
       @@view_mappings_for_child_view[self] ||= []
     end
-    
+
     @@java_class_for_child_view ||= {}
     def self.instance_java_class
       @@java_class_for_child_view[self]
     end
-    
+
     def self.instance_java_class=(java_class)
       @@java_class_for_child_view[self] = java_class
     end
-    
+
     @@signal_mappings ||= {}
     def self.signal_mappings
       @@signal_mappings[self] ||= {}
     end
-    
+
     public
     # Declares what class to instantiate when creating the view.  Any listeners
     # set on the component are added to this class as well as the setting of the
@@ -115,7 +115,7 @@ module Monkeybars
         raise "Setting the view class requires either a string naming the class to load, or an actual class constant. set_java_class was given #{java_class.inspect}."
       end
     end
-    
+
     # Declares a mapping between the properties of the view and either the model's 
     # or the transfer's properties.  This mapping is used when creating the model.
     # If you wish to trigger subsequent updates of the view, you may call 
@@ -218,12 +218,12 @@ module Monkeybars
       mapping = Mapping.new(properties)
       view_mappings << mapping
     end
-    
+
     # See View.map
     def self.raw_mapping(to_view_method, from_view_method, handlers_to_ignore = [])
       view_mappings << Mapping.new(:using => [to_view_method, from_view_method], :ignoring => handlers_to_ignore)
     end
-    
+
     # Declares a mapping between a signal and a method to process the signal.  When 
     # the signal is received, the method is called with the model and the transfer as parameters.
     # If a signal is sent that is not defined, an UnknownSignalError exception is raised.
@@ -242,9 +242,9 @@ module Monkeybars
         warn "The usage of define_signal(signal, method_name) has been deprecated, please use define_signal :name => :signal, :handler => :method_name"
         signal_mappings[options] = method_name
       end
-      
+
     end
-    
+
     # Declares how nested views from their respective nested controllers are to be
     # added and removed from the view. Multiple nestings for the different nested
     # controllers are possible through the :sub_view value, which is basically a grouping
@@ -288,15 +288,18 @@ module Monkeybars
       view_nestings[properties[:sub_view]] ||= []
       view_nestings[properties[:sub_view]] << Nesting.new(properties)
     end
-    
+
     def initialize
       @__field_references = {}
-      
+
       @is_java_class = !self.class.instance_java_class.nil? && self.class.instance_java_class.ancestors.member?(java.lang.Object)
-      if @is_java_class
-        @main_view_component = create_main_view_component
-      end
-      
+      # There may be a better way to track this, but we have at least three possibilities:
+      #  - The UI form is a Java class all the way; that it, it came from Java code compiled into a .class file.
+      #  - The UI form was written in Ruby, but inherits from a Java class (e.g. JFrame). It is quite servicable
+      #    for the UI, but will behave differently in regards to Java reflection
+      #  - The UI form is not Java at all. 
+      @is_pure_java_class = @is_java_class && self.class.instance_java_class.respond_to?('main__method')
+      @main_view_component = create_main_view_component if @is_java_class
       setup_implicit_and_explicit_event_handlers
       load
     end
@@ -325,7 +328,7 @@ module Monkeybars
         end
       end
     end
-    
+
     # This method is called when Controller#load has completed (usually during Controller#open)
     # but before the view is shown.  This method is meant to be overriden in views that
     # need control over how their mappings are initially run.  By overriding this method
@@ -337,19 +340,19 @@ module Monkeybars
     def on_first_update(model, transfer)
       update(model, transfer)
     end
-    
+
     def visible?
       return @main_view_component.visible
     end
-    
+
     def visible=(visibility)
       @main_view_component.visible = visibility
     end
-    
+
     def show
       @main_view_component.visible = true
     end
-    
+
     def hide
       @main_view_component.visible = false
     end
@@ -380,7 +383,7 @@ module Monkeybars
         rescue NameError
           raise UndefinedControlError, "Cannot add #{handler.type} handler to #{component} on #{self}, the component could not be found"
         end
-        
+
         begin        
           object.send("add#{handler.type.camelize}Listener", handler)
         rescue NameError
@@ -388,7 +391,7 @@ module Monkeybars
         end
       end
     end
-    
+
     # Attempts to find a member variable in the underlying @main_view_component
     # object if one is set, otherwise falls back to default method_missing implementation.
     #
@@ -406,30 +409,30 @@ module Monkeybars
         end
       end
     end
-    
+
     def add_nested_view(nested_name, nested_view, nested_component, model, transfer) #:nodoc:
       self.class.view_nestings[nested_name].select{|nesting| nesting.nests_with_add?}.each {|nesting| nesting.add(self, nested_view, nested_component, model, transfer)}
     end
 
     def remove_nested_view(nested_name, nested_view, nested_component, model, transfer) #:nodoc:
       self.class.view_nestings[nested_name].select{|nesting| 
-         nesting.nests_with_remove?
+        nesting.nests_with_remove?
       }.each {|nesting| 
-            nesting.remove(self, nested_view, nested_component, model, transfer) 
-         }
+        nesting.remove(self, nested_view, nested_component, model, transfer) 
+      }
     end
-    
+
     def update(model, transfer)
       self.class.view_mappings.select{|mapping| mapping.maps_to_view?}.each {|mapping| mapping.to_view(self, model, transfer)}
       transfer.clear
     end
-    
+
     # The inverse of update.  Called when view_state is called in the controller.
     def write_state(model, transfer)
       transfer.clear
       self.class.view_mappings.select{|mapping| mapping.maps_from_view?}.each {|mapping| mapping.from_view(self, model, transfer)}
     end
-    
+
     def process_signal(signal, model, transfer, &block)
       handler = self.class.signal_mappings[signal]
       if handler.nil?
@@ -439,17 +442,17 @@ module Monkeybars
         self.send(handler, model, transfer, &block) unless handler.nil?
       end
     end
-    
+
     # Stub to be overriden in sub-class.  This is where you put the code you would
     # normally put in initialize.  Load will be called whenever a new class is instantiated
     # which happens when the Controller's instance method is called on a non-instantiated
     # controller.  Thus this method will always be called before the Controller's
     # load method (which is called during Controlller#open).
     def load; end
-    
+
     # Stub to be overriden in sub-class.  This is called whenever the view is closed.
     def unload; end
-    
+
     # Uses get_field to retrieve the value of a particular field, this is typically
     # a component on a Java form. Used internally by method missing to enable:
     #
@@ -459,10 +462,9 @@ module Monkeybars
         @main_view_component
       else
         field_name = field_name.to_sym
-        if @is_java_class
+        if compiled_java_swing_class?(field_name)
           field_object = get_field(field_name)
-          #Java.java_to_ruby(field_object.value(Java.ruby_to_java(@main_view_component)))
-          field_object.value(@main_view_component.java_object)
+          Java.java_to_ruby(field_object.value(Java.ruby_to_java(@main_view_component)))
         else
           get_field(field_name).call
         end
@@ -479,9 +481,9 @@ module Monkeybars
     def get_field(field_name)
       field_name = field_name.to_sym
       field = @__field_references[field_name]
-      
+
       if field.nil?
-        if @is_java_class
+        if @is_pure_java_class 
           [field_name.to_s, field_name.camelize, field_name.camelize(false), field_name.underscore].uniq.each do |name|
             begin
               field = self.class.instance_java_class.java_class.declared_field(name)
@@ -490,11 +492,11 @@ module Monkeybars
             break unless field.nil?
           end
           raise UndefinedControlError, "There is no component named #{field_name} on view #{@main_view_component.class}" if field.nil?
-          
+
           field.accessible = true
         else
           begin
-          field = @main_view_component.method(field_name)
+            field = @main_view_component.method(field_name)
           rescue NameError, NoMethodError
             raise UndefinedControlError, "There is no component named #{field_name} on view #{@main_view_component.class}"
           end
@@ -503,11 +505,11 @@ module Monkeybars
       end
       field
     end
-    
+
     def dispose
       @main_view_component.dispose if @main_view_component.respond_to? :dispose
     end
-    
+
     def get_field_names
       fields = []
       if @is_java_class
@@ -521,8 +523,8 @@ module Monkeybars
         @main_view_component.send(:instance_variables).map! {|name| name.sub('@', '')}
       end
     end
-    
-  private
+
+    private
     # Creates and returns the main view component to be assigned to @main_view_component.
     # Override this when a non-default constructor is needed.
     def create_main_view_component
@@ -538,9 +540,18 @@ module Monkeybars
       end
       list
     end
-    
+
+    # See if we have a Swing class that was created using inline Ruby code, instead of compiled Java code
+    def inline_ruby_swing_class?(field_name)
+      @is_java_class && !@is_pure_java_class 
+    end
+
+    def compiled_java_swing_class?(field_name)
+      @is_pure_java_class 
+    end
+
   end
-  
+
 end
 
 
@@ -557,12 +568,12 @@ module HandlerContainer
     listeners = {}
     types.each do |type|  
       listener_class = if Monkeybars::Handlers::AWT_TYPES.member?(type)
-        instance_eval("java.awt.event.#{type}Listener", __FILE__, __LINE__)
-      elsif Monkeybars::Handlers::SWING_TYPES.member?(type)
-        instance_eval("javax.swing.event.#{type}Listener", __FILE__, __LINE__)
-      elsif Monkeybars::Handlers::BEAN_TYPES.member?(type)
-        instance_eval("java.beans.#{type}Listener", __FILE__, __LINE__)
-      end
+                         instance_eval("java.awt.event.#{type}Listener", __FILE__, __LINE__)
+                       elsif Monkeybars::Handlers::SWING_TYPES.member?(type)
+                         instance_eval("javax.swing.event.#{type}Listener", __FILE__, __LINE__)
+                       elsif Monkeybars::Handlers::BEAN_TYPES.member?(type)
+                         instance_eval("java.beans.#{type}Listener", __FILE__, __LINE__)
+                       end
       listeners[type] = self.get_listeners(listener_class.java_class)
       listeners[type].each do |listener|
         self.send("remove#{type}Listener", listener)
@@ -588,5 +599,3 @@ Component = java.awt.Component
 class Component
   include HandlerContainer
 end
-
-

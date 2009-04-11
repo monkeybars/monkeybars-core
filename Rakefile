@@ -8,8 +8,8 @@ ensure_in_path 'lib'
 require 'monkeybars_version'
 
 PROJ.name = 'monkeybars'
-PROJ.authors = 'David Koontz, Logan Barnett, Mario Aquino'
-PROJ.email = 'david@koontzfamily.org'
+PROJ.authors = 'David Koontz, Logan Barnett, Mario Aquino, James Britt'
+PROJ.email = 'logustus@gmail.com'
 PROJ.url = 'http://monkeybars.org'
 PROJ.version = Monkeybars::VERSION
 PROJ.summary = 
