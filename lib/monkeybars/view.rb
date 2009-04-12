@@ -298,14 +298,15 @@ module Monkeybars
     def initialize
       @__field_references = {}
 
-      @is_java_class = !self.class.instance_java_class.nil? && self.class.instance_java_class.ancestors.member?(java.lang.Object)
+      #@is_java_class = !self.class.instance_java_class.nil? && self.class.instance_java_class.ancestors.member?(java.lang.Object)
       # There may be a better way to track this, but we have at least three possibilities:
       #  - The UI form is a Java class all the way; that it, it came from Java code compiled into a .class file.
       #  - The UI form was written in Ruby, but inherits from a Java class (e.g. JFrame). It is quite servicable
       #    for the UI, but will behave differently in regards to Java reflection
       #  - The UI form is not Java at all. 
-      @is_pure_java_class = @is_java_class && self.class.instance_java_class.respond_to?('main__method')
-      @main_view_component = create_main_view_component if @is_java_class
+#      @is_pure_java_class = @is_java_class && self.class.instance_java_class.respond_to?('main__method')
+      @main_view_component = create_main_view_component #if @is_java_class
+      @is_java_class = !@main_view_component.class.respond_to?(:java_proxy_class)
       setup_implicit_and_explicit_event_handlers
       load
     end
@@ -406,7 +407,12 @@ module Monkeybars
     # value.  The passed in argument MUST BE A JAVA OBJECT or this call will fail.
     def method_missing(method, *args, &block)
       if match = /(.*)=$/.match(method.to_s)
-        get_field(match[1]).set_value(Java.ruby_to_java(@main_view_component), Java.ruby_to_java(args[0]))
+        if @is_java_class
+          field = get_field(match[1])
+          field.set_value(Java.ruby_to_java(@main_view_component), Java.ruby_to_java(args[0]))
+        else
+          set_jruby_field(match[1], args[0])
+        end
       else
         begin
           return get_field_value(method)
@@ -414,6 +420,10 @@ module Monkeybars
           super
         end
       end
+    end
+
+    def set_jruby_field(getter, value)
+      @main_view_component.send("#{getter}=", value)
     end
 
     def add_nested_view(nested_name, nested_view, nested_component, model, transfer) #:nodoc:
@@ -536,6 +546,7 @@ module Monkeybars
     def create_main_view_component
       self.class.instance_java_class.new
     end
+    
     # Retrieves all the components on the main view. This will work even if
     # @main_view_component is not a Java object as long as it implements
     # a components method.

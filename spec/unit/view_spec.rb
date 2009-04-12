@@ -7,6 +7,29 @@ class TestingView < Monkeybars::View
   set_java_class 'org.monkeybars.TestView'
 end
 
+class JRubyTestFrame < Java::javax::swing::JFrame
+  attr_accessor :test_button
+  def initialize
+    super
+    @test_button = Java::javax::swing::JButton.new("test button")
+  end
+end
+
+class JRubyTestView < Monkeybars::View
+
+  def create_main_view_component
+    JRubyTestFrame.new
+  end
+
+  def clicked?
+    @clicked
+  end
+
+  def test_button_action_performed
+    @clicked = true
+  end
+end
+
 describe Monkeybars::View, ".nest" do
   it 'creates a Nesting object for this subclass' do
     TestingView.nest :sub_view => :foo , :view => :bar
@@ -71,36 +94,62 @@ describe Monkeybars::View, "#get_field_value" do
   end
 end
 
+describe "Views with JRuby components" do
+  it "uses the JRuby component for @main_view_component" do
+    @view = JRubyTestView.new
+    @view.instance_variable_get(:@main_view_component).class.should == JRubyTestFrame
+  end
+
+  it "can get references when called with component" do
+    @view = JRubyTestView.new
+    @view.test_button.text.should == "test button"
+  end
+
+  it "allows references to be updated when called with component=" do
+    @view = JRubyTestView.new
+    @view.test_button = Java::javax::swing::JButton.new("Test Button 2")
+    @view.test_button.text.should == "Test Button 2"
+  end
+
+  it "registers event handlers" do
+    @view = JRubyTestView.new
+    @view.test_button.do_click
+    @view.should be_clicked
+  end
+end
+
 describe Monkeybars::View, "#get_field" do
   after(:each) do
     #Make swing threads go away so test can exit
     @view.instance_variable_get("@main_view_component").dispose
   end
-  
-  it "uses cached reference to a field if it is available" do
-    @view = TestingView.new
-    @view.instance_variable_get(:@__field_references)[:test_label] = "test data instead of an actual field"
-    @view.send(:get_field, :test_label).should == "test data instead of an actual field"
-  end
-  
-  it "allows field references to be updated when called with =" do
-    class ReplaceComponentView < Monkeybars::View
-      set_java_class 'org.monkeybars.TestView'
-      
-      def replace_test_button
-        self.test_button = javax.swing.JButton.new("New button text")
-      end
-      
-      def test_button_text
-	      test_button.text
-      end
+
+  describe "for Java components" do
+    it "uses cached reference to a field if it is available" do
+      @view = TestingView.new
+      @view.instance_variable_get(:@__field_references)[:test_label] = "test data instead of an actual field"
+      @view.send(:get_field, :test_label).should == "test data instead of an actual field"
     end
-    
-    @view = ReplaceComponentView.new
-    puts "@main_view_component: #{@view.instance_variable_get("@main_view_component")}"
-    @view.replace_test_button
-    @view.test_button_text.should == "New button text"
-    
+
+    it "allows field references to be updated when called with =" do
+      class ReplaceComponentView < Monkeybars::View
+        set_java_class 'org.monkeybars.TestView'
+
+        def replace_test_button
+          self.test_button = javax.swing.JButton.new("New button text")
+        end
+
+        def test_button_text
+          test_button.text
+        end
+      end
+
+      @view = ReplaceComponentView.new
+      puts "@main_view_component: #{@view.instance_variable_get("@main_view_component")}"
+      @view.replace_test_button
+      @view.test_button_text.should == "New button text"
+
+    end
   end
 end
 
@@ -121,7 +170,10 @@ end
 
 describe Monkeybars::View, "#update" do
   it "only invokes mappings with direction to view or both" do
-    class InvokeMappingToView < Monkeybars::View; end
+    class InvokeMappingToView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+    end
+    
     view = InvokeMappingToView.new
 
     mock_mappings = Array.new(5) { |i| mock("Mapping#{i}", :from_view => nil)}
@@ -144,7 +196,9 @@ end
 
 describe Monkeybars::View, "#write_state" do
   it "only invokes mappings with direction from view or both" do
-    class InvokeMappingFromView < Monkeybars::View; end
+    class InvokeMappingFromView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+    end
     view = InvokeMappingFromView.new
 
     mock_mappings = Array.new(5) { |i| mock("Mapping#{i}", :from_view => nil)}
@@ -167,10 +221,13 @@ end
 
 describe Monkeybars::View, "#process_signal" do
   class BasicSignalHandler < Monkeybars::View
+    set_java_class 'org.monkeybars.TestView'
     define_signal :signal1, :handler
   end  
 
   class ProcessSignalView < Monkeybars::View
+    set_java_class 'org.monkeybars.TestView'
+    
     define_signal :signal1, :handler
 
     def handler(model, transfer)
@@ -178,8 +235,12 @@ describe Monkeybars::View, "#process_signal" do
     end
   end
 
+  class NoSignalView < Monkeybars::View
+    set_java_class 'org.monkeybars.TestView'
+  end
+
   it "invokes a UndefinedSignalError when it recieves a signal that is not declared" do
-    view = Monkeybars::View.new
+    view = NoSignalView.new
     lambda {view.process_signal(:signal_that_is_not_defined, nil, nil)}.should raise_error(Monkeybars::UndefinedSignalError)
   end
   

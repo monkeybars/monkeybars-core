@@ -8,6 +8,8 @@ describe "update method" do
   
   it "parses view and method properties (as symbols) from ModelMapping data" do
     class ModelMappingSymbolsView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+
       map :view => :view_field, :model => :model_field
       attr_accessor :view_field
     end
@@ -30,6 +32,8 @@ describe "update method" do
   
   it "parses view and method properties (as strings) from ModelMapping data" do
     class ModelMappingStringsView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+      
       map :view => "view_field", :model => "model_field"
       attr_accessor :view_field
     end
@@ -52,6 +56,8 @@ describe "update method" do
   
   it "parses nested view and method properties from ModelMapping data" do
     class NestedModelMappingView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+
       attr_accessor :view_field
       Struct.new("View", :sub_field)
       
@@ -86,6 +92,8 @@ describe "update method" do
   
   it "invokes 'from_model' method when specified" do
     class FromModelView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+      
       attr_accessor :view_field
       map :view => :view_field, :model => :model_field, :using => [:view_field_from_model_method, nil]
       
@@ -108,6 +116,8 @@ describe "update method" do
   
   it "invokes raw_mapping 'from_model' method when specified" do
     class RawMappingFromModelView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+
       raw_mapping :to_view_method, nil
       attr_accessor :view_field
       
@@ -137,8 +147,13 @@ describe "update method" do
       attr_accessor :model_property
     end
     
-    class BaseView < Monkeybars::View; end
+    class BaseView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+    end
+    
     class ChildView < BaseView
+      set_java_class 'org.monkeybars.TestView'
+
       attr_accessor :property
       map :view => "property", :model => "model_property"
     end
@@ -157,6 +172,8 @@ describe "update method" do
     end
     
     class DefaultFromModelView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+
       attr_accessor :view_property
       map :view => :view_property, :model => :model_property, :using => [:default, :default]
     end
@@ -175,6 +192,8 @@ describe "write_state method" do
   
   it "parses view and method properties (as symbols) from ModelMapping data" do
     class PropertiesAsSymbolsView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+
       map :view => :view_field, :model => :model_field
       attr_accessor :view_field
     end
@@ -197,6 +216,8 @@ describe "write_state method" do
   
   it "parses view and method properties (as strings) from ModelMapping data" do
     class PropertiesAsStringsView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+
       map :view => "view_field", :model => "model_field"
       attr_accessor :view_field
     end
@@ -219,6 +240,8 @@ describe "write_state method" do
   
   it "parses nested view and method properties from ModelMapping data" do
     class NestedPropertiesView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+
       attr_accessor :view_field
       Struct.new("View2", :sub_field)
       
@@ -252,6 +275,8 @@ describe "write_state method" do
   
   it "invokes 'to_model' method when specified" do
     class ToModelView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+
       map :view => "view_field", :model => "model_field", :using => [nil, :method1]
       attr_accessor :view_field
       
@@ -278,6 +303,8 @@ describe "write_state method" do
   
   it "invokes raw_mapping 'to_model' method when specified" do
     class RawMappingToModelView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+
       raw_mapping nil, :method1
       attr_accessor :view_field
       
@@ -308,6 +335,8 @@ describe "write_state method" do
     end
     
     class DefaultToModelView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+
       attr_accessor :view_property
       map :view => :view_property, :model => :model_property, :using => [:default, :default]
     end

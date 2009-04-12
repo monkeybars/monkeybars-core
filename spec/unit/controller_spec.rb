@@ -267,6 +267,8 @@ describe Monkeybars::Controller, "#signal" do
   
   it "invokes the view's process_signal method, passing along a block if given" do
     class SignalView < Monkeybars::View
+      set_java_class 'org.monkeybars.TestView'
+      
       def process_signal(signal_name, model, transfer, &callback)
 	raise "No block given!" unless block_given?
         raise "Incorrect signal name!" unless :signal1 == signal_name
