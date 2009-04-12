@@ -100,6 +100,7 @@ module Monkeybars
     # Declares what class to instantiate when creating the view.  Any listeners
     # set on the component are added to this class as well as the setting of the
     # close action that is defined in the controller.
+    # Accepts a string that is the Java package, or a class for the Java or JRuby UI object
     def self.set_java_class(java_class)
       # We're allowing two options: The existing "Give me a string", and
       # passing a constant (which is new behavior).
@@ -297,15 +298,12 @@ module Monkeybars
 
     def initialize
       @__field_references = {}
-
-      #@is_java_class = !self.class.instance_java_class.nil? && self.class.instance_java_class.ancestors.member?(java.lang.Object)
-      # There may be a better way to track this, but we have at least three possibilities:
+      # We have at three possibilities:
       #  - The UI form is a Java class all the way; that it, it came from Java code compiled into a .class file.
       #  - The UI form was written in Ruby, but inherits from a Java class (e.g. JFrame). It is quite servicable
-      #    for the UI, but will behave differently in regards to Java reflection
+      #    for the UI, but will behave differently in regards to Java reflection -- We'll refer to this as a JRuby class
       #  - The UI form is not Java at all. 
-#      @is_pure_java_class = @is_java_class && self.class.instance_java_class.respond_to?('main__method')
-      @main_view_component = create_main_view_component #if @is_java_class
+      @main_view_component = create_main_view_component
       raise MissingMainViewComponentError, "Missing @main_view_component. Use View.set_java_class or override create_main_view_component." if @main_view_component.nil?
       @is_java_class = !@main_view_component.class.respond_to?(:java_proxy_class)
       setup_implicit_and_explicit_event_handlers
