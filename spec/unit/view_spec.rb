@@ -16,7 +16,6 @@ class JRubyTestFrame < Java::javax::swing::JFrame
 end
 
 class JRubyTestView < Monkeybars::View
-
   def create_main_view_component
     JRubyTestFrame.new
   end
@@ -29,6 +28,8 @@ class JRubyTestView < Monkeybars::View
     @clicked = true
   end
 end
+
+class MissingMainViewComponentView < Monkeybars::View; end
 
 describe Monkeybars::View, ".nest" do
   it 'creates a Nesting object for this subclass' do
@@ -95,6 +96,11 @@ describe Monkeybars::View, "#get_field_value" do
 end
 
 describe "Views with JRuby components" do
+  after(:each) do
+    #Make swing threads go away so test can exit
+    @view.instance_variable_get("@main_view_component").dispose
+  end
+
   it "uses the JRuby component for @main_view_component" do
     @view = JRubyTestView.new
     @view.instance_variable_get(:@main_view_component).class.should == JRubyTestFrame
@@ -115,6 +121,25 @@ describe "Views with JRuby components" do
     @view = JRubyTestView.new
     @view.test_button.do_click
     @view.should be_clicked
+  end
+end
+
+describe "View creation" do
+  after(:each) do
+    #Make swing threads go away so test can exit
+    @view.instance_variable_get("@main_view_component").dispose if !@view.nil? && !@view.instance_variable_get(:@main_view_component).nil?
+  end
+
+  it "raises an error if @main_view_component is nil" do
+    lambda { @view = MissingMainViewComponentView.new }.should raise_error(MissingMainViewComponentError)
+  end
+
+  it "does not raise an error if @main_view_component is not nil for JRuby view components" do
+    lambda { @view = JRubyTestView.new }.should_not raise_error
+  end
+
+  it "does not raise an error if @main_view_component is not nil for Java view components" do
+    lambda { @view = TestingView.new }.should_not raise_error
   end
 end
 

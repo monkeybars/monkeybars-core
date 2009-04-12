@@ -306,6 +306,7 @@ module Monkeybars
       #  - The UI form is not Java at all. 
 #      @is_pure_java_class = @is_java_class && self.class.instance_java_class.respond_to?('main__method')
       @main_view_component = create_main_view_component #if @is_java_class
+      raise MissingMainViewComponentError, "Missing @main_view_component. Use View.set_java_class or override create_main_view_component." if @main_view_component.nil?
       @is_java_class = !@main_view_component.class.respond_to?(:java_proxy_class)
       setup_implicit_and_explicit_event_handlers
       load
@@ -544,7 +545,7 @@ module Monkeybars
     # Creates and returns the main view component to be assigned to @main_view_component.
     # Override this when a non-default constructor is needed.
     def create_main_view_component
-      self.class.instance_java_class.new
+      self.class.instance_java_class.new if self.class.instance_java_class.respond_to?(:new)
     end
     
     # Retrieves all the components on the main view. This will work even if
@@ -572,7 +573,7 @@ module Monkeybars
 end
 
 class InvalidSignalError < Exception; end
-
+class MissingMainViewComponentError< Exception; end
 
 module HandlerContainer
   # Removes the handlers associated with a component for the duration of the block.
