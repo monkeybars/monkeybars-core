@@ -122,6 +122,16 @@ describe "Views with JRuby components" do
     @view.test_button.do_click
     @view.should be_clicked
   end
+
+  it "can be indicated using View.set_java_class" do
+    lambda do
+      class JRubySetJavaClassView < Monkeybars::View
+        set_java_class JRubyTestFrame
+      end
+    end.should_not raise_error
+
+    lambda {@view = JRubySetJavaClassView.new }.should_not raise_error(MissingMainViewComponentError)
+  end
 end
 
 describe "View creation" do
