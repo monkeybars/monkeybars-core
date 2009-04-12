@@ -239,7 +239,6 @@ module Monkeybars
         begin
           options.validate_only :name, :handler
           options.validate_all  :name, :handler
-          #raise InvalidHashKeyError if options.keys.size > 2 # There is no validate for
         rescue InvalidHashKeyError
           raise InvalidSignalError, ":signal and :handler must be provided for define_signal. Options provided: #{options.inspect}"
         end
@@ -490,7 +489,7 @@ module Monkeybars
       field = @__field_references[field_name]
 
       if field.nil?
-        if @is_pure_java_class 
+        if @is_java_class
           [field_name.to_s, field_name.camelize, field_name.camelize(false), field_name.underscore].uniq.each do |name|
             begin
               field = self.class.instance_java_class.java_class.declared_field(name)
@@ -554,7 +553,7 @@ module Monkeybars
     end
 
     def compiled_java_swing_class?(field_name)
-      @is_pure_java_class 
+      @is_java_class
     end
 
   end
