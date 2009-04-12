@@ -477,7 +477,7 @@ module Monkeybars
         @main_view_component
       else
         field_name = field_name.to_sym
-        if compiled_java_swing_class?(field_name)
+        if @is_java_class
           field_object = get_field(field_name)
           Java.java_to_ruby(field_object.value(Java.ruby_to_java(@main_view_component)))
         else
@@ -556,16 +556,6 @@ module Monkeybars
       end
       list
     end
-
-    # See if we have a Swing class that was created using inline Ruby code, instead of compiled Java code
-    def inline_ruby_swing_class?(field_name)
-      @is_java_class && !@is_pure_java_class 
-    end
-
-    def compiled_java_swing_class?(field_name)
-      @is_java_class
-    end
-
   end
 
 end
