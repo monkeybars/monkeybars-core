@@ -9,8 +9,9 @@ module Monkeybars
     def self.enable_on_debugging_args
       puts "inspecting args"
       puts ARGV
-      until ARGV.empty?
-        arg = ARGV.pop
+      argv = ARGV.dup
+      until argv.empty?
+        arg = argv.pop
         case arg
         when '--debug-server'
           port = ARGV.pop
@@ -19,7 +20,7 @@ module Monkeybars
           rescue
             port = 4848
             # put the arg back
-            ARGV.unshift port
+            argv.unshift port
           end
           start_server port
         when '--record-edt'
