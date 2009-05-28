@@ -267,7 +267,16 @@ module Monkeybars
       action
     end
     
-    public
+  public
+    # True if the controller's view is focused. Focus mostly means this is the window where mouse clicks and keyboard presses are directed.
+    # There are also UI effects for focused components.
+    # For event driven notifications of focus, see the following:
+    # http://java.sun.com/j2se/1.4.2/docs/api/java/awt/event/FocusListener.html
+    # http://java.sun.com/docs/books/tutorial/uiswing/events/focuslistener.html
+    # http://java.sun.com/docs/books/tutorial/uiswing/misc/focus.html
+    def focused?
+      @__view.focused?
+    end
     # Calls the method that was set using Controller.set_update_method.  If no method has been set defined, this call is ignored.
     def update
       if self.class.class_variables.member?("@@update_method_name")
