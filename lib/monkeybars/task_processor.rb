@@ -22,7 +22,9 @@ module Monkeybars
         javax.swing.SwingUtilities.invoke_and_wait Runnable.new(task)
       end
     end
-    
+
+    module_function :on_edt, :repaint_while
+
     class Runner < Job
       def initialize(&proc)
         @proc = proc

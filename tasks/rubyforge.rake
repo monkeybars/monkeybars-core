@@ -18,6 +18,8 @@ namespace :gem do
     end
 
     rf = RubyForge.new
+    rf.configure
+    rf.autoconfig.merge! 'package_ids' => {'monkeybars' => 4922}, 'group_ids' => {'monkeybars' => 4073}
     puts 'Logging in'
     rf.login
 

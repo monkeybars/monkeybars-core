@@ -437,6 +437,16 @@ module Monkeybars
       }
     end
 
+    # True if the controller's view is focused. Focus mostly means this is the window where mouse clicks and keyboard presses are directed.
+    # There are also UI effects for focused components.
+    # For event driven notifications of focus, see the following:
+    # http://java.sun.com/j2se/1.4.2/docs/api/java/awt/event/FocusListener.html
+    # http://java.sun.com/docs/books/tutorial/uiswing/events/focuslistener.html
+    # http://java.sun.com/docs/books/tutorial/uiswing/misc/focus.html
+    def focused?
+      @main_view_component.focus_owner?
+    end
+
     def update(model, transfer)
       self.class.view_mappings.select{|mapping| mapping.maps_to_view?}.each {|mapping| mapping.to_view(self, model, transfer)}
       transfer.clear

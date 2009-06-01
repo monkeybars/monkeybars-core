@@ -10,6 +10,38 @@ describe Monkeybars::Nesting do
 end
 
 describe Monkeybars::MethodNesting do
+  it "works with the add method missing for :using nestings" do
+    nesting = Monkeybars::Nesting.new(:sub_view => "foo", :using => [nil, :remove_foo])
+    view = mock("view")
+
+    view.should_receive :remove_foo
+
+    nesting.remove(view, nil, nil, nil, nil)
+  end
+
+  it "works with the remove method missing for :using nestings" do
+    nesting = Monkeybars::Nesting.new(:sub_view => "foo", :using => [:add_foo, nil])
+    view = mock("view")
+
+    view.should_receive :add_foo
+
+    nesting.add(view, nil, nil, nil, nil)
+  end
+
+  it "raises an error when a :using method is not provided" do
+    nesting = Monkeybars::Nesting.new(:sub_view => "foo", :using => [:add_foo, nil])
+    view = mock("view", :add_foo => nil)
+
+    lambda { nesting.remove(view, nil, nil, nil, nil) }.should raise_error(NameError)
+  end
+
+  it "raises an error when a method declared in :using is not provided" do
+    nesting = Monkeybars::Nesting.new(:sub_view => "foo", :using => [:add_foo, :remove_foo])
+    view = mock("view", :add_foo => nil)
+
+    lambda { nesting.remove(view, nil, nil, nil, nil) }.should raise_error(NameError)
+  end
+
   it 'calls the first/only :using method on add' do
     nesting = Monkeybars::Nesting.new(:sub_view => "foo", :using => [:add_foo, :remove_foo])
     view = mock("view")

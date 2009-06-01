@@ -54,6 +54,10 @@ module Monkeybars
         [nesting_options[:using], nil]
       end
     end
+
+    def to_s
+      ":sub_view => #{@sub_view.inspect}, :using => [#{@add_method.inspect}, #{@remove_method.inspect}]"
+    end
     
     def nests_with_add?
       !@add_method.nil?
@@ -65,11 +69,13 @@ module Monkeybars
     
     def add(view, nested_view, nested_component, model, transfer)
       #instance_eval("view.#{@add_method}(@sub_view, model, transfer)")
+      raise NameError.new "Add method not provided for nesting #{self}" if @add_method.nil? || !view.respond_to?(@add_method)
       view.send(@add_method, nested_view, nested_component, model, transfer)
     end
     
     def remove(view, nested_view, nested_component, model, transfer)
       #instance_eval("view.#{@remove_method}(@sub_view, model, transfer)")
+      raise NameError.new "Remove method not provided for nesting #{self}" if @remove_method.nil? || !view.respond_to?(@remove_method)
       view.send(@remove_method, nested_view, nested_component, model, transfer)
     end
   end
@@ -80,7 +86,7 @@ module Monkeybars
     end
     
     def methods_only?
-      (to_view_method_present? and from_view_method_present?) and not property_present?
+      (to_view_method_present? or from_view_method_present?) and not property_present?
     end
     
     def property_present?
