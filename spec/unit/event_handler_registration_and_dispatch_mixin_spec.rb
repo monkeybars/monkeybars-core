@@ -114,7 +114,7 @@ describe Monkeybars::Controller, "implicit handler registration" do
       
       def add_handler(handler, component)
         handler.type.should == "Action"
-	handler.instance_variable_get("@component_name").should == "test_button"
+        handler.instance_variable_get("@component_name").should == "test_button"
         component.should == "test_button"
         $add_handler_called = true
       end
@@ -130,7 +130,33 @@ describe Monkeybars::Controller, "implicit handler registration" do
     $add_handler_called.should be_true
     t.close
   end
+
+  it "detects a ! at the end of implicit handlers and sets the handler to automatically call update_view" do
+    view_class = Class.new(Monkeybars::View) do
+      set_java_class "org.monkeybars.TestView"
+      attr_accessor :view_was_updated
+
+      raw_mapping :test_mapping, :test_mapping
+
+      def test_mapping(model, transfer)
+        @view_was_updated = true
+      end
+    end
+    view = view_class.new
+
+    controller = Class.new(Monkeybars::Controller) do
+      set_view { view }
+      set_model { Object.new }
+
+      def test_button_action_performed!; end
+    end
+
+    c = controller.instance
+    c.instance_variable_get("@__view").get_field_value("testButton").do_click
+    view.view_was_updated.should be_true
+  end
   
+
   it "does not try to implicitly add methods that exist on the base Controller class"
   it "does not add an implicit handler if an explict handler of that type was already added for that component"
   it "detects the type of the listener to use for the component when using an implicit handler"

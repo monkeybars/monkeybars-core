@@ -197,11 +197,14 @@ module Monkeybars
       component_match = nil
       
       Monkeybars::Handlers::ALL_EVENT_NAMES.each do |event|
-        component_match = Regexp.new("(.*)_(#{event})").match(method.to_s)
+        component_match = Regexp.new("(.*)_(#{event})(!?)").match(method.to_s)
         break unless component_match.nil?
       end
-      
+
       return if component_match.nil?
+
+      auto_invoke_update_view = false
+      auto_invoke_update_view = true if '!' == component_match[3]
       component_name, event_name = component_match[1], component_match[2]
       
       begin
@@ -219,16 +222,16 @@ module Monkeybars
           next if listener_match.nil?
           if Monkeybars::Handlers::EVENT_NAMES_BY_TYPE[listener_match[1]].member? event_name
             if component_to_alias.nil?
-              add_handler_for listener_match[1], component_name, component
+              add_handler_for listener_match[1], component_name, component, auto_invoke_update_view
             else
-              add_handler_for listener_match[1], {component_to_alias => component_name}, component
+              add_handler_for listener_match[1], {component_to_alias => component_name}, component, auto_invoke_update_view
             end
           end
         end
       end
     end
 
-    def add_handler_for(handler_type, components, java_component)
+    def add_handler_for(handler_type, components, java_component, auto_invoke_update_view = false)
       components = ["global"] if components.nil?
       components = [components] unless components.kind_of? Array
       components.each do |component|
@@ -241,7 +244,7 @@ module Monkeybars
           component_field = component
         end
         unless @__registered_handlers[java_component].member? handler_type.underscore
-          handler = "Monkeybars::#{handler_type.camelize}Handler".constantize.new(self, component_name.to_s)
+          handler = "Monkeybars::#{handler_type.camelize}Handler".constantize.new(self, component_name.to_s, auto_invoke_update_view)
           @__event_handler_view_target.add_handler(handler, component_field)
           @__registered_handlers[java_component] << handler_type.underscore
         end

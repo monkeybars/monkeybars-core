@@ -3,7 +3,7 @@ require 'monkeybars/inflector'
 include_class 'javax.swing.SwingUtilities'
 
 module Monkeybars
-    # This class is primarily used internally for setting up a handler for window 
+  # This class is primarily used internally for setting up a handler for window 
   # close events although any of the WindowAdapter methods can be set.  To instantiate
   # a new MonkeybarsWindowAdapter, pass in a hash of method name symbols and method 
   # objects.  The method names must be the various methods from the 
@@ -40,6 +40,7 @@ module Monkeybars
   module BaseHandler
     def method_missing(method, *args, &block)
       @callback.handle_event(@component_name, method.underscore, args[0])
+      @callback.update_view if @auto_invoke_update_view
     end
   end
 
@@ -64,9 +65,10 @@ end
     eval <<-ENDL
       module Monkeybars
         class #{type}Handler
-          def initialize(callback, component_name)
+          def initialize(callback, component_name, auto_invoke_update_view = false)
             @callback = callback
             @component_name = component_name
+            @auto_invoke_update_view = auto_invoke_update_view
           end
 
           def type
