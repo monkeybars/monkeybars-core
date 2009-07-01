@@ -1,4 +1,4 @@
-#! /usr/bin/env ruby
+#!/usr/bin/env jruby
 
 require 'fileutils'
 require 'rubygems'
@@ -19,23 +19,62 @@ end
 if ARGV.empty?
   help
 else
-  case ARGV[0]
-  when "-h" || "--help" || nil
-    help
-  when "-v" || "--version"
-    $stdout << "Monkeybars version #{Monkeybars::VERSION}\n"
-  else
-    # create new directory and copy app skeleton over
-    project_name = ARGV[0]
-    
-    unless File.directory? project_name
-      $stdout << "Creating directory #{project_name}\n"
-      FileUtils.mkdir_p(project_name)
-      FileUtils.cd(project_name)
-      $stdout << "Copying monkeybars project structure\n"
-      FileUtils.cp_r(File.dirname(__FILE__) + "/../skeleton/.", "./")
+  rawr_install_args = ''
+  project_name = ''
+
+  until ARGV.empty?
+    case ARGV.first
+    when "-h" || "--help" || nil
+      help
+      exit
+    when "-v" || "--version"
+      $stdout << "Monkeybars version #{Monkeybars::VERSION}\n"
+      exit
+    when /-RI(.+)/
+      rawr_install_args << $1 + ' '
+      ARGV.shift
     else
-      $stdout << "Directory already exists, aborting\n"
+      # create new directory and copy app skeleton over
+      project_name = ARGV[0]
+      ARGV.shift
+    end
+  end
+  
+  if File.directory? project_name
+    $stdout << "Directory already exists, aborting\n"
+  else
+    begin
+      $stdout << "Creating directory #{project_name}\n"
+      #FileUtils.mkdir_p(project_name)
+      # TODO: Bring back RakeFile once you can force Rawr to append the require 'rawr' statement via the command line
+      # as opposed to its current interactive mode
+      puts `rawr install #{rawr_install_args} #{project_name}`
+      build_config_path = File.join(project_name, 'build_configuration.rb')
+      build_config = File.read build_config_path
+      build_config.sub! /^end$/, <<-ENDL
+c.mac_icon_path = File.expand_path('data/monkeybars.icns')
+c.windows_icon_path = File.expand_path('data/monkeybars.ico')
+end
+ENDL
+
+      File.open(build_config_path, 'w') {|f| f << build_config}
+
+      from = File.expand_path(File.join(File.dirname(__FILE__), '..', 'skeleton')) + '/.' # needs to be before the cd
+      FileUtils.cd(project_name) do
+        $stdout << "Copying monkeybars project structure\n"
+        FileUtils.cp_r(from , '.')
+        File.open('Rakefile', 'a') do |f|
+          f << <<-ENDL
+Dir.glob("tasks/**/*.rake").each do |rake_file|
+load File.expand_path(File.dirname(__FILE__) + "/" + rake_file)
+end
+ENDL
+        end
+      end
+    rescue => e
+      puts "Error installing Monkeybars project:"
+      puts e
+      puts e.backtrace
     end
   end
 end
