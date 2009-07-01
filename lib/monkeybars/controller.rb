@@ -44,6 +44,19 @@ module Monkeybars
   # 
   #   def some_component_event_name(swing_event)
   #
+  # Automatic listeners can also be decorated with a trailing ! to indicate that the
+  # update_view method should automatically be run on completion of the callback being
+  # run from a Swing event.  In the previous example
+  #
+  #   def some_component_event_name!
+  #   end
+  #
+  # is the equivalent of
+  #
+  #   def some_component_event_name
+  #     update_view
+  #   end
+  #
   # While an event handler is running, the Swing Event Dispatch Thread (usually called the EDT)
   # is blocked and as such, no repaint events will occur and no new events will be proccessed.
   # If you have a process that is long running, but you don't want to make asynchronous
@@ -114,21 +127,9 @@ module Monkeybars
       new
     end
     
-    # Declares the view class (as a symbol) to use when instantiating the controller.
-    # 
-    #   set_view :MyView
-    #
-    # The file my_view.rb will be auto-required before attempting to instantiate
-    # the MyView class.
-    #
-    def self.set_view(view)
-      self.view_class = view
-    end
-
-    # See set_view.  The declared model class is also auto-required prior to the
-    # class being instantiated.  It is not a requirement that you have a model,
-    # Monkeybars will operate without one as long as you do not attempt to use
-    # methods that interact with the model.
+    # The declared model class is auto-required prior to the class being instantiated.
+    # It is not a requirement that you have a model, Monkeybars will operate without
+    # one as long as you do not attempt to use methods that interact with the model.
     #
     # The set_model method may be used in 3 different ways.
     #
@@ -136,7 +137,8 @@ module Monkeybars
     # a string. Internally the controller instantiates this class and makes it
     # available to the controller via a private method #model. Note that this
     # form of set_model does not allow passing any parameters to the model
-    # class; the model must implement a zero-argument constructor.
+    # class, thus the model must implement a zero-argument constructor.
+    #
     #  class FooController < ApplicationController
     #    set_model 'FooModel'
     #    set_view 'FooView'
@@ -144,8 +146,9 @@ module Monkeybars
     #  end
     #
     # The second format passes a block to set_model. The block is executed via
-    # #instance_eval with the result assigned as the model. The model constructor
-    # may take parameters.
+    # #instance_eval with the result assigned as the model. The construction of the
+    # model is fully under your control.
+    # 
     #  class FooController < ApplicationController
     #    set_model { FooModel.new("arg1", "arg2", "arg3") }
     #    set_view 'FooView'
@@ -153,20 +156,28 @@ module Monkeybars
     #  end
     # 
     # The third format takes both a string with the model class name _and_ a block
-    # for the purpose of setting initial values. No parameters may be passed
-    # to the constructor in this format; it does allow immediate use of any
-    # declared accessors.
+    # for the purpose of setting initial values. The block will be passed the model
+    # object.  No parameters may be passed to the constructor in this format.
+    #
     #  class FooModel
     #    attr_accessor :some_value
     #  end
+    #  
     #  class FooController < Monkeybars::Controller
-    #    set_model "FooModel" do 
+    #    set_model "FooModel" do |model|
     #      model.some_value = 5
     #    end
     #  end
     #
     def self.set_model(model=nil, &block)
       self.model_class = [model,block]
+    end
+
+    # See Controller.set_model.  Uses same 3 options for declaring the view to use
+    # and for optionally supplying a block or both a class and a block.
+    #
+    def self.set_view(view=nil, &block)
+      self.view_class = [view,block]
     end
 
     # Declares a method to be called whenever the controller's update method is called.
@@ -233,9 +244,11 @@ module Monkeybars
     
     def initialize
       @model_has_block = false
+      @view_has_block = false
       @__model = create_new_model unless self.class.model_class.nil?
-      instance_eval(&self.class.model_class.last) if @model_has_block
+      self.class.model_class.last.call(@__model) if @model_has_block
       @__view = create_new_view unless self.class.view_class.nil?
+      self.class.view_class.last.call(@__view) if @view_has_block
       @__transfer = {}
       @__view_state = nil
       setup_implicit_and_explicit_event_handlers
@@ -560,10 +573,16 @@ module Monkeybars
     
     def create_new_view
       begin
-        self.class.view_class.constantize.new
-      rescue NameError
-        require self.class.view_class.underscore
-        self.class.view_class.constantize.new
+        unless self.class.view_class.first.nil?
+          @view_has_block = true unless self.class.view_class.last.nil?
+          instance = self.class.view_class.first.constantize.new
+          return instance
+        else
+          return self.class.view_class.last.call
+        end
+      rescue NameError => e
+        require self.class.view_class.first.underscore
+        self.class.view_class.first.constantize.new
       end
     end
 

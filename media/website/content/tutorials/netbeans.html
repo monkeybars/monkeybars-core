@@ -21,23 +21,7 @@
 			<li>If you download the Java distribution you will need to use the package manager to add the Ruby editing packages. This is a little more straightforward than adding the Java packages and is the preferred package if you don't install "All"</li>
 		</ul>
 	</p>
-  <!--
-	<p id="open_link1"><a href="javascript:void(0)" onclick="document.getElementById('video1').style.display='block';;document.getElementById('open_link1').style.display='none'">Watch the video</a></p>
-	<p>
-		<div id="video1" style="display: none;">
-			<a href="javascript:void(0)" onclick="document.getElementById('video1').style.display='none';document.getElementById('open_link1').style.display='block'">Hide video</a><br/>
-
-			<p id="player1"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
-			<script type="text/javascript">
-				var so = new SWFObject('../flvplayer.swf','player','800','600','7');
-				so.addParam("allowfullscreen","true");
-				so.addVariable("file","http://www.koontzfamily.org/david/videos/tutorials/netbeans_a.flv");
-				so.addVariable("displayheight","600");
-				so.write('player1');
-			</script>
-		</div>
-    </p>
-    -->
+ 
 	<p>
 		<h3>Installing requisite plugins</h3>
 		If you download a version other than the "All" version you will need to install one or more plugins to make your editor work as a JRuby Swing development system. To access the plugin manager in Netbeans go to Tools -> Plugins.
@@ -54,26 +38,25 @@
 			<li>Ruby Extra Hints (optional)</li>
 		</ul>	
 	</p>
-  <!--
-	<p id="open_link2"><a href="javascript:void(0)" onclick="document.getElementById('video2').style.display='block';;document.getElementById('open_link2').style.display='none'">Watch the video</a></p>
-	<p>
-		<div id="video2" style="display: none;">
-			<a href="javascript:void(0)" onclick="document.getElementById('video2').style.display='none';document.getElementById('open_link2').style.display='block'">Hide video</a><br/>
 
-			<p id="player2"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
-			<script type="text/javascript">
-				var so = new SWFObject('../flvplayer.swf','player','800','600','7');
-				so.addParam("allowfullscreen","true");
-				so.addVariable("file","http://www.koontzfamily.org/david/videos/tutorials/netbeans_b.flv");
-				so.addVariable("displayheight","600");
-				so.write('player2');
-			</script>
-		</div>
-    </p>
-    -->
+	<p>
+		<h3>Installing <a href="http://rubyforge.org/projects/rawr/">Rawr</a></h3>
+		Since we are using a Java project, Netbeans will expect a Java class as the program's start point.  You can't tell Netbeans to run your project using a Ruby file for your main file so we need a Java file that kicks off your Ruby project. Fortunately the Rawr project provides just such as thing, (in addition to packaging and deployment solutions). Rawr is distributed as a gem, but it has limited functionality when installed under MRI Ruby so it is highly suggested that you install it as a gem under your local JRuby installation.
+		<pre>
+  MRI  : sudo gem install rawr
+  JRuby: jruby -s gem install rawr
+		</pre>
+		To install Rawr into your project, run the following command from the base of your project.
+		<pre>
+  MRI  : rawr install
+  JRuby: jruby -s rawr install
+		</pre>
+		This will add the Main.java file we need along with a configuration file, build_configuration.rb and a copy of the jruby-complete.jar file which is typically needed for distribution and is used for many Rawr tasks such as Ruby file compilation.  Rawr uses build_configuration.rb for the settings needed to build your jar/exe/.app/gzip.  When we run the project from Netbeans the Rawr Main class should be the only class that is shown on the list. Simply select the class, click ok, and your application will start running src/main.rb.
+	</p>
+	
 	<p>
 		<h3>Setting up a Netbeans project</h3>
-		<p>The project is created as a Java project, even though we won't be writing any Java directly. This is because Netbeans will not give you access to create new Java forms using the GUI builder unless the project is a Java project (although you can still edit them as a Ruby project). Until this problem is corrected we must create Java projects so that we have access to the GUI editing tools. For this reason <a href="http://rubyforge.org/projects/rawr/">Rawr</a> is often used to create a Java main file that Netbeans can launch, thereby allowing you to run your app from your "Java" project.</p>
+		<p>The project is created as a Java project, even though we won't be writing any Java directly. This is because Netbeans will not give you access to create new Java forms using the GUI builder unless the project is a Java project (although you can still edit them as a Ruby project). Until this problem is corrected we must create Java projects so that we have access to the GUI editing tools. For this reason Rawr is often used to create a Java main file that Netbeans can launch, thereby allowing you to run your app from your "Java" project.</p>
 		To create a new Netbeans project for your Monkeybars files click on File -> New Project.  Select the Java category and then "Java Project with Existing Sources".
 		<img src = "images/netbeans_1.png"/><br/>
 		Click next and then name your project and make sure the project folder is pointing to your Monkeybars project folder.
@@ -82,58 +65,14 @@
 		<img src = "images/netbeans_3.png"/><br/>
 		Finally click "Finish" and you will see your project show up in the project list.
 	</p>
-  <!--
-	<p id="open_link3"><a href="javascript:void(0)" onclick="document.getElementById('video3').style.display='block';;document.getElementById('open_link3').style.display='none'">Watch the video</a></p>
-	<p>
-		<div id="video3" style="display: none;">
-			<a href="javascript:void(0)" onclick="document.getElementById('video3').style.display='none';document.getElementById('open_link3').style.display='block'">Hide video</a><br/>
 
-			<p id="player3"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
-			<script type="text/javascript">
-				var so = new SWFObject('../flvplayer.swf','player','800','600','7');
-				so.addParam("allowfullscreen","true");
-				so.addVariable("file","http://www.koontzfamily.org/david/videos/tutorials/netbeans_c.flv");
-				so.addVariable("displayheight","600");
-				so.write('player3');
-			</script>
-		</div>
-    </p>
-    -->
 	<p>
 		<h3>Adding libraries</h3>
-		Once your project has been created you'll want to add any jar files you are using to the libraries section of your project.  You can do this by right clicking on the libraries and choosing "Add Jar/Folder". The first thing you'll want to add is the Monkeybars jar file located in your projects's lib directory as well as the JRuby jar file. Now is a good time to add any other jar files your project will need to your lib directory and also add them to your library in Netbeans.
+		Once your project has been created you'll want to add any jar files you are using to the libraries section of your project.  You can do this by right clicking on the libraries and choosing "Add Jar/Folder". The first thing you'll want to add is the Monkeybars jar file located in your projects's lib directory as well as the JRuby jar file. Now is a good time to add any other jar files your project will need to your lib/java directory and also add them to your library in Netbeans.
 		<img src = "images/netbeans_4.png"/><br/>
-		The swing layout jar needed by the Matisse layout system is usually needed and you can find its location on your system by clicking Tools -> Libraries and selecting "Swing Layout Extensions". The "Library Classpath" box will show the location to the jar file. Copy that file into your project's lib directory for distribution.
+		The swing layout jar needed by the Matisse layout system is usually needed and you can find its location on your system by clicking Tools -> Libraries and selecting "Swing Layout Extensions". The "Library Classpath" box will show the location to the jar file. Copy that file into your project's lib/java directory for distribution.
 	</p>
-  <!--
-	<p id="open_link4"><a href="javascript:void(0)" onclick="document.getElementById('video4').style.display='block';;document.getElementById('open_link4').style.display='none'">Watch the video</a></p>
-	<p>
-		<div id="video4" style="display: none;">
-			<a href="javascript:void(0)" onclick="document.getElementById('video4').style.display='none';document.getElementById('open_link4').style.display='block'">Hide video</a><br/>
 
-			<p id="player4"><a href="http://www.macromedia.com/go/getflashplayer">Get the Flash Player</a> to see this player.</p>
-			<script type="text/javascript">
-				var so = new SWFObject('../flvplayer.swf','player','800','600','7');
-				so.addParam("allowfullscreen","true");
-				so.addVariable("file","http://www.koontzfamily.org/david/videos/tutorials/netbeans_d.flv");
-				so.addVariable("displayheight","600");
-				so.write('player4');
-			</script>
-		</div>
-    </p>
-    -->
-	<p>
-		<h3>Configuring Netbeans to run with Rawr</h3>
-		The first time you run your project, you will be prompted to select the "Main class". This is what tells Java where to start running your application. You can't tell Netbeans to run your project using a Ruby file for your main file so we need a Java file that kicks off your Ruby project. Fortunately the Rawr project provides just such as thing, (in addition to packaging and deployment solutions). Rawr is a gem and is installed the normal way.
-		<pre>
-  sudo gem install rawr
-		</pre>
-		To install Rawr into your project, run the following command from the base of your project.
-		<pre>
-  rawr install
-		</pre>
-		This will add the Main.java file we need along with a configuration file, build_configuration.yaml.  Rawr uses this file to build your jar/exe/.app/gzip.  After installing Rawr, if you run your project from Netbeans the Rawr Main class should be the only class that is shown on the list. Simply select the class, click ok, and your application will start running src/main.rb.
-	</p>
 	<p>
 		Continue to the next section: <a href="installing3.html">Using the generator</a>.
 	</p>

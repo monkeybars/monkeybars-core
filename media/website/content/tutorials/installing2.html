@@ -34,9 +34,8 @@
 	<p>
 		<h3>resolver.rb</h3>
 		This file is a utility file, it is separated out so that manifest.rb does not become cluttered.  It adds the Resolver class 
-		which is used to determine where Monkeybars is being loaded from.  It also adds a method to object, "add_to_classpath", which
-		greatly enhances the readability of loading new locations onto the classpath.  This code is in not in the monkeybars jar
-		file as it is needed in order to resolve the location of the monkeybars jar file.
+		which is used to determine where Monkeybars is being loaded from.  It also adds two methods to object, "add_to_classpath" and "add_to_load_path", which
+		greatly enhances the readability of loading new locations onto the classpath.  These methods also allow you to specify relative paths from a file inside a jar to a file outside of a jar and vice versa.  This code is in not in the monkeybars jar file as it is needed in order to resolve the location of the monkeybars jar file.
 	</p>
 	
 	<p>

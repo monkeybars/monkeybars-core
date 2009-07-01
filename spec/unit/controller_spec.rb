@@ -16,40 +16,66 @@ class EmptyTestModel; end
 describe Monkeybars::Controller do
   
   it "allows the model and view to be set externally" do
-    class ExternalModelSetTestController < Monkeybars::Controller; end
+    class ExternalSetTestController < Monkeybars::Controller; end
     
-    ExternalModelSetTestController.set_view "EmptyTestView"
-    ExternalModelSetTestController.set_model "EmptyTestModel"
+    ExternalSetTestController.set_view "EmptyTestView"
+    ExternalSetTestController.set_model "EmptyTestModel"
     
-    ExternalModelSetTestController.send(:view_class).should == "EmptyTestView"
-    ExternalModelSetTestController.send(:model_class).should == ["EmptyTestModel", nil]
+    ExternalSetTestController.send(:view_class).should == ["EmptyTestView", nil]
+    ExternalSetTestController.send(:model_class).should == ["EmptyTestModel", nil]
   end
   
   it "allows the model to be set via a block" do
-    class TestBlockInitializeModel
+    test_block_initialize_model = Class.new do
       def initialize(string)
         @some_string = string
       end
+
+      def close_action(*args); end #stub to satisfy controller
     end
-    class ExternalModelInitializationController < Monkeybars::Controller
-      set_model {TestBlockInitializeModel.new("hello")}
+    
+    controller = Class.new(Monkeybars::Controller) do
+      set_model {test_block_initialize_model.new("hello")}
     end
-    ExternalModelInitializationController.instance.send(:model).should be_an_instance_of(TestBlockInitializeModel)
+    controller.instance.send(:model).should be_an_instance_of(test_block_initialize_model)
+  end
+
+  it "allows the view to be set via a block" do
+    test_block_initialize_view = Class.new do
+      def close_action(*args); end #stub to satisfy controller
+    end
+
+    controller = Class.new(Monkeybars::Controller) do
+      set_view { test_block_initialize_view.new }
+    end
+    controller.instance.send(:instance_variable_get, "@__view").should be_an_instance_of(test_block_initialize_view)
+
   end
   
-  it "allows a block to be passed with set_model to be instance eval'ed" do
-    class TestModel
+  it "allows a block to be passed with set_model to be called during instantiation" do
+    class BlockEvalTestModel
       attr_accessor :some_value
-      def initialize
-        @some_value = 0
-      end
     end
-    class ExternalBlockEvalController < Monkeybars::Controller
-      set_model "TestModel" do 
+    class ExternalModelBlockEvalController < Monkeybars::Controller
+      set_model "BlockEvalTestModel" do |model|
         model.some_value = 5
       end
     end
-    ExternalBlockEvalController.instance.send(:model).some_value.should == 5
+    ExternalModelBlockEvalController.instance.send(:model).some_value.should == 5
+  end
+
+  it "allows a block to be passed with set_view to be called during instantiation" do
+    class BlockEvalTestView
+      attr_accessor :some_value
+
+      def close_action(*args); end #stub to satisfy controller
+    end
+    class ExternalViewBlockEvalController < Monkeybars::Controller
+      set_view "BlockEvalTestView" do |view|
+        view.some_value = 5
+      end
+    end
+    ExternalViewBlockEvalController.instance.send(:instance_variable_get, "@__view").some_value.should == 5
   end
 
   it "gives back a non nil view state if set_model was only given a block" do
@@ -77,7 +103,7 @@ describe Monkeybars::Controller do
     ExternalModelOverrideTestController.set_view "ExternalOverrideTestView"
     ExternalModelOverrideTestController.set_model "ExternalOverrideTestModel"
     
-    ExternalModelOverrideTestController.send(:view_class).should == "ExternalOverrideTestView"
+    ExternalModelOverrideTestController.send(:view_class).should == ["ExternalOverrideTestView", nil]
     ExternalModelOverrideTestController.send(:model_class).should == ["ExternalOverrideTestModel", nil]
   end
   
