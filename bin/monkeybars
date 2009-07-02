@@ -52,8 +52,8 @@ else
       build_config_path = File.join(project_name, 'build_configuration.rb')
       build_config = File.read build_config_path
       build_config.sub! /^end$/, <<-ENDL
-c.mac_icon_path = File.expand_path('data/monkeybars.icns')
-c.windows_icon_path = File.expand_path('data/monkeybars.ico')
+  c.mac_icon_path = File.expand_path('icons/monkeybars.icns')
+  c.windows_icon_path = File.expand_path('icons/monkeybars.ico')
 end
 ENDL
 
@@ -66,7 +66,7 @@ ENDL
         File.open('Rakefile', 'a') do |f|
           f << <<-ENDL
 Dir.glob("tasks/**/*.rake").each do |rake_file|
-load File.expand_path(File.dirname(__FILE__) + "/" + rake_file)
+  load File.expand_path(File.dirname(__FILE__) + "/" + rake_file)
 end
 ENDL
         end

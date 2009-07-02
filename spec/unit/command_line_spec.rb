@@ -30,6 +30,7 @@ describe "Command Line" do
   end
 
   it "uses the icons in the build_configuration.rb" do
-    pending
+    File.read(File.join(@temp_project_dir, 'build_configuration.rb')).should match(/monkeybars\.icns/)
+    File.read(File.join(@temp_project_dir, 'build_configuration.rb')).should match(/monkeybars\.ico/)
   end
 end
