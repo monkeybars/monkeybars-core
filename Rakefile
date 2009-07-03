@@ -18,6 +18,7 @@ PROJ.spec.opts << '--color'
 PROJ.ruby_opts = []
 PROJ.libs << "lib"
 PROJ.rdoc.remote_dir = "api"
+PROJ.gem.dependencies << "rawr 1.3.7"
 
 require 'fileutils'
 require 'spec/rake/spectask'
