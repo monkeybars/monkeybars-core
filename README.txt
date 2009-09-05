@@ -13,25 +13,17 @@ Needs more spec coverage
 
 Mailing list, downloads and bug reports
 
-The mailing list is hosted by Google
+The source, mailing list, discussion forums, issue tracking, and wiki is hosted by Kenai
 
- http://groups.google.com/group/monkeybars
-
-The issue tracking system is hosted at Google Code
-
- http://code.google.com/p/monkeybars-lib/ 
+ http://kenai.com/projects/monkeybars
 
 Downloads are hosted by RubyForge
 
  http://rubyforge.org/projects/monkeybars
  
- or get the source from our repo at
-
- http://gitorious.org/projects/monkeybars
-
 == REQUIREMENTS:
 
-  Java 1.5, Rake, JRuby 1.1 or later.
+  Java 1.6, Rake, JRuby 1.4 or later.
 
 == INSTALL:
 
