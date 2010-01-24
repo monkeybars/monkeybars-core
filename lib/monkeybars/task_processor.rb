@@ -27,6 +27,7 @@ module Monkeybars
 
     class Runner < Job
       def initialize(&proc)
+        super()
         @proc = proc
       end
     
