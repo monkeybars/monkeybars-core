@@ -1,4 +1,4 @@
-Monkeybars 1.0.4
+Monkeybars 1.0.5
 http://www.monkeybars.org
 
 == DESCRIPTION:
@@ -13,13 +13,12 @@ Needs more spec coverage
 
 Mailing list, downloads and bug reports
 
-The source, mailing list, discussion forums, issue tracking, and wiki is hosted by Kenai
+The source is hosted on GitHub: http://github.com/monkeybars/monkeybars-core
 
- http://kenai.com/projects/monkeybars
+The mailing list is http://groups.google.com/group/monkeybars-mvc
 
-Downloads are hosted by RubyForge
+Issues are on Pivotal Tracker: http://www.pivotaltracker.com/projects/118006 
 
- http://rubyforge.org/projects/monkeybars
  
 == REQUIREMENTS:
 
@@ -27,7 +26,7 @@ Downloads are hosted by RubyForge
 
 == INSTALL:
 
-There are three ways to obtain Monkeybars.  All are located on the RubyForge project page ( http://rubyforge.org/projects/monkeybars).
+There are three ways to obtain Monkeybars.  
   - Source distribution
   - Gem which includes a project generator, ideal for new projects
   - Jar file for integration into existing Java applications
@@ -42,5 +41,6 @@ Monkeybars is the work of many contributors.
 
 David Koontz - Core contributor, original author, tutorials
 Logan Barnett - Core contributor, nested views, signals, many bug fixes
-Mario Aquino - Core contributor, listener registration, Foxtrot integration, many bug fixes and specs
-James Britt - Fixes to documentation, build process, nested view bugs
+James Britt - Core contributor, fixes to documentation, build process, nested view bugs
+Mario Aquino - Listener registration, Foxtrot integration, many bug fixes and specs
+
