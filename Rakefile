@@ -36,8 +36,8 @@ task :clean do
 end
 
 task :update_version_readme do
-  readme = IO.readlines( 'README.txt')
-  File.open( 'README.txt', 'w' ) { |f| 
+  readme = IO.readlines( 'README.markdown')
+  File.open( 'README.markdown', 'w' ) { |f| 
     f << "Monkeybars #{Monkeybars::VERSION}\n"
     readme.shift
     f << readme

@@ -26,7 +26,7 @@ PROJ = OpenStruct.new(
   :libs => [],
   :history_file => 'History.txt',
   :manifest_file => 'Manifest.txt',
-  :readme_file => 'README.txt',
+  :readme_file => 'README.markdown',
 
   # Announce
   :ann => OpenStruct.new(
