@@ -24,12 +24,13 @@ filter:    erb
 				<ul id="nav">
 						<li><a href="index.html" <%= 'class="active"' if 'index' == @page.current_page %>>Main</a></li>
 
-						<li><a href="http://code.google.com/p/monkeybars-lib/" <%= 'class="active"' if 'issue_tracker' == @page.current_page %>>Issue Tracker</a></li>
+						<li><a href="http://www.pivotaltracker.com/projects/118006" <%= 'class="active"' if 'issue_tracker' == @page.current_page %>>Issue Tracker</a></li>
 
-						<li><a href="http://rubyforge.org/projects/monkeybars/" <%= 'class="active"' if 'rubyforge' == @page.current_page %>>Rubyforge Project</a></li>
+						<li><a href="https://github.com/monkeybars/monkeybars-core" <%= 'class="active"' if 'github' == @page.current_page %>>Github Project</a></li>
 						
 						<li><a href="docs.html" <%= 'class="active"' if 'docs' == @page.current_page %>>Documentation</a></li>
 						
+						<li><a href="http://groups.google.com/group/monkeybars-mvc" <%= 'class="active"' if 'mailinglist' == @page.current_page %>>Mailing List</a></li>
 						<li><a href="examples.html" <%= 'class="active"' if 'examples' == @page.current_page %>>Examples</a></li>
 						
 						<li><a href="faq.html" <%= 'class="active"' if 'faq' == @page.current_page %>>FAQ</a></li>
