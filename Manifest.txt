@@ -23,7 +23,7 @@ lib/monkeybars/view_positioning.rb
 lib/monkeybars_version.rb
 skeleton/icons/monkeybars.icns
 skeleton/icons/monkeybars.ico
-skeleton/lib/java/monkeybars-1.0.4.jar
+skeleton/lib/java/monkeybars-1.0.5.jar
 skeleton/lib/ruby/README.txt
 skeleton/src/application_controller.rb
 skeleton/src/application_view.rb

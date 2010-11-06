@@ -12,11 +12,10 @@
 #
 
 
-desc 'Upload files to rubyforge server. Must have ENV['RUBYFORGE_NAME'] set.'
+desc 'Upload files to neurogami server.'
 task 'upload' do
-  Dir.chdir('output') do
-    cmd = "scp -r * #{ENV['RUBYFORGE_NAME']}@rubyforge.org:/var/www/gforge-projects/monkeybars"
+    cmd = "scp -v -P #{ENV['MONKEYBARS_SERVER_PORT']} -r public #{ENV['MONKEYBARS_SERVER_ID']}:/usr/local/webdev/monkeybars.org/"
+    warn cmd
     sh cmd
-  end
 end
 

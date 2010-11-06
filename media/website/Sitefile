@@ -1,4 +1,4 @@
-
+SITE.output_dir = 'public'  
 task :default => :build
 
 desc 'deploy the site to the webserver'

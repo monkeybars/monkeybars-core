@@ -15,3 +15,6 @@ build/
 dist/
 package/
 skeleton/lib/java/monkeybars-0.6.4.jar
+media/website/heel-server.rb
+media/website/public
+
