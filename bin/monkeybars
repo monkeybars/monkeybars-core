@@ -45,10 +45,10 @@ else
   else
     begin
       $stdout << "Creating directory #{project_name}\n"
-      #FileUtils.mkdir_p(project_name)
+      FileUtils.mkdir_p(project_name)
       # TODO: Bring back RakeFile once you can force Rawr to append the require 'rawr' statement via the command line
       # as opposed to its current interactive mode
-      puts `rawr install #{rawr_install_args} #{project_name}`
+      puts `jruby -S rawr install #{rawr_install_args} #{project_name}`
       build_config_path = File.join(project_name, 'build_configuration.rb')
       build_config = File.read build_config_path
       build_config.sub! /^end$/, <<-ENDL
