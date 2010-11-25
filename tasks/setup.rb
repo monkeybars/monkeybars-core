@@ -51,7 +51,7 @@ PROJ = OpenStruct.new(
     :executables => nil,
     :extensions => FileList['ext/**/extconf.rb'],
     :files => nil,
-    :need_tar => true,
+    :need_tar => false,
     :need_zip => false,
     :extras => {}
   ),

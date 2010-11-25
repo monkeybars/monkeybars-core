@@ -19,6 +19,8 @@ PROJ.ruby_opts = []
 PROJ.libs << "lib"
 PROJ.rdoc.remote_dir = "api"
 PROJ.gem.dependencies << ["rawr", ">= 1.3.7"]
+PROJ.gem.need_tar = false
+PROJ.gem.need_zip = false
 
 require 'fileutils'
 require 'spec/rake/spectask'
@@ -26,7 +28,7 @@ require 'spec/rake/spectask'
 OUTPUT_DIR = "pkg"
 BUILD_DIR = "#{OUTPUT_DIR}/bin"
 SKELETON_DIR = "skeleton"
-9
+
 task :default => 'spec'
 
 desc "Removes the output directory"

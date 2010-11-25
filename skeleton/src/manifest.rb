@@ -19,9 +19,15 @@ end
 
 require 'resolver'
 
+
+def monkeybars_jar path
+  Dir.glob(path).select { |f| f =~ /(monkeybars-)(.+).jar$/}.first
+end
+
 case Monkeybars::Resolver.run_location
 when Monkeybars::Resolver::IN_FILE_SYSTEM
-  add_to_classpath '../lib/java/monkeybars-1.0.2.jar'
+  here = File.expand_path File.dirname(__FILE__)
+  add_to_classpath monkeybars_jar( here + '/../lib/java/*.jar' )
 end
 
 require 'monkeybars'
