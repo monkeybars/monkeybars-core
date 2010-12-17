@@ -9,19 +9,20 @@ require 'monkeybars_version'
 
 PROJ.name = 'monkeybars'
 PROJ.authors = 'David Koontz, Logan Barnett, James Britt, Mario Aquino'
-PROJ.email = 'logustus@gmail.com'
-PROJ.url = 'http://monkeybars.org'
+PROJ.email = 'james@neurogami.com'
+PROJ.url = 'http://www.monkeybars.org'
 PROJ.version = Monkeybars::VERSION
-PROJ.summary = 
+PROJ.summary = "Powerful cross-platform Ruby apps made simple."
 PROJ.rubyforge.name = 'monkeybars'
 PROJ.spec.opts << '--color'
 PROJ.ruby_opts = []
 PROJ.libs << "lib"
 PROJ.rdoc.remote_dir = "api"
+#PROJ.rdoc.opts = "api"
 PROJ.gem.dependencies << ["rawr", ">= 1.3.7"]
 PROJ.gem.need_tar = false
 PROJ.gem.need_zip = false
-
+PROJ.readme_file = 'README.markdown'
 require 'fileutils'
 require 'spec/rake/spectask'
 

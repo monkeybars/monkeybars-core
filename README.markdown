@@ -33,7 +33,7 @@ Questions or comments? Contact [James Britt](mailto:james+monkeybars@neurogami.c
 Requirements
 ---------
 
-  Java 1.6, Rake, JRuby 1.4 or later.
+  Java 1.6, Rake, JRuby 1.5 or later.
 
 Installation
 ---------
@@ -46,7 +46,7 @@ There are three ways to obtain Monkeybars.
 
 License
 --------
-Monkeybars is licensed under the Ruby licence, see COPYING.txt.
+Monkeybars is licensed under the Ruby licence (as of January 2010); see COPYING.txt.
 
 Attribution
 ---------
@@ -55,7 +55,7 @@ Monkeybars is the work of many contributors.
 
 - David Koontz - Core contributor, original author, tutorials
 - Logan Barnett - Core contributor, nested views, signals, many bug fixes
-- [James Britt](http://www.jamesbritt.com) - Core contributor, fixes to documentation, build process, nested view bugs
+- [James Britt](http://www.jamesbritt.com) - Core contributor, project manager, fixes to documentation, build process, nested view bugs
 - Mario Aquino - Listener registration, Foxtrot integration, many bug fixes and specs
 
 

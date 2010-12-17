@@ -1,11 +1,8 @@
-Monkeybars is the work of several contributors, for a full list
-see Readme.txt
+Monkeybars is the work of several contributors, for a full list see README.markdown
 
-Monkeybars is copyrighted free software by David Koontz
-<david at koontzfamily dot org>
+Monkeybars is copyrighted free software by David Koontz <david at koontzfamily dot org>
 
-You can redistribute it and/or modify it under
-either the terms of the GPL or the conditions below:
+You can redistribute it and/or modify it under either the terms of the GPLv2 or the conditions below:
 
 1. You may make and give away verbatim copies of the source form of the
    software without restriction, provided that you duplicate all of the
@@ -89,3 +86,6 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+===============================================================================
+
+Feed your head.
