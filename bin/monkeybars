@@ -46,8 +46,13 @@ else
     begin
       $stdout << "Creating directory #{project_name}\n"
       FileUtils.mkdir_p(project_name)
+      # Need to cd into  project_name folder before invoking rawr since it uses the cwd to obtain
+      # the project name in build_configuration.rb 
       # TODO: Bring back RakeFile once you can force Rawr to append the require 'rawr' statement via the command line
       # as opposed to its current interactive mode
+      
+# FileUtils.cd(project_name) do
+       warn "jruby -S rawr install #{rawr_install_args} #{project_name}"
       puts `jruby -S rawr install #{rawr_install_args} #{project_name}`
       build_config_path = File.join(project_name, 'build_configuration.rb')
       build_config = File.read build_config_path
@@ -56,6 +61,7 @@ else
   c.windows_icon_path = File.expand_path('icons/monkeybars.ico')
 end
 ENDL
+#      end
 
       File.open(build_config_path, 'w') {|f| f << build_config}
 

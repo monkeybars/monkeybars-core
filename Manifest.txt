@@ -1,3 +1,4 @@
+README.txt
 README.markdown
 History.txt
 Manifest.txt
