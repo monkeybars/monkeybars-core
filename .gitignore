@@ -17,4 +17,10 @@ package/
 skeleton/lib/java/monkeybars-0.6.4.jar
 media/website/heel-server.rb
 media/website/public
+#	outdated-examples/FlickrBrowser/lib/java/monkeybars-1.0.6.jar
+#	outdated-examples/HelloMonkeybars/lib/java/monkeybars-1.0.6.jar
+#	outdated-examples/Nested-DropIn/lib/java/monkeybars-1.0.6.jar
+#	outdated-examples/Nested-Rows/lib/java/monkeybars-1.0.6.jar
+#	outdated-examples/Nested-Simple/lib/java/monkeybars-1.0.6.jar
+#	outdated-examples/jrubydiff/lib/java/monkeybars-1.0.6.jar
 
