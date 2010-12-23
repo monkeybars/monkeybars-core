@@ -24,20 +24,22 @@ task 'gem:release' => 'test:run'
 
 Bones {
   name  'monkeybars'
-  authors  'David Koontz, Logan Barnett, James Britt, Mario Aquino'
+  authors  'James Britt, David Koontz, Logan Barnett, Mario Aquino'
   email  'james@neurogami.com'
   url  'http://www.monkeybars.org'
   version  Monkeybars::VERSION
   readme_file  'README.txt'
-  summary "Powerful cross-platform Ruby apps made simple."
+  summary "Powerful cross-platform Ruby apps made elegant."
   ruby_opts  []
   libs  ["lib"]
+  rdoc.opts  [ "README.markdown", "-m README.txt", ]
   rdoc.remote_dir  "api"
-  rdoc.opts  [ "README.markdown", "-m README.txt"]
- #  gem.dependencies["rawr" ] = "1.4.3"
+  rdoc.exclude ['examples/**/*', 'media/**/*', 'spec/**/*', 'outdated-examples/**/*', './**/*.jar', 'skeleton/**/*', 'tasks.orig']
   gem.need_tar  false
   gem.need_zip  false
- depend_on 'rawr', :version => '1.4.4'
+  depend_on 'rawr', :version => '1.4.4'
+
+  exclude %w{ pkg .git tasks.orig outdated-examples .gitignore __REDO  tasks/neurogami.rake doc/  media/ }
 
 }
 
