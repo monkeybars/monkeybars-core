@@ -41,10 +41,18 @@ There are three ways to obtain Monkeybars.
   - Gem which includes a project generator, ideal for new projects
   - Jar file for integration into existing Java applications
 
+The most current gem can be installed from `gems.neurogami.com`
+
+    sudo gem sources -a http://gems.neurogami.com
+
+or
+
+    sudo gem i monkeybars ––source http://gems.neurogami.com
+
 
 License
 --------
-Monkeybars is licensed under the Ruby licence (as of January 2010); see COPYING.txt.
+Monkeybars is licensed under the Ruby licence (as on January 2010); see COPYING.txt.
 
 Attribution
 ---------

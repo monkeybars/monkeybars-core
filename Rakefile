@@ -75,12 +75,8 @@ task 'update-examples-jar' => [:jar] do
 %w{
 Nested-Simple/lib/java
 HelloMonkeybars/lib/java
-Nested-Rows/lib/java
-Nested-DropIn/lib/java
 FlickrBrowser/lib/java
-jrubydiff/lib/java
   }.each do |path|
-
     FileUtils.rm("examples/#{path}/monkeybars-*", :force => true)
     FileUtils.cp("#{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar", "examples/#{path}/monkeybars-#{Monkeybars::VERSION}.jar")
   end
@@ -104,8 +100,13 @@ task :jar => [:prepare, :update_version_readme] do
     $stdout << `jar xvf ../../lib/foxtrot.jar`
     FileUtils.remove_dir('META-INF', true)
   end
-  $stdout << `jar cf #{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar -C lib monkeybars.rb -C lib monkeybars    -C lib util   -C #{BUILD_DIR} .`
+  warn `jar cf #{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar -C lib monkeybars.rb -C lib monkeybars    -C lib util   -C #{BUILD_DIR} .`
   FileUtils.cp("#{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar", "skeleton/lib/java/monkeybars-#{Monkeybars::VERSION}.jar")
+  unless File.exist? "skeleton/lib/java/monkeybars-#{Monkeybars::VERSION}.jar"
+    raise "Failed to copy monkeybars jar to the skelton dir."
+  else
+    warn "\n#{'.'*80}\nCopied monkeybars jar to the skelton dir.\n"
+  end
 end
 
 desc "Creates a zip file version of the project, excluding files from exclude.lst.  **ONLY WORKS ON OSX/Linux**  Yes this sucks, no I don't want to add another dependency at the moment."
