@@ -23,6 +23,8 @@ task :default => 'test:run'
 task 'gem:release' => 'test:run'
 
 Bones {
+  ignore_file  '.bnignore'
+
   name  'monkeybars'
   authors  'James Britt, David Koontz, Logan Barnett, Mario Aquino'
   email  'james@neurogami.com'
@@ -38,7 +40,6 @@ Bones {
   gem.need_tar  false
   gem.need_zip  false
   depend_on 'rawr', :version => '1.4.4'
-
   exclude %w{ pkg .git tasks.orig outdated-examples .gitignore __REDO  tasks/neurogami.rake doc/  media/ }
 
 }
@@ -92,7 +93,7 @@ task :prepare do
   File.open( "skeleton/lib/ruby/README.txt" , "w") {|f| f << "3rd party Ruby libs and unpacked gems go here." } unless File.exist?( "skeleton/lib/ruby/README.txt" )
 end
 
-task :gem => [:jar]
+#task :gem => [:jar]
 
 desc "Creates monkeybars.jar file for distribution"
 task :jar => [:prepare, :update_version_readme] do

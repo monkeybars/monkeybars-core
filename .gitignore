@@ -14,7 +14,6 @@ nbbuild.xml
 build/
 dist/
 package/
-skeleton/lib/java/monkeybars-0.6.4.jar
 media/website/heel-server.rb
 media/website/public
 #	outdated-examples/FlickrBrowser/lib/java/monkeybars-1.0.6.jar
