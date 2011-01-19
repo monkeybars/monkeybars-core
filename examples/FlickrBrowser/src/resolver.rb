@@ -16,6 +16,7 @@ end
 
 class Object
   def add_to_classpath(path)
+    raise "Nil $CLASSPATH" unless $CLASSPATH
     $CLASSPATH << File.expand_path(File.dirname(__FILE__) + "/" + path.gsub("\\", "/"))
   end
 end

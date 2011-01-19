@@ -93,7 +93,7 @@ task :prepare do
   File.open( "skeleton/lib/ruby/README.txt" , "w") {|f| f << "3rd party Ruby libs and unpacked gems go here." } unless File.exist?( "skeleton/lib/ruby/README.txt" )
 end
 
-#task :gem => [:jar]
+task :gem => [:jar]
 
 desc "Creates monkeybars.jar file for distribution"
 task :jar => [:prepare, :update_version_readme] do
