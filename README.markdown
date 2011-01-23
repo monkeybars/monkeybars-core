@@ -1,4 +1,4 @@
-Monkeybars 1.1.0
+Monkeybars 1.1.1
 [http://www.monkeybars.org](http://www.monkeybars.org)
 
 Description

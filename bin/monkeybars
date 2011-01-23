@@ -52,7 +52,7 @@ else
       # as opposed to its current interactive mode
       
 # FileUtils.cd(project_name) do
-       warn "jruby -S rawr install #{rawr_install_args} #{project_name}"
+      warn "jruby -S rawr install #{rawr_install_args} #{project_name}"
       puts `jruby -S rawr install #{rawr_install_args} #{project_name}`
       build_config_path = File.join(project_name, 'build_configuration.rb')
       build_config = File.read build_config_path
@@ -76,6 +76,9 @@ Dir.glob("tasks/**/*.rake").each do |rake_file|
 end
 ENDL
         end
+
+      puts "Installing swingset ..."
+      warn `swingset`
       end
     rescue => e
       puts "Error installing Monkeybars project:"

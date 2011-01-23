@@ -1,3 +1,7 @@
+== 1.1.1 / Sun Jan 23 12:58:33 MST 2011
+ * Added depency on Neurogami::SwingSet
+ * Updated project generator to include SwingSet-based <app>_ui.rb file
+
 == 0.6.2 / 2008-05-13
  * Changed syntax of define_signal, deprecated old version
  * Unhandled signals now throw an UndefinedSignalError

@@ -1,40 +1,47 @@
 require 'fileutils'
 
-desc "ALL, CONTROLLER, VIEW, MODEL are valid options."
+desc "ALL, CONTROLLER, VIEW, MODEL, UI are valid options."
 task 'generate'
 rule(/^generate/) do |t|
   ARGV[1..-1].each do |generator_command|
-    command, argument = generator_command.split("=")
+    command, argument = generator_command.split "="
     case command
     when "ALL"
-      generate_tuple(argument)
+      generate_tuple argument
     when "VIEW"
-      generate_view(argument)
+      generate_view argument
     when "CONTROLLER"
-      generate_controller(argument)
+      generate_controller argument
     when "MODEL"
-      generate_model(argument)
+      generate_model argument
+    when "UI"
+      generate_ui argument
+
     else
       $stdout << "Unknown generate target #{argument}"
     end
   end
 end
 
-def generate_tuple(path)
+def generate_tuple path
   pwd = FileUtils.pwd
-  generate_controller(path)
-  FileUtils.cd(pwd)
-  generate_model(path)
-  FileUtils.cd(pwd)
-  generate_view(path)
-  FileUtils.cd(pwd)
-  generate_ui(path)
+  generate_controller path
+
+  FileUtils.cd pwd 
+  generate_model path
+  
+  FileUtils.cd pwd
+  generate_view path, from_all = true
+  
+  FileUtils.cd pwd
+  generate_ui path
+
 end
 
-def generate_controller(path)
-  name = setup_directory(path)
+def generate_controller path
+  name = setup_directory path
   file_name = "#{name}_controller.rb"
-  name = camelize(name)
+  name = camelize name
   $stdout << "Generating controller #{name}Controller in file #{file_name}\n"
   File.open(file_name, "w") do |controller_file|
   controller_file << <<-ENDL
@@ -61,15 +68,27 @@ end
   end
 end
 
-def generate_view path
+def generate_view path, from_all = false
   name = setup_directory path
   file_name = "#{name}_view.rb"
-  name = camelize name
-  $stdout << "Generating view #{name}View in file #{file_name}\n"
+  cname = camelize name
+  $stdout << "Generating view #{cname}View in file #{file_name}\n"
+ui_require = if from_all
+      "require '#{name}/#{name}_ui'"
+               else
+                 ""
+  end
+  java_class = if from_all
+      "#{cname}Ui"
+               else
+                 "''"
+  end
   File.open(file_name, "w") do |view_file|
   view_file << <<-ENDL
-class #{name}View < ApplicationView
-  set_java_class ''
+#{ui_require}
+
+class #{cname}View < ApplicationView
+  set_java_class #{java_class}
 end
   ENDL
   end
@@ -78,9 +97,9 @@ end
 
 def generate_ui path
   name = setup_directory path
-  file_name = "#{name}_controller.rb"
+  file_name = "#{name}_ui.rb"
   name = camelize name
-  $stdout << "Generating controller #{name}Controller in file #{file_name}\n"
+  $stdout << "Generating ui #{name}Ui in file #{file_name}\n"
   File.open(file_name, "w") do |ui_file|
   ui_file << <<-ENDL
 
@@ -89,92 +108,74 @@ require 'swingset'
 
 include  Neurogami::SwingSet::Core
   
-class #{name}Frame < Frame
-  
-  FRAME_WIDTH = 600
+class #{name}Ui < Frame
+  include  Neurogami::SwingSet::MiG
+
+  mig_layout
+
+  FRAME_WIDTH  = 600
   FRAME_HEIGHT = 130
 
-  LABEL_WIDTH = 400
+  LABEL_WIDTH  = 400
   LABEL_HEIGHT = 60
 
-  # Make sure our components are available!
-  attr_accessor :default_button, :default_label, :menu_bar, :about_menu, :exit_menu
+  # Make sure our components are available! 
+  attr_accessor :default_button, :default_label
 
-  def about_menu
-    @about_menu
-  end
-
-  def initialize(*args)
+  def initialize *args
     super
     self.minimum_width  = FRAME_WIDTH
     self.minimum_height = FRAME_HEIGHT
     set_up_components
+    default_close_operation = EXIT_ON_CLOSE 
   end
 
   def set_up_components
     component_panel = Panel.new
 
     # If we were clever we would define a method that took a  single hex value, like CSS.
-    component_panel.background_color(255, 255, 255)
-    component_panel.size(FRAME_WIDTH, FRAME_HEIGHT)
+    component_panel.background_color 255, 255, 255
+    component_panel.size FRAME_WIDTH, FRAME_HEIGHT
 
     # This code uses the MiG layout manager.
     # To learn more about MiGLayout, see:
     #     http://www.miglayout.com/
-    component_panel.layout = Java::net::miginfocom::swing::MigLayout.new("wrap 2")
-
-    @menu_bar = MenuBar.new do |menu_bar|
-      @file_menu = Menu.new do |m|
-
-        @exit_menu  = MenuItem.new do |mi|
-          mi.name = 'exit_menu'
-          mi.mnemonic= Monkeybars::Key.symbol_to_code(:VK_X)
-          mi.text ="Exit"
-        end
-
-        m.name = 'file_menu'
-        m.text ="File"
-        m.add(@exit_menu)
-      end
-
-      @help_menu =  Menu.new do |m|
-        @about_menu = MenuItem.new do |mi|
-          mi.name = 'about_menu'
-          mi.mnemonic= Monkeybars::Key.symbol_to_code(:VK_A)
-          mi.text ="About"
-        end
-
-        m.name = 'help_menu'
-        m.text = 'Help'
-        m.add(@about_menu)
-      end
-    # Worth noting: you can add the menu item objects directly, which NetBeans doesn't seem to allow 
-      menu_bar.add(@file_menu)
-      menu_bar.add(@help_menu)
-      set_jmenu_bar(menu_bar)
-    end
-
+    component_panel.layout = mig_layout "wrap 2"
 
     @default_label = Label.new do |l|
-      # A nicer way to set fonts would be welcome
-      l.font = java::awt.Font.new("Lucida Grande", 0, 18)
-      l.minimum_dimensions(LABEL_WIDTH, LABEL_HEIGHT)
-      l.text = "#{name} via Monkeybars rulez!"
+      l.font = Font.new "Lucida Grande", 0, 18
+      l.minimum_dimensions LABEL_WIDTH, LABEL_HEIGHT
+      l.text = "Neurogami::SwingSet rulez!"
     end
 
-    # We need to set a name so that the controller can catch events from this button
-    @default_button = Button.new do |b| 
-      b.name = "default_button"
-      b.text = "Click me!"
+    @default_button = Button.new do |b|
+      b.text = "Close"
     end
+
+
+
+
 
     # Add components to panel
-    component_panel.add @default_button, 'grow x'
     component_panel.add @default_label, "gap unrelated"
+    component_panel.add @default_button, "gap unrelated"
+
     add component_panel
+
+    @default_button.addActionListener lambda{ |e| default_button_clicked e}
+  
+  end
+
+  def default_button_clicked event
+    puts "Our button was clicked"
+    java.lang.System.exit 0
   end
 
 end
+
+
+
+
   ENDL
   end
 end
