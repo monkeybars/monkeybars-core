@@ -13,6 +13,7 @@ manifest.mf
 nbbuild.xml
 build/
 dist/
+tasks/neurogami.rake
 package/
 media/website/heel-server.rb
 media/website/public
