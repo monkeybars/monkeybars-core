@@ -1,4 +1,4 @@
-package com.neurogami.rawr;
+package org.monkeybars.rawr;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
