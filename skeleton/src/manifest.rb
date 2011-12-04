@@ -27,7 +27,9 @@ end
 case Monkeybars::Resolver.run_location
 when Monkeybars::Resolver::IN_FILE_SYSTEM
   here = File.expand_path File.dirname(__FILE__)
-  add_to_classpath monkeybars_jar( here + '/../lib/java/*.jar' )
+  _mbj = monkeybars_jar( here + '/../lib/java/*.jar' )
+  raise "Failed to locate a monkeybars jar!" unless _mbj 
+  add_to_classpath _mbj 
 end
 
 require 'monkeybars'
