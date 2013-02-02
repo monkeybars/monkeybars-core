@@ -59,7 +59,7 @@ module Monkeybars
       # (even from outside the class), you can use the define_handler method.
       #
       # If you wish to override the default event handling behavior, override handle_event
-      def add_listener(details)
+      def add_listener details
         handlers << details
       end
 
@@ -85,7 +85,7 @@ module Monkeybars
       #   define_handler(:ok_button_action_performed, :cancel_button_action_performed) do
       #     # handle event(s) here
       #   end
-      def define_handler(*actions, &block)
+      def define_handler *actions, &block
         actions.each {|action| event_handler_procs[action.to_sym] << block}
       end
     end

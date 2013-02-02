@@ -169,27 +169,22 @@ module Monkeybars
     #    end
     #  end
     #
-    def self.set_model(model=nil, &block)
+    def self.set_model model=nil, &block
       self.model_class = [model,block]
     end
 
     # See Controller.set_model.  Uses same 3 options for declaring the view to use
     # and for optionally supplying a block or both a class and a block.
     #
-    def self.set_view(view=nil, &block)
+    def self.set_view view=nil, &block
       self.view_class = [view,block]
     end
 
     # Declares a method to be called whenever the controller's update method is called.
-    def self.set_update_method(method)
-
+    def self.set_update_method method
       raise "Argument must be a symbol" unless method.kind_of? Symbol
       raise "'Update' is a reserved method name" if :update == method
-      warn "*** Setting @@update_method_name to '#{method}' ***"
-      #self.send(:class_variable_set, :@@update_method_name, method)
       self.send :class_variable_set,  :@@update_method_name, method 
-
-      
     end
     
     # Valid close actions are
@@ -208,8 +203,8 @@ module Monkeybars
     #   will release the resources for the window and its components, can be 
     #   brought back with a call to show
     # - action :hide - sets the visibility of the window to false
-    def self.set_close_action(action)
-      self.send(:class_variable_set, :@@close_action, action)
+    def self.set_close_action action
+      self.send :class_variable_set, :@@close_action, action
     end
     
     # Returns a frozen hash of ControllerName => [instances] pairs. This is
@@ -229,8 +224,9 @@ module Monkeybars
     class << self
        alias_method :original_add_listener, :add_listener
     end
-    def self.add_listener(details)
-      original_add_listener(details)
+
+    def self.add_listener details
+      original_add_listener details
       hide_protected_class_methods #workaround for JRuby bug #1283
     end
     
@@ -278,7 +274,7 @@ module Monkeybars
     
     def close_action
       if self.class.class_variables.member?("@@close_action")
-        action = self.class.send(:class_variable_get, :@@close_action)
+        action = self.class.send :class_variable_get, :@@close_action
       else
         action = :close
       end
@@ -301,17 +297,16 @@ module Monkeybars
       
       if self.class.class_variables.member? :"@@update_method_name"
         method_name = self.class.send :class_variable_get, :@@update_method_name
-        puts "send '#{method_name}'" # JGBDEBUG
         send method_name
       else
-        warn "updated called, but no value set for @@update_method_name"
+        warn "update called, but no value has been set for @@update_method_name"
       end
     end
 
     # Triggers updating of the view based on the mapping and the current contents
     # of the model and the transfer
     def update_view
-      @__view.update(model, transfer)
+      @__view.update model, transfer
     end
     
     # Sends a signal to the view.  The view will process the signal (if it is
@@ -321,10 +316,10 @@ module Monkeybars
     # This is useful for communicating one off events such as a state transition
     #
     #   def update
-    #     signal(:red_alert) if model.threshold_exceeded?
+    #     signal :red_alert if model.threshold_exceeded?
     #   end
-    def signal(signal_name, &callback)
-      @__view.process_signal(signal_name, model, transfer, &callback)
+    def signal signal_name, &callback
+      @__view.process_signal signal_name, model, transfer, &callback
     end
     
     # Nests a controller under this controller with the given key
@@ -336,7 +331,7 @@ module Monkeybars
     # This forces the view to perform its nesting.
     # See also Monkeybars::Controller#remove_nested_controller
     #
-    def add_nested_controller(name, sub_controller)
+    def add_nested_controller name, sub_controller
       nested_view = sub_controller.instance_variable_get(:@__view)
       @__view.add_nested_view(name, nested_view, nested_view.instance_variable_get(:@main_view_component), model, transfer)
     end
@@ -353,7 +348,7 @@ module Monkeybars
     # This performs the view's nesting.
     # See also Monkeybars::Controller#add_nested_controller
     #
-    def remove_nested_controller(name, sub_controller)
+    def remove_nested_controller name, sub_controller
       nested_view = sub_controller.instance_variable_get(:@__view)
       @__view.remove_nested_view(name, nested_view, nested_view.instance_variable_get(:@main_view_component), model, transfer)
     end
@@ -396,7 +391,7 @@ module Monkeybars
 
     # Calls load if the controller has not been opened previously, then calls update_view
     # and shows the view.
-    def open(*args, &block)
+    def open *args, &block
       @@instance_lock[self.class].synchronize do
         unless @@instance_list[self.class].member? self
           @@instance_list[self.class] << self
@@ -418,14 +413,14 @@ module Monkeybars
     # Stub to be overriden in sub-class.  This is where you put the code you would
     # normally put in initialize, it will be called the first time open is called
     # on the controller.
-    def load(*args); end
+    def load *args; end
 
     # Stub to be overriden in sub-class.  This is called whenever the controller is closed.
     def unload; end
 
     alias_method :original_handle_event, :handle_event
     # See EventHandlerRegistrationAndDispatchMixin#handle_event
-    def handle_event(component_name, event_name, event) #:nodoc:
+    def handle_event component_name, event_name, event #:nodoc:
       original_handle_event(component_name, event_name, event)
       clear_view_state
     end
@@ -487,8 +482,8 @@ module Monkeybars
       return @__view_state unless @__view_state.nil?
       model = self.class.model_class.nil? ? nil : create_new_model
       transfer = {}
-      @__view.write_state(model, transfer)
-      @__view_state = ViewState.new(model, transfer)
+      @__view.write_state model, transfer
+      @__view_state = ViewState.new model, transfer
     end
 
     # Equivalent to view_state.model
@@ -521,7 +516,7 @@ module Monkeybars
     # 
     #   model.user_name = view_state.model.user_name
     #   model.password = view_state.model.password
-    def update_model(source, *properties) # :doc:
+    def update_model source, *properties # :doc:
       update_provided_model(source, @__model, *properties)
     end
     
@@ -538,7 +533,7 @@ module Monkeybars
     # 
     #   model.user.user_name = view_state.model.user_name
     #   model.user.password = view_state.model.password
-    def update_provided_model(source, destination, *properties) # :doc:
+    def update_provided_model source, destination, *properties # :doc:
       properties.each do |property|
         destination.send("#{property}=", source.send(property))
       end
@@ -549,7 +544,7 @@ module Monkeybars
       @@model_class_for_child_controller[self]
     end
     
-    def self.model_class=(model)
+    def self.model_class= model
       @@model_class_for_child_controller[self] = model
     end
     
@@ -558,7 +553,7 @@ module Monkeybars
       @@view_class_for_child_controller[self]
     end
     
-    def self.view_class=(view)
+    def self.view_class= view
       @@view_class_for_child_controller[self] = view
     end
     
@@ -596,14 +591,14 @@ module Monkeybars
       end
     end
 
-    def built_in_close_method(event)
+    def built_in_close_method event
       if event.getID == java.awt.event.WindowEvent::WINDOW_CLOSING || event.getID == javax.swing.event.InternalFrameEvent::INTERNAL_FRAME_CLOSING
         case (action = close_action)
         when :close
           close
         when :exit
           Monkeybars::Controller.active_controllers.values.flatten.each {|c| c.close }
-          java.lang.System.exit(0)
+          java.lang.System.exit 0
         when :hide
           hide
         when :dispose
@@ -620,7 +615,7 @@ module Monkeybars
   class ViewState
     attr_reader :model, :transfer
     
-    def initialize(model, transfer)
+    def initialize model, transfer
       @model, @transfer = model, transfer
     end
     

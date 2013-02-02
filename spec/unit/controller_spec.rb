@@ -340,10 +340,10 @@ describe Monkeybars::Controller do
     end
 
 
-    def close_controller_test_case(close_action = nil)
+    def close_controller_test_case close_action = nil
       ClosingController.set_close_action(close_action) unless close_action.nil?
       controller = ClosingController.instance
-      view = controller.instance_variable_get("@__view")
+      view = controller.instance_variable_get "@__view"
       yield controller, view
       view.close
     end
@@ -371,11 +371,12 @@ describe Monkeybars::Controller do
           v.should_receive :unload
           v.should_receive :dispose
         }
-        expectations.call(controller, view)
+
+        expectations.call controller, view
 
         another_controller = AnotherClosingController.instance
-        another_view = another_controller.instance_variable_get("@__view")
-        expectations.call(another_controller, another_view)
+        another_view = another_controller.instance_variable_get "@__view"
+        expectations.call another_controller, another_view
 
         java.lang.System.should_receive :exit
       end
