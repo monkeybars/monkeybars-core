@@ -2,7 +2,7 @@ module Monkeybars
   class View
     module Positioning
 
-      include_class Java::java::awt::Toolkit
+      java_import Java::java::awt::Toolkit
 
       # Returns a java.awt.Dimension
       def screen_size 

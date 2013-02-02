@@ -5,8 +5,8 @@ require 'rubygems'
 require 'monkeybars_version'
 
 def help(message = nil)
-  $stdout << message + "\n-----------------------------------\n" unless message.nil?
-  $stdout << <<-ENDL
+  puts message + "\n-----------------------------------\n" unless message.nil?
+  puts <<-ENDL
   Usage:
       monkeybars -h/--help
       monkeybars -v/--version
@@ -28,7 +28,7 @@ else
       help
       exit
     when "-v" || "--version"
-      $stdout << "Monkeybars version #{Monkeybars::VERSION}\n"
+      puts "Monkeybars version #{Monkeybars::VERSION}\n"
       exit
     when /-RI(.+)/
       rawr_install_args << $1 + ' '
@@ -41,17 +41,17 @@ else
   end
   
   if File.directory? project_name
-    $stdout << "Directory already exists, aborting\n"
+    puts "Directory already exists, aborting\n"
   else
     begin
-      $stdout << "Creating directory #{project_name}\n"
+      puts "Creating directory #{project_name}\n"
       FileUtils.mkdir_p(project_name)
       # Need to cd into  project_name folder before invoking rawr since it uses the cwd to obtain
       # the project name in build_configuration.rb 
       # TODO: Bring back RakeFile once you can force Rawr to append the require 'rawr' statement via the command line
       # as opposed to its current interactive mode
       
-# FileUtils.cd(project_name) do
+ FileUtils.cd(project_name) do
       warn "jruby -S rawr install #{rawr_install_args} #{project_name}"
       puts `jruby -S rawr install #{rawr_install_args} #{project_name}`
       build_config_path = File.join(project_name, 'build_configuration.rb')
@@ -61,13 +61,13 @@ else
   c.windows_icon_path = File.expand_path('icons/monkeybars.ico')
 end
 ENDL
-#      end
+      end
 
       File.open(build_config_path, 'w') {|f| f << build_config}
 
       from = File.expand_path(File.join(File.dirname(__FILE__), '..', 'skeleton')) + '/.' # needs to be before the cd
       FileUtils.cd(project_name) do
-        $stdout << "Copying monkeybars project structure\n"
+        puts "Copying monkeybars project structure\n"
         FileUtils.cp_r(from , '.')
         File.open('Rakefile', 'a') do |f|
           f << <<-ENDL

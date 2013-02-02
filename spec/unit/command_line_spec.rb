@@ -2,10 +2,16 @@ require File.join(File.dirname(__FILE__), '..', 'spec_helper.rb')
 
 describe "Command Line" do
   before :all do
-    @command = "jruby #{File.join(File.dirname(__FILE__), '..', '..', 'bin', 'monkeybars')} -RI--no-download spec-tmp-proj"
-    @temp_project_dir = File.join(File.dirname(__FILE__), '..', '..', 'spec-tmp-proj')
+    base_folder = File.expand_path File.join( File.dirname(__FILE__), '..', '..' )
+    @command = "jruby #{File.join(base_folder, 'bin', 'monkeybars')} -RI--no-download spec-tmp-proj"
+    @temp_project_dir = File.join(base_folder, 'spec-tmp-proj')
     FileUtils.rm_rf(@temp_project_dir)
-    `#{@command}`
+   puts @command
+   File.open( "spec-cli.txt", 'w'){ |f|
+     f.puts  @command
+   
+   }
+   puts `#{@command}`
   end
 
   after :all do
@@ -14,7 +20,8 @@ describe "Command Line" do
 
   it "creates a Rakefile that uses Rawr" do
     
-    File.should be_exist(File.join(@temp_project_dir, 'Rakefile'))
+    File.should be_exist @temp_project_dir
+    File.should be_exist File.join(@temp_project_dir, 'Rakefile')
     File.read(File.join(@temp_project_dir, 'Rakefile')).should match(/require 'rawr'/)
   end
 

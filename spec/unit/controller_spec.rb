@@ -2,9 +2,9 @@ require File.dirname(__FILE__) + '/../spec_helper.rb'
 require 'monkeybars/view'
 require 'monkeybars/controller'
 require 'spec/unit/test_files.jar'
-include_class 'java.awt.event.ActionEvent'
-include_class 'java.awt.event.MouseEvent'
-include_class 'java.awt.event.WindowEvent'
+java_import 'java.awt.event.ActionEvent'
+java_import 'java.awt.event.MouseEvent'
+java_import 'java.awt.event.WindowEvent'
 
 class RealFormTestView < Monkeybars::View
   set_java_class 'org.monkeybars.TestView'

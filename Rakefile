@@ -129,11 +129,16 @@ task :prepare_spec_jar do
   create_test_jar_file
 end
 
-task :spec => [:prepare_spec]
+task :spec => [:prepare_spec] do 
+  sh "rspec spec"
+end
 
 task :prepare_spec do
   create_test_jar_file unless File.exist?("spec/unit/test_files.jar")
 end
+
+
+
 
 def create_test_jar_file
   $stdout << `javac spec/unit/org/monkeybars/TestView.java`

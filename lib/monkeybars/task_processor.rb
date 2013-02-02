@@ -1,5 +1,5 @@
-include_class "foxtrot.Worker"
-include_class "foxtrot.Job"
+java_import "foxtrot.Worker"
+java_import "foxtrot.Job"
 
 module Monkeybars
   # Module that contains methods and classes used to take care of background

@@ -1,6 +1,6 @@
-include_class javax.swing.tree.DefaultMutableTreeNode
-include_class javax.swing.ImageIcon
-include_class java.net.URL
+java_import javax.swing.tree.DefaultMutableTreeNode
+java_import javax.swing.ImageIcon
+java_import java.net.URL
 
 require 'flickraw'
 

@@ -1,5 +1,5 @@
-include_class javax.swing.JComponent
-include_class javax.swing.KeyStroke
+java_import javax.swing.JComponent
+java_import javax.swing.KeyStroke
 
 require 'monkeybars/exceptions'
 require 'monkeybars/inflector'
@@ -107,7 +107,7 @@ module Monkeybars
       # In a view class, the develoepr can simply give the name of a defined class
       # to use, in which case this code does not need to try to load anything.
       if java_class.is_a?(String)
-        include_class java_class
+        java_import java_class
         class_name = /.*?\.?(\w+)$/.match(java_class)[1]
         self.instance_java_class = const_get(class_name)
       elsif  java_class.is_a?(Class)

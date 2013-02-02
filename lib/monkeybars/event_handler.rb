@@ -1,6 +1,6 @@
 require 'monkeybars/inflector'
 
-include_class 'javax.swing.SwingUtilities'
+java_import 'javax.swing.SwingUtilities'
 
 module Monkeybars
   # This class is primarily used internally for setting up a handler for window 
