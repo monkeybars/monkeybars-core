@@ -50,7 +50,10 @@ else
       # the project name in build_configuration.rb 
       # TODO: Bring back RakeFile once you can force Rawr to append the require 'rawr' statement via the command line
       # as opposed to its current interactive mode
-      
+     
+      build_config_path = ''
+      build_config      = ''
+
  FileUtils.cd(project_name) do
       warn "jruby -S rawr install #{rawr_install_args} #{project_name}"
       puts `jruby -S rawr install #{rawr_install_args} #{project_name}`
@@ -63,7 +66,7 @@ end
 ENDL
       end
 
-      File.open(build_config_path, 'w') {|f| f << build_config}
+      File.open(build_config_path, 'w') {|f| f.puts build_config}
 
       from = File.expand_path(File.join(File.dirname(__FILE__), '..', 'skeleton')) + '/.' # needs to be before the cd
       FileUtils.cd(project_name) do
