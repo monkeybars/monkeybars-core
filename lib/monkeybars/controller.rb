@@ -182,9 +182,14 @@ module Monkeybars
 
     # Declares a method to be called whenever the controller's update method is called.
     def self.set_update_method(method)
+
       raise "Argument must be a symbol" unless method.kind_of? Symbol
       raise "'Update' is a reserved method name" if :update == method
-      self.send(:class_variable_set, :@@update_method_name, method)
+      warn "*** Setting @@update_method_name to '#{method}' ***"
+      #self.send(:class_variable_set, :@@update_method_name, method)
+      self.send :class_variable_set,  :@@update_method_name, method 
+
+      
     end
     
     # Valid close actions are
@@ -290,11 +295,16 @@ module Monkeybars
     def focused?
       @__view.focused?
     end
+    
     # Calls the method that was set using Controller.set_update_method.  If no method has been set defined, this call is ignored.
     def update
-      if self.class.class_variables.member?("@@update_method_name")
-        method_name = self.class.send(:class_variable_get, :@@update_method_name) 
-        send(method_name)
+      
+      if self.class.class_variables.member? :"@@update_method_name"
+        method_name = self.class.send :class_variable_get, :@@update_method_name
+        puts "send '#{method_name}'" # JGBDEBUG
+        send method_name
+      else
+        warn "updated called, but no value set for @@update_method_name"
       end
     end
 

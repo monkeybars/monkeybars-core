@@ -23,7 +23,6 @@ class FlickrBrowserView < ApplicationView
     javax.swing.tree.DefaultTreeModel.new(root, true)
   end
   
-  #define_signal :expand_node, :expand_node
    define_signal :name => :expand_node, :handler => :expand_node
   def expand_node(model, transfer)
     expanding_node = transfer[:expanding_node]
@@ -33,7 +32,6 @@ class FlickrBrowserView < ApplicationView
     photos_tree.model.node_structure_changed expanding_node
   end
   
-#   define_signal :update_image, :update_image
    define_signal :name => :update_image, :handler => :update_image
   def update_image(model, transfer)
     image_label.icon = ImageIcon.new(URL.new(transfer[:image_url])) 

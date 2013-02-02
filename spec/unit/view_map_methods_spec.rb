@@ -185,7 +185,7 @@ describe "update method" do
     v.view_property.should == "model property string"
   end
   
-  it "ignores handlers when .ignoring is used"
+  ## it "ignores handlers when .ignoring is used"
 end
 
 describe "write_state method" do
@@ -349,5 +349,5 @@ describe "write_state method" do
     model.model_property.should == "some amazingly awesome view data"
   end
   
-  it "ignores handlers when .ignoring is used"
+  ## it "ignores handlers when .ignoring is used"
 end

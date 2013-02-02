@@ -199,8 +199,8 @@ describe Monkeybars::View, "#add_handler" do
 end
 
 describe Monkeybars::View, "#validate_mapping" do
-  it "identifies mappings as in-only, out-only, or bi-directional"
-  it "detects mis-named methods declared in a mapping"
+  ## it "identifies mappings as in-only, out-only, or bi-directional"
+  ## it "detects mis-named methods declared in a mapping"
 end
 
 describe Monkeybars::View, "#update" do

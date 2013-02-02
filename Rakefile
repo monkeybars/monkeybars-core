@@ -13,13 +13,13 @@ ensure_in_path 'lib'
 require 'monkeybars_version'
 
 require 'fileutils'
-require 'spec/rake/spectask'
+#require 'spec/rake/spectask'
 
 OUTPUT_DIR = "pkg"
 BUILD_DIR = "#{OUTPUT_DIR}/bin"
 SKELETON_DIR = "skeleton"
 
-task :default => 'test:run'
+task :default => 'spec'
 task 'gem:release' => 'test:run'
 
 Bones {

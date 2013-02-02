@@ -157,10 +157,10 @@ describe Monkeybars::Controller, "implicit handler registration" do
   end
   
 
-  it "does not try to implicitly add methods that exist on the base Controller class"
-  it "does not add an implicit handler if an explict handler of that type was already added for that component"
-  it "detects the type of the listener to use for the component when using an implicit handler"
-  it "detects when a new method is added and registers a new listener if appropriate"
+  ##it "does not try to implicitly add methods that exist on the base Controller class"
+  ##it "does not add an implicit handler if an explict handler of that type was already added for that component"
+  ##it "detects the type of the listener to use for the component when using an implicit handler"
+  ##it "detects when a new method is added and registers a new listener if appropriate"
 end
 
 describe Monkeybars::Controller, "define_handler (class-level)" do

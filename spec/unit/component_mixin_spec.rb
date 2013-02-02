@@ -3,11 +3,11 @@ require 'monkeybars'
 
 describe "disable_handlers method" do
   it "should be available on java.awt.Component and subclasses" do
-    java.awt.Component.instance_methods.member?("disable_handlers").should be_true
-    java.awt.Container.instance_methods.member?("disable_handlers").should be_true
-    java.awt.Button.instance_methods.member?("disable_handlers").should be_true
-    javax.swing.JComponent.instance_methods.member?("disable_handlers").should be_true
-    javax.swing.JComboBox.instance_methods.member?("disable_handlers").should be_true
+    java.awt.Component.instance_methods.member?(:disable_handlers).should be_true
+    java.awt.Container.instance_methods.member?(:disable_handlers).should be_true
+    java.awt.Button.instance_methods.member?(:disable_handlers).should be_true
+    javax.swing.JComponent.instance_methods.member?(:disable_handlers).should be_true
+    javax.swing.JComboBox.instance_methods.member?(:disable_handlers).should be_true
   end
   
   it "should remove all handlers of a given type before yielding to the given block and then add the handlers back" do

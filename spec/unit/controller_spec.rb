@@ -108,10 +108,12 @@ describe Monkeybars::Controller do
   end
   
   it "updates the correct instance on Controller#update" do
+
     class MultipleInstanceUpdateController < Monkeybars::Controller
       set_update_method :tick
       
       def tick
+        warn "\n object_id = #{object_id}"
         object_id
       end
     end
@@ -119,7 +121,13 @@ describe Monkeybars::Controller do
     instance1 = MultipleInstanceUpdateController.create_instance
     instance2 = MultipleInstanceUpdateController.create_instance
 
-    instance1.update.should_not == instance2.update
+    _u1 = instance1.update # This should be returning the result of calling `tick`
+    _u1.should_not == nil
+
+    _u2 = instance2.update
+    _u2.should_not == nil
+
+    _u1.should_not == _u2
   end
 
   describe "instantiation" do

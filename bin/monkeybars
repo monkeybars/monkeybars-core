@@ -55,20 +55,24 @@ else
       build_config      = ''
 
  FileUtils.cd(project_name) do
-      warn "jruby -S rawr install #{rawr_install_args} #{project_name}"
-      puts `jruby -S rawr install #{rawr_install_args} #{project_name}`
-      build_config_path = File.join(project_name, 'build_configuration.rb')
+      warn "jruby -S rawr install #{rawr_install_args} "
+      puts `jruby -S rawr install #{rawr_install_args} `
+      warn "Create build_configuration  ..."
+      build_config_path =  'build_configuration.rb'
       build_config = File.read build_config_path
       build_config.sub! /^end$/, <<-ENDL
   c.mac_icon_path = File.expand_path('icons/monkeybars.icns')
   c.windows_icon_path = File.expand_path('icons/monkeybars.ico')
 end
 ENDL
-      end
+      
 
       File.open(build_config_path, 'w') {|f| f.puts build_config}
+      
+  end
 
       from = File.expand_path(File.join(File.dirname(__FILE__), '..', 'skeleton')) + '/.' # needs to be before the cd
+  
       FileUtils.cd(project_name) do
         puts "Copying monkeybars project structure\n"
         FileUtils.cp_r(from , '.')
