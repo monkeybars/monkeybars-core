@@ -69,13 +69,13 @@ module Monkeybars
     
     def add view, nested_view, nested_component, model, transfer
       #instance_eval("view.#{@add_method}(@sub_view, model, transfer)")
-      raise NameError.new "Add method not provided for nesting #{self}" if @add_method.nil? || !view.respond_to? @add_method
+      raise NameError.new "Add method not provided for nesting #{self}" if @add_method.nil? || !view.respond_to?( @add_method )
       view.send @add_method, nested_view, nested_component, model, transfer
     end
     
     def remove view, nested_view, nested_component, model, transfer
       #instance_eval("view.#{@remove_method}(@sub_view, model, transfer)")
-      raise NameError.new "Remove method not provided for nesting #{self}" if @remove_method.nil? || !view.respond_to? @remove_method
+      raise NameError.new "Remove method not provided for nesting #{self}" if @remove_method.nil? || !view.respond_to?( @remove_method )
       view.send @remove_method, nested_view, nested_component, model, transfer
     end
   end
