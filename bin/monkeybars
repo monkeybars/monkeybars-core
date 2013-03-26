@@ -65,8 +65,6 @@ else
   c.windows_icon_path = File.expand_path('icons/monkeybars.ico')
 end
 ENDL
-      
-
       File.open(build_config_path, 'w') {|f| f.puts build_config}
       
   end

@@ -39,8 +39,8 @@ Bones {
   rdoc.exclude ['examples/**/*', 'media/**/*', 'spec/**/*', 'outdated-examples/**/*', './**/*.jar', 'skeleton/**/*', 'tasks.orig']
   gem.need_tar  false
   gem.need_zip  false
-  depend_on 'rawr', :version => '>=1.4.4'
-  depend_on 'swingset', :version => '>=0.3.0'
+  depend_on 'rawr', :version => '>=1.6.5'
+  depend_on 'swingset', :version => '>=0.4.0'
   exclude %w{ pkg .git tasks.orig outdated-examples .gitignore  tasks/neurogami.rake doc/  media/ }
 
 }
