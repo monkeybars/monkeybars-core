@@ -181,12 +181,12 @@ end
 end
 
 def setup_directory path
-  FileUtils.mkdir_p path.gsub("\\", "/")
+  FileUtils.mkdir_p path.gsub "\\", "/"
   FileUtils.cd path
   path.split("/").last
 end
 
-def camelize(name, first_letter_in_uppercase = true)
+def camelize name, first_letter_in_uppercase = true
   name = name.to_s
   if first_letter_in_uppercase
     name.gsub(/\/(.?)/) { "::" + $1.upcase }.gsub(/(^|_)(.)/) { $2.upcase }

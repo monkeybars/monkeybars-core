@@ -195,11 +195,11 @@ module Monkeybars
       @@symbols[pair[0]] = pair[1]
     end
     
-    def self.code_to_symbol(code)
+    def self.code_to_symbol code
       @@codes[code]
     end
     
-    def self.symbol_to_code(symbol)
+    def self.symbol_to_code symbol
       @@symbols[symbol]
     end
   end

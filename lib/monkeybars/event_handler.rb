@@ -11,20 +11,20 @@ module Monkeybars
   #
   # For example:
   #
-  #   def handle_window_closing(event)
+  #   def handle_window_closing event
   #     puts "the window is closing"
   #   end
   #   
   #   handler = MonkeybarsWindowAdapter.new(:windowClosing => method(handle_window_closing))
   class MonkeybarsWindowAdapter #:nodoc:
-    def initialize(methods)
+    def initialize methods
       super()
       raise ArgumentError if methods.empty?
       methods.each { |method, proc| raise ArgumentError.new("Only window and internalFrame events can be used to create a MonkeybarsWindowAdapter") unless (/^(window|internalFrame)/ =~ method.to_s) and (proc.respond_to? :to_proc) }
       @methods = methods
     end
 
-    def method_missing(method, *args, &blk)
+    def method_missing method, *args, &blk
       if /^(window|internalFrame)/ =~ method.to_s
         @methods[method].call(*args) if @methods[method]
       else
@@ -38,8 +38,8 @@ module Monkeybars
   # recipent of events. It dispatches the event handling to the controller's
   # handle_event method.
   module BaseHandler
-    def method_missing(method, *args, &block)
-      @callback.handle_event(@component_name, method.underscore, args[0])
+    def method_missing method, *args, &block
+      @callback.handle_event @component_name, method.underscore, args[0]
       @callback.update_view if @auto_invoke_update_view
     end
   end
@@ -65,7 +65,7 @@ end
     eval <<-ENDL
       module Monkeybars
         class #{type}Handler
-          def initialize(callback, component_name, auto_invoke_update_view = false)
+          def initialize callback, component_name, auto_invoke_update_view = false
             @callback = callback
             @component_name = component_name
             @auto_invoke_update_view = auto_invoke_update_view

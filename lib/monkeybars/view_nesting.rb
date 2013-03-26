@@ -4,26 +4,26 @@ module Monkeybars
       alias_method :__new__, :new
     end
     
-    def self.new(nesting_options = {})
-      nesting_options.validate_only(:sub_view, :using, :view)
+    def self.new nesting_options = {}
+      nesting_options.validate_only :sub_view, :using, :view
       nesting_options.extend Monkeybars::HashNestingValidation
 
       if nesting_options.property_only?
-        PropertyNesting.__new__(nesting_options)
+        PropertyNesting.__new__ nesting_options
       elsif nesting_options.methods_only?
-        MethodNesting.__new__(nesting_options)
+        MethodNesting.__new__ nesting_options
       else
         raise InvalidNestingError, "Cannot determine nesting type with parameters #{nesting_options.inspect}"
       end
     end
     
-    def initialize(properties)
+    def initialize properties
       @sub_view = properties[:sub_view]
     end
   end
   
   class PropertyNesting < Nesting
-    def initialize(properties)
+    def initialize properties
       super
       @view_property = properties[:view]
     end
@@ -36,17 +36,17 @@ module Monkeybars
       true
     end
     
-    def add(view, nested_view, nested_component, model, transfer)
-      instance_eval("view.#{@view_property}.add nested_component")
+    def add view, nested_view, nested_component, model, transfer
+      instance_eval "view.#{@view_property}.add nested_component"
     end
     
-    def remove(view, nested_view, nested_component, model, transfer)
-      instance_eval("view.#{@view_property}.remove nested_component")
+    def remove view, nested_view, nested_component, model, transfer
+      instance_eval "view.#{@view_property}.remove nested_component"
     end
   end
   
   class MethodNesting < Nesting
-    def initialize(nesting_options)
+    def initialize nesting_options
       super
       @add_method, @remove_method = if nesting_options[:using].kind_of? Array
         [nesting_options[:using][0], nesting_options[:using][1]]
@@ -67,16 +67,16 @@ module Monkeybars
       !@remove_method.nil?
     end
     
-    def add(view, nested_view, nested_component, model, transfer)
+    def add view, nested_view, nested_component, model, transfer
       #instance_eval("view.#{@add_method}(@sub_view, model, transfer)")
-      raise NameError.new "Add method not provided for nesting #{self}" if @add_method.nil? || !view.respond_to?(@add_method)
-      view.send(@add_method, nested_view, nested_component, model, transfer)
+      raise NameError.new "Add method not provided for nesting #{self}" if @add_method.nil? || !view.respond_to? @add_method
+      view.send @add_method, nested_view, nested_component, model, transfer
     end
     
-    def remove(view, nested_view, nested_component, model, transfer)
+    def remove view, nested_view, nested_component, model, transfer
       #instance_eval("view.#{@remove_method}(@sub_view, model, transfer)")
-      raise NameError.new "Remove method not provided for nesting #{self}" if @remove_method.nil? || !view.respond_to?(@remove_method)
-      view.send(@remove_method, nested_view, nested_component, model, transfer)
+      raise NameError.new "Remove method not provided for nesting #{self}" if @remove_method.nil? || !view.respond_to? @remove_method
+      view.send @remove_method, nested_view, nested_component, model, transfer
     end
   end
   

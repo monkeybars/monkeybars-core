@@ -18,17 +18,17 @@ class GlobalErrorHandler
   # 
   # or you may want to dispatch to an error handler method.
   # 
-  #   GlobalErrorHandler.on_error {|exception, thread| my_error_handler_method(exception, thread) }
-  def self.on_error(&callback)
-    java.lang.Thread.default_uncaught_exception_handler = self.new(&callback)
+  #   GlobalErrorHandler.on_error {|exception, thread| my_error_handler_method exception, thread }
+  def self.on_error &callback
+    java.lang.Thread.default_uncaught_exception_handler = self.new &callback
   end
 
-  def uncaughtException(thread, exception)
-    @callback.call(exception, thread)
+  def uncaughtException thread, exception
+    @callback.call exception, thread
   end
   
 private
-  def initialize(&callback)
+  def initialize &callback
     @callback = callback
   end
 end

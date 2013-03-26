@@ -19,22 +19,22 @@ module Monkeybars
       alias_method :__new__, :new
     end
     
-    def self.new(mapping_options = {})
-      mapping_options.validate_only(:view, :model, :transfer, :using, :ignoring, :translate_using)
+    def self.new mapping_options = {}
+      mapping_options.validate_only :view, :model, :transfer, :using, :ignoring, :translate_using
       mapping_options.extend HashMappingValidation
       
       if mapping_options.properties_only?
-        PropertyMapping.__new__(mapping_options)
+        PropertyMapping.__new__ mapping_options
       elsif mapping_options.methods_only?
-        RawMapping.__new__(mapping_options)
+        RawMapping.__new__ mapping_options
       elsif mapping_options.both_properties_and_methods?
-        MethodMapping.__new__(mapping_options)
+        MethodMapping.__new__ mapping_options
       else
         raise InvalidMappingError, "Cannot determine mapping type with parameters #{mapping_options.inspect}"
       end
     end
     
-    def initialize(mapping_options = {})
+    def initialize mapping_options = {}
       @view_property = mapping_options[:view] || nil
       @model_property = mapping_options[:model] || nil
       @transfer_property = mapping_options[:transfer] || nil
@@ -65,7 +65,7 @@ module Monkeybars
       elsif mapping_options.at_least_one_property_present? and !mapping_options.both_properties_present?
         raise InvalidMappingError, "Both a view and a model/transfer property must be provided"
       end
-      set_direction(mapping_options)
+      set_direction mapping_options
     end
     
     def maps_to_view?
@@ -76,22 +76,22 @@ module Monkeybars
       (DIRECTION_BOTH == @direction) or (DIRECTION_FROM_VIEW == @direction)
     end
     
-    def to_view(view, model, transfer)
+    def to_view view, model, transfer
       disable_declared_handlers(view) do
         if model_mapping?
-          model_to_view(view, model)
+          model_to_view view, model
         else
-          transfer_to_view(view, transfer) if mapped_transfer_key_present?(transfer)
+          transfer_to_view(view, transfer) if mapped_transfer_key_present? transfer
         end
       end
     end
     
-    def from_view(view, model, transfer)
+    def from_view view, model, transfer
       disable_declared_handlers(view) do
         if model_mapping?
-          model_from_view(view, model)
+          model_from_view view, model
         elsif transfer_mapping?
-          transfer_from_view(view, transfer)
+          transfer_from_view view, transfer
         end
       end
     end
@@ -106,11 +106,11 @@ module Monkeybars
 
     private
 
-    def mapped_transfer_key_present?(transfer)
+    def mapped_transfer_key_present? transfer
       transfer.has_key? @transfer_property
     end
     
-    def set_direction(mapping_options)
+    def set_direction mapping_options
       @direction = if mapping_options.both_methods_present?
         DIRECTION_BOTH
       elsif mapping_options.to_view_method_present?
@@ -120,16 +120,16 @@ module Monkeybars
       end
     end
     
-    def disable_declared_handlers(view, &block)
+    def disable_declared_handlers view, &block
       if @event_types_to_ignore.empty?
         yield
       else
         field = view.get_field_value(/^(\w+)\.?/.match(@view_property)[1])
         @event_types_to_ignore.each do |event_type|
           unless event_type.to_s == "document"
-            field.disable_handlers(event_type, &block)
+            field.disable_handlers event_type, &block
           else
-            field.document.disable_handlers(event_type, &block)
+            field.document.disable_handlers event_type, &block
           end
         end
       end
@@ -143,9 +143,9 @@ module Monkeybars
       ":view => #{@view_property.inspect}, #{model_or_transfer_key} => #{model_or_transfer_property.inspect}"
     end
     
-    def model_to_view(view, model)
+    def model_to_view view, model
       begin
-        instance_eval("view.#{@view_property} = model.#{@model_property}", __FILE__, __LINE__)
+        instance_eval "view.#{@view_property} = model.#{@model_property}", __FILE__, __LINE__
       rescue NoMethodError
         raise InvalidMappingError, "Either model.#{@model_property} or self.#{@view_property} in #{view.class} is not valid."
       rescue TypeError => e
@@ -157,9 +157,9 @@ module Monkeybars
       end
     end
     
-    def transfer_to_view(view, transfer)
+    def transfer_to_view view, transfer
       begin
-        instance_eval("view.#{@view_property} = transfer[#{@transfer_property.inspect}]", __FILE__, __LINE__)
+        instance_eval "view.#{@view_property} = transfer[#{@transfer_property.inspect}]", __FILE__, __LINE__
       rescue NoMethodError
         raise InvalidMappingError, "Either transfer[#{@transfer_property.inspect}] or self.#{@view_property} in #{view.class} is not valid."
       rescue TypeError => e
@@ -169,9 +169,9 @@ module Monkeybars
       end
     end
     
-    def model_from_view(view, model)
+    def model_from_view view, model
       begin
-        instance_eval("model.#{@model_property} = view.#{@view_property}", __FILE__, __LINE__)
+        instance_eval "model.#{@model_property} = view.#{@view_property}", __FILE__, __LINE__
       rescue NoMethodError
         raise InvalidMappingError, "Either model.#{@model_property} or self.#{@view_property} in #{view.class} is not valid."
       rescue TypeError => e
@@ -181,9 +181,9 @@ module Monkeybars
       end
     end
     
-    def transfer_from_view(view, transfer)
+    def transfer_from_view view, transfer
       begin
-        instance_eval("transfer[#{@transfer_property.inspect}] = view.#{@view_property}", __FILE__, __LINE__)
+        instance_eval "transfer[#{@transfer_property.inspect}] = view.#{@view_property}", __FILE__, __LINE__
       rescue NoMethodError
         raise InvalidMappingError, "Either transfer[#{@transfer_property.inspect}] or self.#{@view_property} in #{view.class} is not valid."
       rescue TypeError => e
@@ -194,32 +194,32 @@ module Monkeybars
     end
     
     private
-    def self.new(*args)
+    def self.new *args
       raise "#{self} is not a concrete class"
     end
   end
   
   class RawMapping < Mapping
-    def to_view(view, model, transfer)
+    def to_view view, model, transfer
       disable_declared_handlers(view) do
-        view.method(@to_view_method).call(model, transfer)
+        view.method(@to_view_method).call model, transfer
       end
     end
     
-    def from_view(view, model, transfer)
+    def from_view view, model, transfer
       view.method(@from_view_method).call(model, transfer) unless @from_view_method.nil?
     end
   end
   
   class PropertyMapping < BasicPropertyMapping
-    def set_direction(mapping_options)
+    def set_direction mapping_options
       @direction = DIRECTION_BOTH
     end
   end
 
   class MethodMapping < BasicPropertyMapping
     
-    def initialize(mapping_properties)
+    def initialize mapping_properties
       super
       if using_translation?
         @to_view_translation = @data_translation_hash
@@ -237,18 +237,18 @@ module Monkeybars
       !@data_translation_hash.nil?
     end
     
-    def model_to_view(view, model)
+    def model_to_view view, model
       if using_translation?
-        model_data = instance_eval("model.#{@model_property}", __FILE__, __LINE__)
+        model_data = instance_eval "model.#{@model_property}", __FILE__, __LINE__
         unless @to_view_translation.has_key? model_data
           raise TranslationError, "The key #{model_data.inspect} for model #{model.class} does not exist #{@to_view_translation.inspect}"
         end
         
-        instance_eval("view.#{@view_property} = @to_view_translation[model_data]", __FILE__, __LINE__)
+        instance_eval "view.#{@view_property} = @to_view_translation[model_data]", __FILE__, __LINE__
       elsif :default == @to_view_method
         super
       else
-        instance_eval("view.#{@view_property} = view.method(@to_view_method).call(model.#{@model_property})", __FILE__, __LINE__)
+        instance_eval "view.#{@view_property} = view.method(@to_view_method).call(model.#{@model_property})", __FILE__, __LINE__
       end
     rescue NameError => e
       raise InvalidMappingError, "Either view.#{@view_property} or view.#{@to_view_method}(#{@model_property}) is not valid.\nOriginal error: #{e}\n#{e.message}"
@@ -256,7 +256,7 @@ module Monkeybars
       raise InvalidMappingError, "Error while trying to map for #{view.class}: #{to_s}\n#{e.class} - #{e}"
     end
     
-    def transfer_to_view(view, transfer)
+    def transfer_to_view view, transfer
       if using_translation?
         transfer_data = instance_eval("transfer[#{@transfer_property.inspect}]", __FILE__, __LINE__)
         unless @to_view_translation.has_key? transfer_data
@@ -274,7 +274,7 @@ module Monkeybars
       raise InvalidMappingError, "Error while trying to map for #{view.class}: #{to_s}\n#{e.class} - #{e}"
     end
     
-    def model_from_view(view, model)
+    def model_from_view view, model
       if using_translation?
         view_data = instance_eval("view.#{@view_property}", __FILE__, __LINE__)
         unless @from_view_translation.has_key? view_data

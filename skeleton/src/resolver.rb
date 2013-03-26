@@ -28,8 +28,8 @@ class Object
   private
   def get_expanded_path path
     raise "Cannot pass a nil path to 'get_expanded_path'." unless path
-    resolved_path = File.expand_path(File.dirname(__FILE__) + "/" + path.gsub("\\", "/"))
-    resolved_path.gsub!("file:", "") unless resolved_path.index(".jar!")
+    resolved_path = File.expand_path File.dirname(__FILE__) + "/" + path.gsub("\\", "/")
+    resolved_path.gsub!("file:", "") unless resolved_path.index ".jar!"
     resolved_path.gsub! "%20", ' '
     resolved_path
   end
