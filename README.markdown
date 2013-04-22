@@ -31,7 +31,7 @@ Questions or comments? Contact [James Britt](mailto:james+monkeybars@neurogami.c
 Requirements
 ---------
 
-  Java 1.6, Rake, JRuby 1.5 or later.
+  Java 1.6, Rake, JRuby 1.7.x 
 
 Installation
 ---------
