@@ -36,12 +36,13 @@ Bones {
   libs  ["lib"]
   rdoc.opts  [ "README.markdown", "-m README.txt", ]
   rdoc.remote_dir  "api"
+
   rdoc.exclude ['examples/**/*', 'media/**/*', 'spec/**/*', 'outdated-examples/**/*', './**/*.jar', 'skeleton/**/*', 'tasks.orig']
   gem.need_tar  false
   gem.need_zip  false
   depend_on 'rawr', :version => '>=1.6.5'
   depend_on 'swingset', :version => '>=0.4.0'
-  exclude %w{ pkg .git tasks.orig outdated-examples .gitignore  tasks/neurogami.rake doc/  media/ }
+  exclude %w{ .rvmrc .bnsignore pkg .git tasks.orig outdated-examples .gitignore  tasks/neurogami.rake doc/  media/ }
 
 }
 
@@ -138,7 +139,11 @@ task :prepare_spec do
 end
 
 
+desc "Shell out to run rspec"
 
+task :specs do
+sh 'spec spec/*'
+end
 
 def create_test_jar_file
   $stdout << `javac spec/unit/org/monkeybars/TestView.java`

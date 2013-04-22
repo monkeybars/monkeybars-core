@@ -56,6 +56,7 @@ else
 
  FileUtils.cd(project_name) do
       warn "jruby -S rawr install #{rawr_install_args} "
+      puts `jruby -version`
       puts `jruby -S rawr install #{rawr_install_args} `
       warn "Create build_configuration  ..."
       build_config_path =  'build_configuration.rb'

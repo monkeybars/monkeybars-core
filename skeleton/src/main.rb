@@ -8,7 +8,7 @@ require 'java'
 # Platform specific operations, feel free to remove or override any of these
 # that don't work for your platform/application
 
-case Config::CONFIG["host_os"]
+case RbConfig::CONFIG["host_os"]
 when /darwin/i # OSX specific code
   java.lang.System.set_property "apple.laf.useScreenMenuBar", "true"
 when /^win|mswin/i # Windows specific code
