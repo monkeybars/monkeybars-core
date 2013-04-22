@@ -22,7 +22,7 @@ The source is hosted on GitHub: [http://github.com/monkeybars/monkeybars-core](h
 
 The mailing list is [http://groups.google.com/group/monkeybars-mvc](http://groups.google.com/group/monkeybars-mvc)
 
-Issues are on Pivotal Tracker: [http://www.pivotaltracker.com/projects/118006](http://www.pivotaltracker.com/projects/118006) 
+Issues are on GitHub Tracker: [https://github.com/monkeybars/monkeybars-core/issues) 
 
 
 Questions or comments? Contact [James Britt](mailto:james+monkeybars@neurogami.com)
