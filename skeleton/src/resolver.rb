@@ -17,12 +17,12 @@ end
 class Object
   def add_to_classpath path
     raise "Cannot pass a nil path to 'add_to_classpath '." unless path
-    $CLASSPATH << get_expanded_path(path)
+    $CLASSPATH <<  get_expanded_path(path)
   end
 
   def add_to_load_path path
     raise "Cannot pass a nil path to 'add_to_load_path '." unless path
-    $LOAD_PATH << get_expanded_path(path)
+    $:.push get_expanded_path(path)
   end
 
   private

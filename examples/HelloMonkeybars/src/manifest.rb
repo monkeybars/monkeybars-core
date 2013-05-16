@@ -55,6 +55,7 @@ require 'application_view'
 
 case Monkeybars::Resolver.run_location
 when Monkeybars::Resolver::IN_FILE_SYSTEM
+  add_to_classpath  here + '/../lib/java/*.jar' 
   # Files to be added only when running from the file system go here
 when Monkeybars::Resolver::IN_JAR_FILE
   # Files to be added only when run from inside a jar file

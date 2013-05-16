@@ -99,12 +99,14 @@ task :gem => [:jar]
 
 desc "Creates monkeybars.jar file for distribution"
 task :jar => [:prepare, :update_version_readme] do
+  puts "********************** Creating jar for distribution *********************** "
   Dir.chdir(BUILD_DIR) do
     $stdout << `jar xvf ../../lib/foxtrot.jar`
     FileUtils.remove_dir('META-INF', true)
   end
   warn `jar cf #{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar -C lib monkeybars.rb -C lib monkeybars    -C lib util   -C #{BUILD_DIR} .`
   FileUtils.cp("#{OUTPUT_DIR}/monkeybars-#{Monkeybars::VERSION}.jar", "skeleton/lib/java/monkeybars-#{Monkeybars::VERSION}.jar")
+  sh "ls -ltra skeleton/lib/java/"
   unless File.exist? "skeleton/lib/java/monkeybars-#{Monkeybars::VERSION}.jar"
     raise "Failed to copy monkeybars jar to the skelton dir."
   else

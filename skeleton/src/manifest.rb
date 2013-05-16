@@ -1,9 +1,9 @@
 Dir.glob(File.expand_path(File.dirname(__FILE__) + "/**/*").gsub('%20', ' ')).each do |directory|
   # File.directory? is broken in current JRuby for dirs inside jars
   # http://jira.codehaus.org/browse/JRUBY-2289
-  $LOAD_PATH << directory unless directory =~ /\.\w+$/
+  $:.push(directory) unless directory =~ /\.\w+$/
 end
-# Some JRuby $LOAD_PATH path bugs to check if you're having trouble:
+# Some JRuby $: path bugs to check if you're having trouble:
 # http://jira.codehaus.org/browse/JRUBY-2518 - Dir.glob and Dir[] doesn't work
 #                                              for starting in a dir in a jar
 #                                              (such as Active-Record migrations)
@@ -19,7 +19,6 @@ end
 
 require 'resolver'
 
-
 def monkeybars_jar path
   Dir.glob(path).select { |f| f =~ /(monkeybars-)(.+).jar$/}.first
 end
@@ -30,6 +29,7 @@ when Monkeybars::Resolver::IN_FILE_SYSTEM
   _mbj = monkeybars_jar( here + '/../lib/java/*.jar' )
   raise "Failed to locate a monkeybars jar!" unless _mbj 
   add_to_classpath _mbj 
+  require _mbj 
 end
 
 require 'monkeybars'

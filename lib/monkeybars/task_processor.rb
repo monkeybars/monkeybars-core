@@ -12,7 +12,7 @@ module Monkeybars
     # (and repaint), while the long-running task is executing.
     def repaint_while(&task)
       runner = Runner.new(&task)
-      Worker.post(runner)
+      Worker.post runner
     end
     
     def on_edt(&task)
@@ -48,3 +48,5 @@ module Monkeybars
     end
   end
 end
+
+

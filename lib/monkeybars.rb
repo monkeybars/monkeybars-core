@@ -1,4 +1,4 @@
-$LOAD_PATH.unshift(File.dirname(__FILE__))
+$:.unshift File.dirname(__FILE__)
 
 require 'monkeybars/exceptions'
 require 'monkeybars/controller'
