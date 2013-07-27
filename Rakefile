@@ -41,7 +41,7 @@ Bones {
   gem.need_tar  false
   gem.need_zip  false
   depend_on 'rawr', :version => '>=1.6.5'
-  depend_on 'swingset', :version => '>=0.4.0'
+  depend_on 'swingset', :version => '>=0.4.2'
   exclude %w{ .rvmrc .bnsignore pkg .git tasks.orig outdated-examples .gitignore  tasks/neurogami.rake doc/  media/ }
 
 }
