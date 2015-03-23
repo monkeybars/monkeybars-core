@@ -20,7 +20,7 @@ require 'manifest'
 # Platform specific operations, feel free to remove or override any of these
 # that don't work for your platform/application
 
-case Config::CONFIG["host_os"]
+case RbConfig::CONFIG["host_os"]
 when /darwin/i
   java.lang.System.setProperty("apple.laf.useScreenMenuBar", "true")
 end

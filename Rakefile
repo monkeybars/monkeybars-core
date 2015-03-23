@@ -5,6 +5,7 @@
 begin
   require 'bones'
 rescue LoadError
+  warn "Erro trying to load 'bones': #{$!}"
   abort '### Please install the "bones" gem ###'
 end
 

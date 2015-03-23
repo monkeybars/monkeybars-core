@@ -31,6 +31,8 @@ class Object
     resolved_path = File.expand_path File.dirname(__FILE__) + "/" + path.gsub("\\", "/")
     resolved_path.gsub!("file:", "") unless resolved_path.index ".jar!"
     resolved_path.gsub! "%20", ' '
+   # Added because paths creatd failed on Windows
+    resolved_path.sub! /^jar:file:/, "file:/"  
     resolved_path
   end
 end

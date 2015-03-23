@@ -1,7 +1,7 @@
 #!/usr/bin/env jruby
 
 require 'fileutils'
-require 'rubygems'
+# require 'rubygems' ???
 require 'monkeybars_version'
 
 def help(message = nil)
@@ -58,8 +58,13 @@ else
       warn "jruby -S rawr install #{rawr_install_args} "
       puts `jruby -version`
       puts `jruby -S rawr install #{rawr_install_args} `
-      warn "Create build_configuration  ..."
+      warn "Modify build_configuration  ..."
       build_config_path =  'build_configuration.rb'
+      
+      unless File.exist? build_config_path
+        raise "Cannot locate '#{build_config_path}'!"
+      end
+
       build_config = File.read build_config_path
       build_config.sub! /^end$/, <<-ENDL
   c.mac_icon_path = File.expand_path('icons/monkeybars.icns')
